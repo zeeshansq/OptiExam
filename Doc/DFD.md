@@ -198,6 +198,43 @@ sequenceDiagram
     Engine-->>Designer: Update Live Grading SLA Progress Bar (e.g., Grader 1: 100%)
 ```
 
+### 3.3 Process 7.0: Bulk Data Ingestion, Dry-Run Validation & Commit Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Designer / Item Writer
+    participant UI as Import Hub UI (Web)
+    participant Svc as Import Engine Service
+    participant Val as Dry-Run Validator
+    participant DB as Target Data Store (DS-2/DS-3/DS-4/DS-9)
+
+    User->>UI: Clicks "Download Sample Template (.CSV / .XLSX)"
+    UI-->>User: Delivers Pre-Formatted Sample File with Instructions
+
+    User->>UI: Uploads Data File (CSV / XLSX / ZIP)
+    UI->>Svc: POST /api/v1/imports/validate/ (File Payload)
+    Svc->>Val: Parse Headers & Validate Row Schemas (Types, Enums, Foreign Keys)
+    
+    alt Validation Errors Found
+        Val-->>Svc: Error Matrix (Row Numbers, Field Names, Reasons)
+        Svc-->>UI: Return 422 with Detailed Error Audit Table
+        UI-->>User: Highlight Erroneous Rows with Remediation Guide
+    else Validation Succeeded
+        Val-->>Svc: Parsed Clean Records (Count: N)
+        Svc->>DB: Save DataImportJob (Status: PREVIEW_READY, Preview: First 10 Rows)
+        Svc-->>UI: Return 200 OK + 10-Row Confirmation Preview Grid
+        UI-->>User: Render Preview Grid + Prompt "Commit Import"
+    end
+
+    User->>UI: Clicks "Commit Import"
+    UI->>Svc: POST /api/v1/imports/commit/ (Job ID)
+    Svc->>DB: Atomic Bulk Ingestion (User/Question/Roster records created)
+    Svc->>DB: Update DataImportJob (Status: COMPLETED, Successful: N)
+    Svc-->>UI: Return Success Summary Receipt
+    UI-->>User: Display Ingestion Confirmation & Deep Links
+```
+
 ---
 
 ## 4. Comprehensive Data Store & Flow Dictionary
@@ -213,6 +250,7 @@ sequenceDiagram
 | **DF-07** | Grader Allocation | Designer | DS-7 | `exam_id`, `grader_id`, `candidate_range_start`, `candidate_range_end`, `sla_deadline` |
 | **DF-08** | Question Evaluation | Grader | DS-7 | `attempt_id`, `question_id`, `awarded_marks`, `rubric_criteria_selected`, `grader_notes`, `is_draft` |
 | **DF-09** | System Notification | Notification Svc | DS-8 | `tenant_id`, `recipient_id`, `title`, `body`, `action_url`, `is_read`, `priority` |
+| **DF-10** | Bulk Data Import | Designer / Item Writer | DS-9 / DS-2/3/4 | `import_type`, `source_file`, `status`, `total_rows`, `preview_data`, `error_log`, `target_id` |
 
 ---
 
@@ -227,3 +265,10 @@ sequenceDiagram
 
 ### 5.2 Concurrent Examiner Score Updates
 * `QuestionScore` records utilize optimistic concurrency locking with `version` fields to prevent two graders from overwriting the same candidate's essay score simultaneously.
+
+### 5.3 Malformed or Corrupt Bulk Import Files
+* If uploaded CSV/Excel contains malformed rows, missing mandatory headers, or invalid foreign keys:
+  1. Dry-run parser rejects ingestion before any database writes occur.
+  2. Generates line-by-line `error_log` JSON with column names and error messages.
+  3. UI renders an interactive error table with 1-click "Download Error Report" so the user can fix erroneous cells in Excel and re-upload.
+

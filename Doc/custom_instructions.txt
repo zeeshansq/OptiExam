@@ -86,3 +86,11 @@ MANDATORY RULES (DO NOT VIOLATE):
     Participants see results ONLY after Exam.results_published = True.
     This is set explicitly by the Designer via ResultPublicationForm.
     Check exam.results_published in every result-display view.
+
+15. BULK DATA IMPORT ARCHITECTURE:
+    ALL import workflows (Participant Rosters, Question Banks, Users, Blueprints) must:
+    - Provide 1-click downloadable sample files (.CSV and .XLSX) with instructions and examples.
+    - Run 2-stage ingestion: Stage 1 Dry-Run Schema Validation (0 database writes) → Stage 2 Atomic Commit.
+    - Render a 10-row confirmation preview grid and row-by-row error table on validation failure.
+    - Record all import jobs in DataImportJob (apps.core.models) with metrics and error logs.
+

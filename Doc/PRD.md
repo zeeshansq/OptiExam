@@ -321,13 +321,104 @@ The Designer's real-time command center during a live exam:
 
 ---
 
-## 7. Participant Roster & Access Control
+## 7. Bulk Data Import & Migration Suite
 
-The Designer must define who can attempt an exam:
-1. **CSV Import:** Upload a structured CSV (`registration_number, full_name, email`) to populate `ExamParticipantRoster`.
-2. **Manual Entry:** Add individual participants one by one.
-3. **Access Validation:** When a participant clicks "Start Exam", the server verifies they exist in `ExamParticipantRoster` for that exam and tenant. Unauthorized users see an access-denied screen.
-4. **Enrollment Cutoff:** Designer can lock the roster after a defined time.
+OptiExam provides a dedicated, highly robust **Data Ingestion & Import Engine** with specialized user interfaces, step-by-step instructions, pre-validation previews, downloadable sample files, and real-time error auditing across all core domain entities.
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      BULK DATA IMPORT PIPELINE                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│  1. Download Template  ──► 1-Click Download Sample .CSV / .XLSX         │
+│  2. User Upload        ──► Drag-and-Drop file to Dedicated Import Hub   │
+│  3. Dry-Run Validation ──► Schema, Type, Duplicate & Foreign Key Check  │
+│  4. Confirmation Grid  ──► Interactive 10-Row Preview with Error Badges │
+│  5. Atomic Ingestion   ──► Transactional Database Commit & Audit Log    │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 7.1 Participant Exam Roster Import Hub
+* **Dedicated Route:** `/{tenant_slug}/exams/{exam_id}/roster/import/`
+* **Purpose:** Bulk enrollment of hundreds or thousands of students into an exam roster with auto-generated sequential `candidate_index` numbers.
+* **Sample File Downloads:**
+  * `sample_participant_roster.csv` (UTF-8 Plain Text)
+  * `sample_participant_roster.xlsx` (Formatted Excel with dropdowns)
+* **Supported Schema:**
+  | Column Name | Required | Type | Description / Example |
+  |---|---|---|---|
+  | `registration_number` | **Yes** | String (50) | Student ID e.g. `STU-2026-0042` |
+  | `first_name` | **Yes** | String (150) | First name e.g. `Zaid` |
+  | `last_name` | **Yes** | String (150) | Last name e.g. `Khan` |
+  | `email` | **Yes** | Email | Student email e.g. `zaid.khan@institution.edu` |
+  | `department` | No | String (100) | Department e.g. `Computer Science` |
+  | `batch_year` | No | String (20) | Cohort year e.g. `2026` |
+* **Behavior & Safety:**
+  * Automatically creates `accounts.User` (role: `PARTICIPANT`) if the account does not yet exist.
+  * Links candidate to `ExamParticipantRoster` with sequential indexing for Grader allocation.
+  * Option to toggle: `[x] Overwrite existing roster entries` or `[ ] Skip existing entries`.
+
+---
+
+### 7.2 Question Bank Bulk Import Hub
+* **Dedicated Route:** `/{tenant_slug}/questions/banks/{bank_id}/import/`
+* **Purpose:** Allows Item Writers and Designers to import comprehensive question collections (MCQs, Diagrams, Short Questions, Long Essays with Rubrics) in seconds.
+* **Sample File Downloads:**
+  * `sample_question_bank_standard.csv`
+  * `sample_question_bank_advanced.xlsx` (Multi-sheet with Rubric builder)
+  * `sample_questions_bundle.zip` (Contains CSV + sample diagram images in an `images/` folder)
+* **Supported Schema:**
+  | Column Name | Required | Type | Allowed Values / Example |
+  |---|---|---|---|
+  | `question_type` | **Yes** | Enum | `MCQ_SINGLE`, `MCQ_MULTIPLE`, `IMAGE_MCQ`, `SHORT_ANSWER`, `LONG_ESSAY` |
+  | `prompt` | **Yes** | Text | Question problem statement or LaTeX formula |
+  | `points` | **Yes** | Decimal | e.g. `2.0` (Defaults to `1.0` if empty) |
+  | `negative_points` | No | Decimal | e.g. `0.5` (Defaults to `0.0`) |
+  | `difficulty` | No | Enum | `EASY`, `MEDIUM`, `HARD` (Default: `MEDIUM`) |
+  | `blooms_level` | No | Enum | `REMEMBER`, `UNDERSTAND`, `APPLY`, `ANALYZE`, `EVALUATE`, `CREATE` |
+  | `topic_tags` | No | String | Comma-separated tags e.g. `calculus, derivatives` |
+  | `image_filename` | No | String | Name of image in ZIP archive e.g. `circuit_diagram_1.png` |
+  | `option_1` | Conditional | Text | Text for Option A (Required for MCQs) |
+  | `option_2` | Conditional | Text | Text for Option B (Required for MCQs) |
+  | `option_3` | No | Text | Text for Option C |
+  | `option_4` | No | Text | Text for Option D |
+  | `correct_options` | Conditional | String | Indices of correct options: `1` for Single MCQ; `1,3` for Multi MCQ |
+  | `word_limit` | No | Integer | Word limit for Short Answer e.g. `150` |
+  | `model_answer` | No | Text | Reference solution for Graders |
+  | `rubric_criteria` | No | String | Pipe-separated criteria e.g. `Clarity:3|Working:5|Conclusion:2` |
+  | `hint_text` | No | Text | Hint revealed if candidate uses Hint Token |
+  | `explanation` | No | Text | Explanation shown in post-exam review |
+* **ZIP Archive Import Support:** Item Writers can upload a `.zip` file containing `questions.csv` and an `images/` subfolder. The engine automatically extracts, verifies, and attaches images locally to the corresponding `IMAGE_MCQ` question records.
+
+---
+
+### 7.3 Faculty & Evaluator User Import Hub
+* **Dedicated Route:** `/{tenant_slug}/admin/users/import/`
+* **Purpose:** Bulk onboarding of faculty members, Item Writers, and Graders by the Tenant Admin (Designer).
+* **Sample File Downloads:** `sample_faculty_users.csv`, `sample_faculty_users.xlsx`
+* **Supported Schema:** `username, first_name, last_name, email, role (ITEM_WRITER|GRADER|DESIGNER), department, specialization`.
+* **Behavior:** Provisions user accounts, assigns tenant associations, and generates activation/password setup tokens.
+
+---
+
+### 7.4 Exam Blueprint Clone & Import/Export Hub
+* **Purpose:** Complete portability of exam designs across academic semesters or institutions.
+* **Export:** 1-Click "Export Blueprint" generates a structured JSON/Excel file containing exam settings, sections, weightages, lifeline rules, and attached question references.
+* **Import:** "Import Blueprint" creates a new cloned exam draft in 1 click, allowing the Designer to modify dates and re-enroll a new student roster.
+
+---
+
+### 7.5 Pre-Validation, Confirmation Preview & Error Auditing
+All import workflows utilize a 2-stage verification engine (`apps/core/services/import_service.py`):
+1. **Stage 1 — Dry-Run Validation (No Database Mutation):**
+   * Verifies file headers, mandatory fields, data types, enum choices, and duplicate keys.
+   * If errors exist: Displays an interactive **Error Audit Grid** highlighting the exact row number, erroneous field, received value, and actionable remediation instructions.
+2. **Stage 2 — Confirmation Grid (10-Row Preview):**
+   * If validation passes: Renders a preview table of the first 10 parsed records.
+   * Prompts the user: *"148 valid records detected. Click 'Commit Import' to proceed."*
+3. **Stage 3 — Atomic Ingestion:**
+   * Ingests all records within `@transaction.atomic`.
+   * Logs a `DataImportJob` and `AuditLog` record with the imported count.
+
 
 ---
 

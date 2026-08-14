@@ -628,15 +628,134 @@ Score a candidate's subjective response.
 }
 ```
 
+---
+
+## 8. Bulk Data Import Endpoints (`/api/v1/imports/`)
+> **Required Role:** `DESIGNER`, `ITEM_WRITER`, or `SUPER_ADMIN`
+
+### 8.1 `GET /api/v1/imports/templates/{import_type}/`
+Downloads the official formatted sample template file with instructions and sample rows.
+
+**Path Parameters:**
+* `import_type`: `PARTICIPANT_ROSTER`, `QUESTION_BANK`, `FACULTY_USERS`, `EXAM_BLUEPRINT`
+
+**Query Parameters:**
+* `format`: `csv` (default) or `xlsx`
+
+**Response `200 OK`:** File stream (`Content-Disposition: attachment; filename="sample_question_bank_template.xlsx"`)
+
+---
+
+### 8.2 `POST /api/v1/imports/validate/`
+Performs dry-run schema validation on an uploaded file without modifying the database.
+
+**Request:** `multipart/form-data`
+* `import_type`: `QUESTION_BANK`
+* `target_id`: `12` (Bank ID or Exam ID)
+* `file`: `questions_upload.xlsx` (or `.zip` with diagrams)
+
+**Response `200 OK` (Validation Passed):**
+```json
+{
+  "status": "success",
+  "data": {
+    "job_id": 84,
+    "status": "PREVIEW_READY",
+    "total_rows": 150,
+    "valid_rows_count": 150,
+    "error_count": 0,
+    "preview_rows": [
+      {
+        "row_number": 1,
+        "question_type": "MCQ_SINGLE",
+        "prompt": "Evaluate the integral of cos(x) dx.",
+        "points": 2.0,
+        "difficulty": "EASY",
+        "options": ["sin(x) + C", "-sin(x) + C", "tan(x) + C", "cos(x) + C"],
+        "correct_option": "1"
+      }
+    ],
+    "message": "All 150 rows validated successfully. Ready for commit."
+  }
+}
+```
+
+**Response `422 Unprocessable Entity` (Validation Errors Found):**
+```json
+{
+  "status": "error",
+  "code": "VALIDATION_FAILED",
+  "data": {
+    "total_rows": 50,
+    "error_count": 3,
+    "errors": [
+      {
+        "row_number": 4,
+        "field": "correct_options",
+        "received_value": "5",
+        "error_message": "Index '5' out of range. Question only provides 4 options."
+      },
+      {
+        "row_number": 12,
+        "field": "points",
+        "received_value": "-2.0",
+        "error_message": "Question points must be a positive decimal."
+      }
+    ]
+  }
+}
+```
+
+---
+
+### 8.3 `POST /api/v1/imports/commit/`
+Executes atomic database ingestion for a validated `DataImportJob`.
+
+**Request Body:**
+```json
+{
+  "job_id": 84,
+  "overwrite_existing": false
+}
+```
+
 **Response `200 OK`:**
 ```json
 {
   "status": "success",
   "data": {
-    "answer_id": 12049,
-    "marks_awarded": 8.5,
-    "is_draft": false,
-    "evaluated_at": "2026-09-02T14:22:00Z"
+    "job_id": 84,
+    "status": "COMPLETED",
+    "total_ingested": 150,
+    "failed_count": 0,
+    "completed_at": "2026-09-01T10:15:22Z"
   }
 }
 ```
+
+---
+
+### 8.4 `GET /api/v1/imports/jobs/{job_id}/`
+Tracks background import job status and retrieves error audit logs.
+
+**Response `200 OK`:**
+```json
+{
+  "status": "success",
+  "data": {
+    "job_id": 84,
+    "import_type": "PARTICIPANT_ROSTER",
+    "status": "COMPLETED",
+    "total_rows": 500,
+    "processed_rows": 500,
+    "successful_rows": 498,
+    "failed_rows": 2,
+    "error_log": [
+      {"row": 142, "field": "email", "error": "Duplicate candidate registration STU-2026-142 skipped."}
+    ],
+    "created_at": "2026-09-01T10:14:00Z",
+    "completed_at": "2026-09-01T10:14:15Z"
+  }
+}
+```
+

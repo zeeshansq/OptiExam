@@ -243,3 +243,15 @@ class Command(BaseCommand):
 ```
 
 Run via: `python manage.py auto_submit_expired`
+
+---
+
+## 12. Bulk Data Ingestion & Import Integrity Rules
+
+1. **Two-Stage Ingestion Invariant:** Never insert or mutate database records directly from an unvalidated uploaded file.
+   * **Stage 1 (Dry-Run):** Parse and validate headers, foreign keys, and field types without writing to domain tables.
+   * **Stage 2 (Commit):** Only when the user reviews the 10-row confirmation preview and clicks "Commit Import" does atomic ingestion execute.
+2. **Downloadable Sample Templates:** Every import UI must provide 1-click download links to sample `.csv` and `.xlsx` templates containing valid example rows and inline column guidance.
+3. **Atomic Batch Commits:** Bulk imports must execute within `with transaction.atomic():` to ensure an unexpected failure on row 450 rolls back the entire batch cleanly.
+4. **Audit & Error Logging:** Every import job must record a `DataImportJob` entry storing metrics (total rows, processed, failed) and a line-by-line JSON error log.
+

@@ -11,14 +11,15 @@ OptiExam is partitioned into **8 cohesive, loosely coupled Django apps**:
 
 ```
 optiexam/
-├── core/            # Base mixins, tenant middleware, offline static tags, utilities
+├── core/            # Base mixins, tenant middleware, offline static tags, DataImportJob & template services
 ├── tenants/         # Multi-tenant management, institutional branding, feature flags
-├── accounts/        # Custom 5-tier User model, RBAC mixins, authentication & audit
-├── exams/           # Exam blueprints, sections, scheduling, lifelines, Live Ops
-├── questions/       # Question banks, 5 question types, image diagrams, rubric criteria
+├── accounts/        # Custom 5-tier User model, RBAC mixins, authentication & audit, faculty bulk import
+├── exams/           # Exam blueprints, sections, scheduling, lifelines, Live Ops, roster bulk import
+├── questions/       # Question banks, 5 question types, image diagrams, rubric criteria, question bank bulk import
 ├── submissions/     # Candidate exam cockpit, heartbeat sync, anti-cheating, crash recovery
 ├── grading/         # Batched candidate allocation, split-screen evaluation, rubrics
 └── notifications/   # In-app top-nav alerts, real-time supervisor broadcasts
+
 ```
 
 ---

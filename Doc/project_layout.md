@@ -278,11 +278,15 @@ psycopg2-binary>=2.9.9   # PostgreSQL driver (disabled in SQLite mode)
 # Image Processing
 Pillow>=10.4.0
 
+# Excel & Bulk Data Import Ingestion
+openpyxl>=3.1.5
+
 # Date/Time Utilities
 python-dateutil>=2.9.0
 
 # Security
 cryptography>=42.0.0      # AES encryption for offline attempt cache tokens
+
 ```
 
 ### `requirements-dev.txt` (Development Only)

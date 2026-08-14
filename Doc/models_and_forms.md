@@ -112,58 +112,145 @@ ExamLifelineConfigFormSet = inlineformset_factory(
 
 ---
 
-## 3. Participant Roster Forms *(NEW — GAP-01 Resolution)*
+---
 
-### 3.1 `RosterCSVImportForm`
+## 3. Bulk Data Import Forms Suite
+
+### 3.1 `ParticipantBatchImportForm`
 ```python
 # apps/exams/forms.py
-class RosterCSVImportForm(forms.Form):
+from django import forms
+from django.core.exceptions import ValidationError
+
+class ParticipantBatchImportForm(forms.Form):
     """
-    Allows Designer to bulk-import participant roster from a CSV file.
-    Expected CSV columns: registration_number, first_name, last_name, email
+    Form for importing student exam rosters from CSV or Excel (.xlsx) files.
     """
-    csv_file = forms.FileField(
-        label="Upload Participant Roster CSV",
+    file = forms.FileField(
+        label="Select Roster File (.CSV or .XLSX)",
         widget=forms.FileInput(attrs={
             'class': 'form-input-file',
-            'accept': '.csv',
-            'id': 'id-roster-csv',
-            'aria-label': 'Upload Participant CSV File'
+            'accept': '.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'id': 'id-roster-file',
+            'aria-label': 'Upload Participant Roster File'
         }),
-        help_text="CSV format: registration_number, first_name, last_name, email"
+        help_text="Supported formats: .CSV, .XLSX (Max 5MB)"
     )
     overwrite_existing = forms.BooleanField(
         required=False,
-        label="Overwrite existing roster entries",
+        label="Overwrite existing candidate registrations in roster",
         widget=forms.CheckboxInput(attrs={'class': 'form-checkbox', 'id': 'id-overwrite-roster'})
     )
+    send_welcome_email = forms.BooleanField(
+        required=False,
+        initial=True,
+        label="Send email notification with login credentials to new candidates",
+        widget=forms.CheckboxInput(attrs={'class': 'form-checkbox', 'id': 'id-send-email'})
+    )
 
-    def clean_csv_file(self):
-        csv_file = self.cleaned_data['csv_file']
-        if not csv_file.name.endswith('.csv'):
-            raise ValidationError("Only CSV files are accepted.")
-        if csv_file.size > 5 * 1024 * 1024:  # 5MB max
-            raise ValidationError("CSV file must be smaller than 5MB.")
-        return csv_file
+    def clean_file(self):
+        file = self.cleaned_data['file']
+        valid_extensions = ('.csv', '.xlsx')
+        if not any(file.name.lower().endswith(ext) for ext in valid_extensions):
+            raise ValidationError("Invalid file format. Please upload a .CSV or .XLSX file.")
+        if file.size > 5 * 1024 * 1024:
+            raise ValidationError("File size exceeds 5MB limit.")
+        return file
 ```
 
-### 3.2 `RosterManualAddForm`
+### 3.2 `QuestionBankImportForm`
 ```python
-class RosterManualAddForm(forms.Form):
-    """Manually add a single participant to an exam roster."""
-    username = forms.CharField(
-        label="Participant Username",
-        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Existing system username'})
+# apps/questions/forms.py
+class QuestionBankImportForm(forms.Form):
+    """
+    Form for bulk importing questions, diagrams, model answers, and rubrics
+    into a target QuestionBank from CSV, Excel, or ZIP bundle.
+    """
+    bank = forms.ModelChoiceField(
+        queryset=None,  # Populated dynamically with request.tenant banks in __init__
+        label="Target Question Bank",
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id-target-bank'})
     )
-    registration_number = forms.CharField(
+    file = forms.FileField(
+        label="Upload Questions File (.CSV, .XLSX, or .ZIP with diagrams)",
+        widget=forms.FileInput(attrs={
+            'class': 'form-input-file',
+            'accept': '.csv, .xlsx, .zip, application/zip',
+            'id': 'id-question-import-file',
+            'aria-label': 'Upload Question Bank File'
+        }),
+        help_text="Upload .CSV, .XLSX, or a .ZIP archive containing questions.csv and an images/ folder."
+    )
+    default_difficulty = forms.ChoiceField(
+        choices=[('EASY', 'Easy'), ('MEDIUM', 'Medium'), ('HARD', 'Hard')],
+        initial='MEDIUM',
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Optional: override registration #'})
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id-default-difficulty'})
+    )
+
+    def __init__(self, *args, tenant=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if tenant:
+            from questions.models import QuestionBank
+            self.fields['bank'].queryset = QuestionBank.objects.filter(tenant=tenant)
+
+    def clean_file(self):
+        file = self.cleaned_data['file']
+        valid_extensions = ('.csv', '.xlsx', '.zip')
+        if not any(file.name.lower().endswith(ext) for ext in valid_extensions):
+            raise ValidationError("Invalid file format. Please upload .CSV, .XLSX, or .ZIP.")
+        if file.size > 25 * 1024 * 1024:  # 25MB for ZIP archives
+            raise ValidationError("File size exceeds 25MB limit.")
+        return file
+```
+
+### 3.3 `FacultyUserImportForm`
+```python
+# apps/accounts/forms.py
+class FacultyUserImportForm(forms.Form):
+    """
+    Allows Designer / Super Admin to bulk import Item Writers, Graders, and faculty.
+    """
+    file = forms.FileField(
+        label="Upload Faculty / Evaluators File (.CSV or .XLSX)",
+        widget=forms.FileInput(attrs={
+            'class': 'form-input-file',
+            'accept': '.csv, .xlsx',
+            'id': 'id-faculty-file'
+        })
+    )
+    default_role = forms.ChoiceField(
+        choices=[('ITEM_WRITER', 'Item Writer'), ('GRADER', 'Grader'), ('DESIGNER', 'Designer')],
+        initial='ITEM_WRITER',
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id-default-role'})
+    )
+```
+
+### 3.4 `ExamBlueprintImportForm`
+```python
+# apps/exams/forms.py
+class ExamBlueprintImportForm(forms.Form):
+    """
+    Allows 1-click cloning and importing of entire Exam Blueprints from JSON/YAML.
+    """
+    file = forms.FileField(
+        label="Upload Exam Blueprint (.JSON)",
+        widget=forms.FileInput(attrs={'class': 'form-input-file', 'accept': '.json', 'id': 'id-blueprint-file'})
+    )
+    new_exam_code = forms.CharField(
+        label="New Exam Code",
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. CS-401-FALL-2026'})
+    )
+    new_start_time = forms.DateTimeField(
+        label="New Scheduled Start Time",
+        widget=forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local'})
     )
 ```
 
 ---
 
 ## 4. Question Authoring Forms
+
 
 ### 4.1 `MCQQuestionForm` with Dynamic Option FormSet
 
