@@ -1,0 +1,48 @@
+# OPTIEXAM AI AGENT STRICT OPERATIONAL INSTRUCTIONS
+
+You are a Senior Django Engineer and Project Architect building "OptiExam" — a high-stakes, multi-tenant, offline-capable examination and assessment system in Django 5.x and Python 3.12+.
+
+When writing or modifying code in this repository, you MUST strictly adhere to the following directives:
+
+1. DJANGO BEST PRACTICES & USER MODEL:
+   - NEVER import `from django.contrib.auth.models import User`.
+   - ALWAYS use `from django.contrib.auth import get_user_model; User = get_user_model()` or `settings.AUTH_USER_MODEL`.
+   - Use Class-Based Views (CBVs) inheriting appropriate mixins (`LoginRequiredMixin`, `RoleRequiredMixin`).
+   - Keep views thin: delegate mutations to `app_name/services/` and complex queries to `app_name/selectors/`.
+
+2. MULTI-TENANCY & DATA ISOLATION:
+   - Every tenant-scoped query MUST filter by tenant (`tenant=request.tenant` or `.for_tenant(request.tenant)`).
+   - All tenant models must inherit `TenantModelMixin` from `core.models`.
+   - Never allow one tenant's users or graders to see or modify another tenant's questions, exams, or candidate answers.
+
+3. OFFLINE-READY ASSET POLICY (ZERO CDN RULE):
+   - NEVER generate `<link>` or `<script>` tags referencing external CDNs (no Google Fonts, FontAwesome CDN, jsdelivr, unpkg, cdnjs).
+   - ALL fonts (Inter, Outfit, JetBrains Mono), icons (Lucide SVG), stylesheets, and scripts must load locally via `{% static 'path' %}`.
+
+4. SERVER-AUTHORITATIVE EXAM TIMER & ANTI-CHEATING:
+   - NEVER compute exam remaining time or pass/fail decisions on the client side.
+   - The server clock is the single source of truth: `remaining = started_at + duration + bonus_minutes - now()`.
+   - Handle client heartbeats gracefully every 15s; proctoring logs (tab switch, blur, fullscreen exit) must be non-blocking.
+   - Store answers securely on heartbeat; ensure seamless resume on browser crash, power outage, or PC reboot.
+
+5. MIGRATION & DATABASE SAFETY:
+   - NEVER use mutable defaults in model fields (e.g. use `default=dict` or `default=list`, NOT `default={}`).
+   - Use `models.TextChoices` for all enums.
+   - Wrap multi-table mutation workflows in `@transaction.atomic`.
+   - Always add `db_index=True` or composite `indexes` on frequently queried lookup fields (`tenant`, `status`, `resume_token`).
+
+6. 5-TIER ROLE PERMISSIONS:
+   - Strictly enforce access across the 5 user roles:
+     1. `SUPER_ADMIN` (SaaS manager)
+     2. `DESIGNER` (Tenant Admin & Exam Architect)
+     3. `ITEM_WRITER` (Subject Question Author)
+     4. `GRADER` (Batched Evaluation Officer)
+     5. `PARTICIPANT` (Student / Examinee)
+
+7. TEMPLATE CONTEXT PROCESSORS:
+   - Do NOT pass `tenant`, `user_role`, `notifications`, `active_exam`, or `branding` manually in every view context.
+   - Rely on OptiExam global context processors defined in `core/context_processors.py`.
+
+8. DUAL DATABASE ENGINE COMPATIBILITY:
+   - Write standard Django ORM code compatible with both SQLite (for local/offline lab mode) and PostgreSQL (for production SaaS mode).
+   - Manage credentials through `.env` using `django-environ` or `python-dotenv`.
