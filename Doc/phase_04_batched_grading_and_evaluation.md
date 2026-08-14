@@ -179,13 +179,20 @@ sequenceDiagram
 
 ---
 
-### 4.1 UI/UX Split-Screen Evaluation Studio (Full Screen Width)
+### 4.1 UI/UX Split-Screen Evaluation Studio (Whole-Project Standards Enforced)
 1. **100% Full-Width Split-Screen Studio**:
    * Uses 100% full screen width layout (`width: 100%; max-width: 100%;`).
    * **Left Panel (50% Full-Width):** Candidate Subjective Answer text, formatted code blocks, or diagram image attachments with inline zoom.
    * **Right Panel (50% Full-Width):** Model Answer, Rubric Criteria Matrix (1-click point selectors), and Grader Feedback textarea.
-2. **Double-Blind Candidate Strip**:
-   * Top bar spans full screen width showing anonymized index (e.g. `Candidate #042`), question navigation tabs, and grading progress bar.
+   * **Bottom Actions Bar:** Full-width glassmorphic strip with `[Save Draft]`, `[Next Candidate]`, and `[Submit Final Grade]`.
+2. **Grading Queue & Allocation Matrix**:
+   * **Single-Line Filter Toolbar:** Filter grading batches by Exam, Subject, SLA Status, and Grader in one horizontal line (`.filter-row-single`) with `[Filter]` and `[Clear]` (`rotate-ccw`) icon buttons.
+   * **Icon-Only Action Buttons with Concise Tooltips:**
+     - **Start Grading:** `.action-btn-edit` with `{% icon 'edit' %}` and `data-tooltip="Grade"`
+     - **Inspect Evaluation Audit:** `.action-btn-inspect` with `{% icon 'eye' %}` and `data-tooltip="Inspect"`
+     - **Approve / Moderate:** `.action-btn-success` with `{% icon 'check' %}` and `data-tooltip="Approve"`
+     - **Return for Review:** `.action-btn-warning` with `{% icon 'rotate-ccw' %}` and `data-tooltip="Return"`
+
 
 ---
 

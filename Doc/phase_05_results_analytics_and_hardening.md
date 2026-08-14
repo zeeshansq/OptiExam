@@ -176,14 +176,21 @@ templates/
 
 ---
 
-### 4.1 UI/UX Analytics Dashboard & Scorecards (Full Screen Width)
+### 4.1 UI/UX Analytics & Hardening Specifications (Whole-Project Standards Enforced)
 1. **100% Full-Width Cohort Analytics Grid**:
    * Uses 100% full screen width layout (`width: 100%; max-width: 100%;`).
    * Visual score distribution histograms, section performance gauges, and Bloom's Taxonomy breakdown matrices spanning the entire screen.
 2. **Item Discrimination Matrix Table**:
-   * Expansive full-width data table for Item Analysis ($p$-value facility index, $r_{\text{pbis}}$ discrimination index, distractor frequency) with sortable columns and search filters.
+   * Expansive full-width data table for Item Analysis ($p$-value facility index, $r_{\text{pbis}}$ discrimination index, distractor frequency).
+   * **Single-Line Filter Toolbar:** Filter by section, taxonomy, difficulty with `[Filter]` and `[Clear]` (`rotate-ccw`) icon buttons in one line (`.filter-row-single`).
+   * **Clickable Two-Way Column Sorting:** Clickable headers (`{% sort_header %}`) for $p$-value, $r_{\text{pbis}}$, and total attempts.
+   * **Full-Featured Pagination:** Standard windowed pagination (`{% include "includes/pagination.html" %}`).
+   * **Icon-Only Action Buttons with Concise Tooltips:**
+     - **Inspect Question Metrics:** `.action-btn-inspect` with `{% icon 'eye' %}` and `data-tooltip="Inspect"`
+     - **Export CSV/PDF Report:** `.action-btn-success` with `{% icon 'download' %}` and `data-tooltip="Export"`
 3. **Printable / PDF Scorecard Transcript**:
    * Responsive full-width scorecard with clean `@media print` CSS rules for high-resolution paper output.
+
 
 ---
 

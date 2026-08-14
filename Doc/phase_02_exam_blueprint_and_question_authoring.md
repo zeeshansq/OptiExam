@@ -201,18 +201,34 @@ apps/
 
 ## 5. UI/UX Design System Specifications for Authoring & Blueprinting
 
-1. **Full-Screen Width Studio Architecture**:
-   * Uses 100% full screen width layout (`.container`, `.container-fluid`) to provide expansive horizontal authoring space.
-   * Multi-column Question Bank and Blueprint grids expand across the full viewport width.
-2. **Question Authoring UI**:
-   * Dynamic Alpine.js or Vanilla JS formset manager for adding/removing options without page refresh.
-   * Wide split preview card updating live as Item Writer types.
-   * Model answer accordion with clear "Confidential to Graders" warning badge.
-3. **Exam Blueprint UI**:
-   * Multi-step wizard with visual progress breadcrumb (`Details → Security → Sections & Questions → Lifelines → Roster`).
-   * Visual weightage distribution summary bar and full-width Question Bank picker table.
+1. **100% Full-Screen Width Studio Architecture**:
+   * Uses 100% full screen width layout (`.container`, `.container-fluid`) across all Question Banks, Question Studios, and Exam Blueprint builders.
+   * Eliminates fixed narrow containers to give Item Writers and Designers edge-to-edge space.
 
-   * Interactive CSV dropzone with instantaneous row count validation.
+2. **Single-Line Filter Toolbar & Concise Clear Action**:
+   * Question Bank repositories and Blueprint lists MUST use `.filter-row-single` to keep search input, taxonomy/type dropdowns, `[Filter]` button, and `[Clear]` icon button (`rotate-ccw`) in a single horizontal row.
+   * Active filter badge chips with 1-click removal appear directly above the table.
+
+3. **Balanced Full-Width Two-Column Form Structure**:
+   * Question Authoring Studios use a balanced 2-column grid (`<div class="grid grid-cols-2 gap-6">`):
+     - **Left Column (50%):** Prompt, question type, Bloom's taxonomy level, points, and dynamic options/rubric formset.
+     - **Right Column (50%):** Model answer, hint text, explanation, diagram uploader, and live instant rendering preview.
+     - **Bottom Actions Bar:** Full-width glassmorphic strip with `[Cancel]`, `[Save as Draft]`, and `[Publish to Bank]` buttons.
+
+4. **Interactive Data Tables & Full-Featured Pagination**:
+   * Question lists and candidate roster tables must use two-way sortable headers (`{% sort_header %}`), page size selection (`10/25/50/100`), and windowed pagination (`{% include "includes/pagination.html" %}`).
+
+5. **Icon-Only Colorful Action Buttons with Concise Hover Tooltips**:
+   * Row actions in Question Banks and Blueprint rosters MUST use `.action-btn` icon buttons:
+     - **Inspect / Preview:** `.action-btn-inspect` with `{% icon 'eye' %}` and `data-tooltip="Inspect"`
+     - **Edit Question:** `.action-btn-edit` with `{% icon 'edit' %}` and `data-tooltip="Edit"`
+     - **Delete / Archive:** `.action-btn-delete` with `{% icon 'trash-2' %}` and `data-tooltip="Delete"`
+     - **Assign to Exam:** `.action-btn-success` with `{% icon 'plus' %}` and `data-tooltip="Assign"`
+
+6. **Two-Stage Bulk Import Invariant (Participant Rosters & Question Banks)**:
+   * Dedicated pages with 1-click downloadable sample `.csv` and `.xlsx` templates.
+   * Stage 1 Dry-Run Schema Validation (0 database writes) → 10-row preview grid + row-level error table → Stage 2 Atomic Commit.
+
 
 ---
 

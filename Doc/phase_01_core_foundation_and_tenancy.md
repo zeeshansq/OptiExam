@@ -194,16 +194,16 @@ Implement the 5 specialized context processors in `apps/core/context_processors.
 
 ### Task 1.7: Super Admin Complete CRUD & Advanced Interactive Matrix (`apps/tenants`)
 1. **Full CRUD View Suite**:
-   * `SuperAdminDashboardView`: High-density directory matrix with multi-field search (`q`), tier filter, status filter, two-way column sorting, and full pagination (`10/25/50/100` page size).
-   * `TenantCreateView`: Categorized 4-section smart form (Identity, Quotas, Branding, Security) with color presets palette and auto-slugify.
-   * `TenantUpdateView`: Comprehensive institution editor with live feature flag matrix toggles.
-   * `TenantDetailView`: Deep inspection cockpit for quotas, storage metrics, and feature flags.
-   * `TenantDeleteView`: Safe deactivation / soft delete with glassmorphic modal confirmation.
+   * `SuperAdminDashboardView`: High-density directory matrix with **single-line filter toolbar** (`.filter-row-single`), multi-field search (`q`), tier filter, status filter, `[Filter]` and `[Clear]` (`rotate-ccw`) icon buttons, two-way clickable column sorting (`{% sort_header %}`), full-featured windowed pagination (`{% include "includes/pagination.html" %}` with `10/25/50/100` page size), and **colorful icon-only action buttons** (`action-btn-inspect` with `eye`, `action-btn-edit` with `edit`, `action-btn-delete` with `trash-2`) with concise hover tooltips (`"Inspect"`, `"Edit"`, `"Delete"`).
+   * `TenantCreateView` & `TenantUpdateView`: Balanced **two-column full-screen width smart form** (`<div class="grid grid-cols-2 gap-6">`) structured into 4 categorized cards (Identity, Quotas, Branding, Security) with 1-click color presets, auto-slugify, and full-width bottom actions bar.
+   * `TenantDetailView`: Deep inspection cockpit for quotas, storage metrics, and 1-click feature flag icon toggles with concise tooltips (`"Enable"`, `"Disable"`).
+   * `TenantDeleteView`: Safe deactivation / soft delete with confirmation view.
    * `TenantFeatureFlagToggleView`: AJAX 1-click feature toggle endpoint.
 2. **Audit Log Explorer Hub (`AuditLogListView`)**:
-   * Global and tenant-filtered event logs with category filter pills, IP search, date range picker, and pagination.
+   * Global and tenant-filtered event logs with single-line filter toolbar, IP search, category dropdown, and pagination.
 3. **Tenant User Management Hub (`TenantUserListView`, `TenantUserCreateView`, `TenantUserUpdateView`)**:
    * Multi-role user administration with role filters, status badges, password reset, and deactivation.
+
 
 ### Task 1.8: Bulk Faculty & User CSV/Excel Import Hub (`apps/accounts`)
 1. Implement `FacultyUserImportForm` and dedicated User Import View at `/{tenant_slug}/admin/users/import/`.

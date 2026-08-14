@@ -256,40 +256,44 @@ All application layouts, dashboards, exam cockpits, and grading studios are engi
 
 ---
 
-### 3.6 Categorized Smart Forms & Helper Elements Standard
-All forms across SaaS Admin, Designer, Authoring, and User Management must be structured into **logical, categorized card sections** with advance helping UI elements:
-1. **Visual Grouping & Section Hierarchy:**
-   * Forms are divided into clearly titled sections (e.g. `1. Institution Identity`, `2. Quotas & Capacity`, `3. Branding & Theme`, `4. Security & Feature Toggles`).
-   * Each section has an icon, section subtitle, and contextual help cards (`page-guide`).
-2. **Smart Prefilled Values & Defaults:**
-   * Intelligent pre-filled suggestions (e.g. sensible concurrent candidate quotas based on tier, default brand colors, auto-slugify on title input).
+### 3.6 Categorized Smart Forms & Balanced Two-Column Full-Width Standard
+All forms across SaaS Admin, Designer, Authoring, and User Management must be structured into **100% full-screen width balanced two-column card layouts** (`<div class="grid grid-cols-2 gap-6">`):
+1. **Balanced Two-Column Full-Width Architecture:**
+   * Forms MUST NEVER be constrained by artificial `max-width` bottlenecks (such as `max-width: 900px`).
+   * **Left Column (50%):** Core identity, primary parameters, and capacity/configuration card sections.
+   * **Right Column (50%):** Branding, metadata, security, status, and auxiliary settings card sections.
+   * **Full-Width Bottom Actions Bar:** Glassmorphic strip spanning both columns with cancellation and primary submit action buttons.
+2. **Visual Grouping & Section Hierarchy:**
+   * Forms are divided into clearly titled sections (e.g. `1. Institution Identity`, `2. Quotas & Capacity`, `3. Branding & Theme`, `4. Security & Status`).
+   * Each section has an icon, section subtitle, and contextual help cards.
+3. **Smart Prefilled Values & Helping Defaults:**
+   * Intelligent pre-filled suggestions (e.g. sensible concurrent candidate quotas based on tier, default brand colors, real-time auto-slugify on title input).
    * 1-Click Color Preset Palettes for brand color selection with live hex preview.
-3. **Advanced Helping UI Elements:**
-   * Live character counters for textareas and questions.
-   * Visual input state indicators (green checkmark on valid format, warning badge on duplicate slug).
-   * Password strength meters and 1-click password generator with show/hide toggle.
-   * Clear file dropzones with instant file type / size validation and image preview thumbnail.
+   * Password strength meters, show/hide toggles, and clear image dropzones with previews.
 
 ---
 
-### 3.7 Interactive Data Tables, Advanced Search, Multi-Filters & Pagination Standard
+### 3.7 Interactive Data Tables, Single-Line Filters, Pagination & Icon Action Buttons Standard
 All tabular data views (Tenants, Users, Question Banks, Blueprints, Attempts, Grading Batches, Audit Logs) must implement high-density interactive tables:
-1. **Advanced Searching & Multi-Field Querying:**
-   * Debounced real-time / submit search across multiple fields (e.g. search query matches name, slug, domain, email, registration number simultaneously).
-   * Instant search clearing button (`x`) and search query persistence in URL query parameters (`?q=...`).
-2. **Multi-Parameter Filter Toolbar:**
-   * Filter bars containing dropdown selectors (e.g. Tier, Role, Status, Date Range, Department).
-   * **Active Filter Chips:** Visual badge pills above table displaying current active filters with 1-click individual removal or "Clear All Filters" button.
-3. **Multi-Column Clickable Sorting:**
-   * Clickable column headers with sort indicators (`↑` ascending, `↓` descending, `↕` sortable) preserving active filters across pagination (`?sort=name&order=desc`).
-4. **Full-Featured Pagination System:**
+1. **Single-Line Filter Toolbar Standard:**
+   * Filter bars MUST fit in a **single horizontal line** using `.filter-row-single`.
+   * Search input (`.filter-search-field`), dropdown filters (`.filter-dropdown-field`), the primary **Filter** submit button, and the **Clear/Reset** icon button (`rotate-ccw`) sit side-by-side on the same row with consistent `38px` component heights.
+   * **Active Filter Chips:** Visual badge pills above table displaying current active filters with 1-click `×` removal.
+2. **Multi-Column Clickable Sorting:**
+   * Clickable column headers with sort indicators (`↑` ascending, `↓` descending, `↕` sortable) via `{% sort_header 'field' 'Label' %}` preserving active filters across pagination (`?sort=name&order=desc`).
+3. **Full-Featured Pagination System:**
    * **Summary Metric:** Displays `"Showing X to Y of Z total entries"`.
    * **Page Size Selector:** Configurable page size selector (`10`, `25`, `50`, `100` items per page).
    * **Navigation Controls:** First (`«`), Previous (`‹`), Smart windowed page numbers (e.g. `1 ... 4 5 6 ... 20`), Next (`›`), and Last (`»`).
-   * Direct page jump input for rapid navigation across hundreds of pages.
-5. **Interactive Row Actions & Modals:**
-   * Action dropdown menus per row (View, Edit, Manage Features, Deactivate, Delete).
-   * Destructive actions require a glassmorphic confirmation modal displaying the target resource name before execution.
+4. **Icon-Only Colorful Action Buttons with Concise Tooltips:**
+   * Row actions MUST use well-aligned, colorful icon-only buttons (`.action-btn`) instead of raw text labels:
+     - 👁️ **Inspect / View:** `.action-btn.action-btn-inspect` (Cyan) with `{% icon 'eye' %}` and `data-tooltip="Inspect"`
+     - ✏️ **Edit / Settings:** `.action-btn.action-btn-edit` (Indigo) with `{% icon 'edit' %}` and `data-tooltip="Edit"`
+     - 🗑️ **Delete / Deactivate:** `.action-btn.action-btn-delete` (Crimson) with `{% icon 'trash-2' %}` and `data-tooltip="Delete"`
+     - ✅ **Enable / Approve:** `.action-btn.action-btn-success` (Emerald) with `{% icon 'check' %}` and `data-tooltip="Enable"`
+   * Tooltip help text must remain concise (action name only, without appending row names or extraneous details).
+   * Destructive actions require a confirmation view before execution.
+
 
 ---
 

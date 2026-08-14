@@ -223,13 +223,18 @@ static/
 
 ---
 
-### 4.1 UI/UX Cockpit & Live Ops Matrix (Full Screen Width)
+### 4.1 UI/UX Cockpit & Live Ops Matrix (Whole-Project Standards Enforced)
 1. **Edge-to-Edge Candidate Cockpit**:
    * Uses 100% full screen width (`width: 100vw; height: 100vh;`) under browser fullscreen lockdown.
    * Left Question Navigator drawer (fluid 260px) + Expansive 100% fluid Question Response Area + Fixed Persistent Timer bar at top.
 2. **Live Ops Control Room (Designer)**:
    * 100% full screen width candidate monitoring matrix displaying hundreds of concurrent candidates in high-density grid.
-   * Real-time search filter and instant action buttons (Grant +5m Bonus, Force Disconnect) across full width.
+   * **Single-Line Filter Toolbar:** Filter by student name, registration number, live status (Active/Warning/Offline), with `[Filter]` button and `[Clear]` icon button (`rotate-ccw`) in one line (`.filter-row-single`).
+   * **Icon-Only Action Buttons with Concise Tooltips:**
+     - **Grant +5m Bonus:** `.action-btn-success` with `{% icon 'clock' %}` and `data-tooltip="Bonus +5m"`
+     - **Inspect Live Proctoring Feed:** `.action-btn-inspect` with `{% icon 'eye' %}` and `data-tooltip="Inspect"`
+     - **Force Submit Attempt:** `.action-btn-delete` with `{% icon 'trash-2' %}` and `data-tooltip="Force Submit"`
+
 
 ---
 
