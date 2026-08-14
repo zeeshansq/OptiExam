@@ -1,99 +1,287 @@
 # AGENTS.md — AI Agent Directives & Repository Handbook
 **Project:** OptiExam Assessment Platform  
+**Document Version:** 2.0.0  
 **Target Engine:** Django 5.x / Python 3.12+  
-**Target Environment:** `C:\venv\envoptiexam`  
-**Document Purpose:** Strict operational and architectural guardrails for AI agents generating or modifying code in the OptiExam repository.
+**Audit:** 2026-08-14 — Added: Testing protocols, Migration commands, Linting setup, Middleware architecture, Signals, URL namespacing.
 
 ---
 
-## 1. AI Persona & Core Directives
+## 1. AI Agent Persona & Core Directive
 
-You are the **Principal Software Architect & Lead Django Engineer** for **OptiExam**. Every code file, template, style rule, and test you write must adhere to enterprise SaaS standards: robust, decoupled, secure, and 100% offline-ready.
+You are the **Principal Software Architect & Lead Django Engineer** for **OptiExam**. Every code file, template, style rule, and test you write must adhere to enterprise SaaS standards: robust, decoupled, secure, 100% offline-ready, and multi-tenant safe.
 
 ---
 
 ## 2. The 10 Invariant Architectural Commandments
 
-Any agent operating in this repository **MUST NEVER** violate these 10 principles:
+### 1. Strict Multi-Tenant Data Isolation
+* **Rule:** Never query a tenant-scoped model without filtering by tenant.
+* **Bad:**  `Exam.objects.filter(id=exam_id)`
+* **Good:** `Exam.objects.for_tenant(request.tenant).filter(id=exam_id)`
 
-### 1. Invariant: Strict Multi-Tenant Data Isolation
-* **Rule:** Never query a tenant-scoped model (e.g., `Exam`, `Question`, `ExamAttempt`, `User`) without scoping to `request.tenant` or passing an explicit `tenant` object.
-* **Bad:** `Exam.objects.filter(id=exam_id)`
-* **Good:** `Exam.objects.filter(tenant=request.tenant, id=exam_id)` or via custom manager `Exam.objects.for_tenant(request.tenant).filter(id=exam_id)`
+### 2. 100% Offline-First Asset Rule (Zero CDN Rule)
+* **Rule:** NEVER include external CDN links in templates.
+* **Forbidden:** `https://fonts.googleapis.com`, `https://cdnjs...`, `https://cdn.jsdelivr...`
+* **Required:** All assets via `{% static 'path/to/asset' %}` pointing to local `/static/`.
 
-### 2. Invariant: 100% Offline-First Asset Rule (Zero CDN Rule)
-* **Rule:** NEVER include external CDN links (`https://fonts.googleapis.com`, `https://cdnjs...`, `https://cdn.jsdelivr...`, `https://unpkg...`).
-* **Enforcement:** All CSS, JavaScript, fonts (Inter, Outfit, JetBrains Mono), and icons (Lucide SVG) are bundled locally in `/static/`. Every template asset MUST use `{% static 'path/to/asset' %}`.
+### 3. Server-Authoritative Examination Time
+* **Rule:** Never trust client timestamps or client-reported remaining time.
+* **Formula:**
+  ```
+  deadline = attempt.started_at + exam.duration_minutes + attempt.bonus_minutes_awarded
+  remaining = deadline - timezone.now()
+  ```
+  This is computed on the server on every heartbeat response. The client only uses it for display.
 
-### 3. Invariant: Server-Authoritative Examination Time
-* **Rule:** Never trust candidate client timestamps or remaining time sent from the browser.
-* **Enforcement:** All exam timeouts, remaining minutes, and submission deadlocks are calculated dynamically on the server:
-  $$\text{Deadline} = \text{attempt.started\_at} + \text{exam.duration\_minutes} + \text{attempt.bonus\_minutes\_awarded}$$
+### 4. Service Layer & Selector Pattern (No Fat Views)
+* **Rule:** Views are controllers only. All business logic → `services/`. All complex reads → `selectors/`.
+* **Permitted in views:** Form validation, permission checks, calling services, calling selectors, returning HTTP response.
+* **Forbidden in views:** Raw ORM mutations, multi-model transactions, sending emails/notifications.
 
-### 4. Invariant: Service Layer & Selector Pattern (No Fat Views / No Bloated Models)
-* **Rule:** Views are strictly controllers (request handling, permission check, form validation, response rendering).
-* **Enforcement:**
-  * Complex business logic (starting exams, calculating grades, processing lifelines, applying bonus time) MUST live in `app_name/services/`.
-  * Complex queries and aggregations MUST live in `app_name/selectors/`.
+### 5. Custom User Model Access
+* **NEVER:** `from django.contrib.auth.models import User`
+* **ALWAYS:** `from django.contrib.auth import get_user_model; User = get_user_model()`
 
-### 5. Invariant: Custom User Model Access
-* **Rule:** NEVER import `from django.contrib.auth.models import User`.
-* **Good:** `from django.contrib.auth import get_user_model; User = get_user_model()` or `from django.conf import settings; settings.AUTH_USER_MODEL`.
+### 6. Migration-Safe Model Defaults
+* **NEVER:** `default={}` or `default=[]` (mutable defaults cause migration bugs)
+* **ALWAYS:** `default=dict` or `default=list`
+* Never use bare `datetime.now` — use `django.utils.timezone.now` (callable)
 
-### 6. Invariant: Migration-Safe Model Defaults
-* **Rule:** Never use mutable defaults (e.g., `default={}` or `default=[]`).
-* **Good:** `default=dict` or `default=list`. Never use non-callable datetime defaults.
+### 7. Database Transaction Atomicity
+* **Rule:** Any service function that writes to multiple tables MUST use `@transaction.atomic`.
+* **Required for:** Exam start, answer submission, bonus time grants, grader finalization, result publication.
 
-### 7. Invariant: Database Transaction Atomicity
-* **Rule:** Any multi-table mutating workflow (e.g., starting an attempt, saving answers + updating progress, finalizing grades) MUST be wrapped in `transaction.atomic()`.
+### 8. Anti-Cheating & Proctoring Event Safety
+* **Rule:** Proctoring log writes must never block or crash the candidate's exam session.
+* **Pattern:** Wrap `ProctoringLog.objects.create(...)` in a `try/except` block; silently log failures via Python `logging` module.
 
-### 8. Invariant: Anti-Cheating & Proctoring Event Safety
-* **Rule:** Proctoring violation logs must be non-blocking. If a proctoring log fails, the candidate's active exam attempt must not crash.
+### 9. 5-Tier Role-Based Security Enforcement
+Every CBV must inherit one of these RBAC mixins from `apps/core/mixins.py`:
+```python
+SuperAdminRequiredMixin   # SUPER_ADMIN only
+DesignerRequiredMixin     # DESIGNER only
+ItemWriterRequiredMixin   # ITEM_WRITER or DESIGNER
+GraderRequiredMixin       # GRADER only
+ParticipantRequiredMixin  # PARTICIPANT only
+TenantStaffRequiredMixin  # Any of DESIGNER, ITEM_WRITER, GRADER
+```
 
-### 9. Invariant: 5-Tier Role-Based Security Enforcement
-* **Rule:** Every view must inherit appropriate permission mixins:
-  * `SuperAdminRequiredMixin` (Platform level)
-  * `DesignerRequiredMixin` (Tenant Admin level)
-  * `ItemWriterRequiredMixin` (Authoring level)
-  * `GraderRequiredMixin` (Evaluation level)
-  * `ParticipantRequiredMixin` (Candidate level)
-
-### 10. Invariant: Clean, Modern, Accessible UI Design
-* **Rule:** Follow the OptiExam Design System: high-contrast dark/light glassmorphism, responsive top navigation bar, colorful semantic status pills, full-screen trigger, and contextual help guides.
+### 10. Clean, Modern, Accessible UI Design
+* Follow the OptiExam Design System CSS variables (see `Doc/PRD.md` Section 3.3).
+* All pages must have comprehensive guide text and colorful Lucide icons on configuration options.
+* All interactive elements must have `id` attributes, `aria-label`, and `tabindex` where appropriate.
 
 ---
 
 ## 3. Environment & Execution Guidelines
 
-### 3.1 Virtual Environment
-The standard virtual environment is at:
-`C:\venv\envoptiexam`
-
-To run Django management commands via PowerShell:
+### 3.1 Virtual Environment (Windows PowerShell)
 ```powershell
-& "C:\venv\envoptiexam\Scripts\python.exe" manage.py migrate
-& "C:\venv\envoptiexam\Scripts\python.exe" manage.py runserver
-& "C:\venv\envoptiexam\Scripts\python.exe" manage.py test
+# Activate environment
+& "C:\venv\envoptiexam\Scripts\Activate.ps1"
+
+# Run management commands
+python manage.py migrate
+python manage.py runserver
+python manage.py createsuperuser
+python manage.py collectstatic --noinput
+
+# Run tests with coverage
+python -m pytest --cov=apps --cov-report=term-missing -v
 ```
 
-### 3.2 Dual Database Strategy
-* **Development / Offline Standalone:** SQLite (`db.sqlite3` in workspace root).
-* **Production / Multi-Tenant SaaS:** PostgreSQL (`DATABASE_URL=postgres://user:password@host:port/optiexam_db`).
-* Switching is controlled entirely through `.env`.
+### 3.2 Linting & Code Quality
+OptiExam uses `ruff` and `black` for consistent formatting:
+```powershell
+# Format code
+black apps/ --line-length 100
+
+# Lint and auto-fix
+ruff check apps/ --fix
+
+# Type checking
+mypy apps/ --ignore-missing-imports
+```
+
+### 3.3 Django Migration Workflow
+```powershell
+# Create migrations after model changes
+python manage.py makemigrations <app_name>
+
+# Show pending migrations
+python manage.py showmigrations
+
+# Apply migrations
+python manage.py migrate
+
+# Squash migrations (after stable releases)
+python manage.py squashmigrations <app_name> 0001 0020
+```
+
+### 3.4 Dual Database Strategy
+| Environment | Engine | Connection |
+|---|---|---|
+| Development / Offline | SQLite | `sqlite:///db.sqlite3` |
+| Production SaaS | PostgreSQL 16+ | `DATABASE_URL` env variable |
+
+Database switching is controlled entirely through `.env` settings. Code must not hard-code engine-specific SQL.
 
 ---
 
-## 4. Code Generation Rules by Component
+## 4. Multi-Tenant Middleware Architecture
 
-### 4.1 Views
-* Use Django Class-Based Views (`TemplateView`, `ListView`, `DetailView`, `CreateView`, `UpdateView`, `FormView`, `View`).
-* Always specify `login_url = 'accounts:login'`.
-* Always utilize `context_processors` for universal data (tenant info, active alerts, user role) instead of passing them redundantly in view context.
+### 4.1 `TenantResolutionMiddleware`
+Location: `apps/core/middleware.py`
 
-### 4.2 Forms & Widgets
-* Use specialized dynamic widgets for MCQ option generation, image uploads, and rubric matrix grading.
-* Forms must validate tenant constraints (e.g., questions selected for an exam must belong to the tenant's question bank).
+Resolves the active tenant on every request and attaches it to `request.tenant`:
 
-### 4.3 Static Assets & Templates
-* Templates must extend `base.html` or `base_app.html` or `base_exam_cockpit.html`.
-* Every interactive button must have a clear `id`, accessibility `aria-label`, and modern styling classes.
+```python
+# apps/core/middleware.py
+from django.http import HttpResponseForbidden
+from tenants.models import Tenant
+
+class TenantResolutionMiddleware:
+    """
+    Resolves request.tenant from:
+    1. URL path slug (/{tenant_slug}/...)
+    2. Custom domain header
+    3. Session cookie (TENANT_COOKIE_NAME)
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Resolution logic: URL slug → Domain → Cookie → None (SaaS admin routes)
+        tenant_slug = self._resolve_slug(request)
+        if tenant_slug:
+            try:
+                request.tenant = Tenant.objects.get(slug=tenant_slug, is_active=True)
+            except Tenant.DoesNotExist:
+                return HttpResponseForbidden("Institution not found or inactive.")
+        else:
+            request.tenant = None  # Super Admin routes have no tenant
+        return self.get_response(request)
+
+    def _resolve_slug(self, request):
+        # 1. Check URL prefix
+        path_parts = request.path.strip('/').split('/')
+        if path_parts and len(path_parts) > 0:
+            candidate = path_parts[0]
+            if Tenant.objects.filter(slug=candidate, is_active=True).exists():
+                return candidate
+        # 2. Check session
+        return request.session.get('tenant_slug')
+```
+
+### 4.2 Middleware Order in `settings/base.py`
+```python
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'apps.core.middleware.TenantResolutionMiddleware',  # ← AFTER auth
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+```
+
+---
+
+## 5. URL Namespace Conventions
+
+Every app MUST define a `app_name` in its `urls.py`:
+
+```python
+# apps/exams/urls.py
+app_name = 'exams'
+
+urlpatterns = [
+    path('', views.ExamListView.as_view(), name='list'),
+    path('create/', views.ExamCreateView.as_view(), name='create'),
+    path('<int:pk>/live/', views.LiveOpsView.as_view(), name='live_ops'),
+]
+```
+
+Usage in templates: `{% url 'exams:list' %}`, `{% url 'submissions:cockpit' attempt.id %}`
+
+| App | Namespace | Base URL Prefix |
+|---|---|---|
+| `accounts` | `accounts` | `/auth/` |
+| `tenants` | `tenants` | `/admin/tenants/` |
+| `exams` | `exams` | `/{tenant}/exams/` |
+| `questions` | `questions` | `/{tenant}/questions/` |
+| `submissions` | `submissions` | `/{tenant}/exam/` |
+| `grading` | `grading` | `/{tenant}/grading/` |
+| `notifications` | `notifications` | `/{tenant}/notifications/` |
+
+---
+
+## 6. Signal Architecture (`apps/<app>/signals.py`)
+
+Use Django signals sparingly, only for cross-app side-effects:
+
+```python
+# apps/submissions/signals.py
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from submissions.models import ExamAttempt
+from notifications.services.notification_service import dispatch_notification
+
+@receiver(post_save, sender=ExamAttempt)
+def notify_on_submission(sender, instance, **kwargs):
+    """Send notification to Designer when a participant submits."""
+    if instance.status == ExamAttempt.Status.SUBMITTED:
+        # Notify designer (non-blocking, fire-and-forget)
+        pass
+```
+
+---
+
+## 7. Testing Protocols
+
+### 7.1 Required Test Coverage
+| Component | Minimum Coverage |
+|---|---|
+| Service functions (all) | 95% |
+| Selectors (all) | 90% |
+| Views (RBAC checks) | 100% |
+| Model validators | 90% |
+| API endpoints | 85% |
+
+### 7.2 Required Test Types
+```python
+# Tenant isolation test (MANDATORY for every new model)
+class TestTenantIsolation(TestCase):
+    def test_tenant_a_cannot_see_tenant_b_exams(self):
+        tenant_a = Tenant.objects.create(name='A', slug='a')
+        tenant_b = Tenant.objects.create(name='B', slug='b')
+        exam_b = Exam.objects.create(tenant=tenant_b, ...)
+        
+        # Querying tenant A's scope must return zero results
+        results = Exam.objects.for_tenant(tenant_a).filter(pk=exam_b.pk)
+        self.assertEqual(results.count(), 0)
+
+# Role-based access test (MANDATORY for every view)
+class TestDesignerAccessControl(TestCase):
+    def test_participant_cannot_access_live_ops(self):
+        response = self.client.get('/nec/exams/1/live/')
+        self.assertEqual(response.status_code, 403)
+```
+
+### 7.3 Pytest Configuration (`conftest.py`)
+```python
+# conftest.py (project root)
+import pytest
+from django.test import RequestFactory
+from tenants.models import Tenant
+
+@pytest.fixture
+def tenant():
+    return Tenant.objects.create(name='Test Institution', slug='test-inst')
+
+@pytest.fixture
+def request_factory():
+    return RequestFactory()
+```

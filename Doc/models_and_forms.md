@@ -1,40 +1,37 @@
 # Models & Forms Technical Breakdown — OptiExam Input Architecture
-**Document Version:** 1.0.0  
-**Project:** OptiExam Assessment Platform  
-**Document Scope:** Complete guide to Django Forms, FormSets, Custom Widgets, Validation Hooks, and Input Handling across the 5 User Roles.
+**Document Version:** 2.0.0  
+**Audit:** 2026-08-14 — Added: Roster CSV import form, Tenant creation form, Result publication form, Grader allocation formset, expanded validation.
 
 ---
 
-## 1. Authentication & User Management Forms
+## 1. Authentication Forms
 
 ### 1.1 `OptiExamLoginForm`
-Provides a universal, secure login interface for all 5 user tiers with automated tenant resolution.
-
 ```python
-# accounts/forms.py
+# apps/accounts/forms.py
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
 class OptiExamLoginForm(AuthenticationForm):
     username = forms.CharField(
+        label="Username",
         widget=forms.TextInput(attrs={
-            'class': 'form-input',
-            'placeholder': 'Enter your username or email',
-            'autocomplete': 'username',
-            'id': 'login-username'
+            'class': 'form-input', 'placeholder': 'Username or email',
+            'autocomplete': 'username', 'id': 'id-login-username',
+            'aria-label': 'Username'
         })
     )
     password = forms.CharField(
+        label="Password",
         widget=forms.PasswordInput(attrs={
-            'class': 'form-input',
-            'placeholder': 'Enter your password',
-            'autocomplete': 'current-password',
-            'id': 'login-password'
+            'class': 'form-input', 'placeholder': 'Password',
+            'autocomplete': 'current-password', 'id': 'id-login-password',
+            'aria-label': 'Password'
         })
     )
     remember_me = forms.BooleanField(
         required=False,
-        widget=forms.CheckboxInput(attrs={'class': 'form-checkbox'})
+        widget=forms.CheckboxInput(attrs={'class': 'form-checkbox', 'id': 'id-remember-me'})
     )
 ```
 
@@ -42,13 +39,12 @@ class OptiExamLoginForm(AuthenticationForm):
 
 ## 2. Exam Blueprint & Configuration Forms
 
-### 2.1 `ExamForm`
-Used by the Designer (Tenant Admin) to create and configure comprehensive examination blueprints.
-
+### 2.1 `ExamForm` — Main Exam Blueprint Creator
 ```python
-# exams/forms.py
+# apps/exams/forms.py
 from django import forms
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from exams.models import Exam
 
 class ExamForm(forms.ModelForm):
@@ -59,43 +55,44 @@ class ExamForm(forms.ModelForm):
             'duration_minutes', 'start_time', 'end_time',
             'total_marks', 'passing_percentage',
             'allow_back_navigation', 'shuffle_questions', 'shuffle_options',
-            'fullscreen_required', 'max_tab_violations'
+            'fullscreen_required', 'max_tab_violations', 'disable_copy_paste',
         ]
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. Fall Semester Final: Database Systems'}),
-            'code': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. CS-401-2026'}),
-            'description': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 3}),
-            'instructions': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 4, 'placeholder': 'Rules displayed before starting...'}),
-            'rules': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 4}),
-            'duration_minutes': forms.NumberInput(attrs={'class': 'form-input', 'min': 5, 'max': 360}),
-            'start_time': forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local'}),
-            'end_time': forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local'}),
-            'total_marks': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.5'}),
-            'passing_percentage': forms.NumberInput(attrs={'class': 'form-input', 'step': '1'}),
+            'title':              forms.TextInput(attrs={'class': 'form-input', 'id': 'id-exam-title'}),
+            'code':               forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. CS-401-2026', 'id': 'id-exam-code'}),
+            'description':        forms.Textarea(attrs={'class': 'form-textarea', 'rows': 3}),
+            'instructions':       forms.Textarea(attrs={'class': 'form-textarea', 'rows': 6, 'id': 'id-exam-instructions',
+                                                        'placeholder': 'Instructions shown to candidates before starting...'}),
+            'rules':              forms.Textarea(attrs={'class': 'form-textarea', 'rows': 4}),
+            'duration_minutes':   forms.NumberInput(attrs={'class': 'form-input', 'min': 5, 'max': 360, 'id': 'id-duration'}),
+            'start_time':         forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local', 'id': 'id-start-time'}),
+            'end_time':           forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local', 'id': 'id-end-time'}),
+            'total_marks':        forms.NumberInput(attrs={'class': 'form-input', 'step': '0.5', 'id': 'id-total-marks'}),
+            'passing_percentage': forms.NumberInput(attrs={'class': 'form-input', 'step': '1', 'min': '0', 'max': '100'}),
             'max_tab_violations': forms.NumberInput(attrs={'class': 'form-input', 'min': 1, 'max': 10}),
         }
 
     def clean(self):
         cleaned_data = super().clean()
-        start_time = cleaned_data.get('start_time')
-        end_time = cleaned_data.get('end_time')
-        duration_minutes = cleaned_data.get('duration_minutes')
+        start_time   = cleaned_data.get('start_time')
+        end_time     = cleaned_data.get('end_time')
+        duration     = cleaned_data.get('duration_minutes')
 
         if start_time and end_time:
             if start_time >= end_time:
-                raise ValidationError("Exam Start Time must be strictly earlier than End Time.")
-            
-            window_minutes = (end_time - start_time).total_seconds() / 60
-            if duration_minutes and duration_minutes > window_minutes:
-                raise ValidationError(f"Allowed duration ({duration_minutes}m) cannot exceed the total scheduling window ({int(window_minutes)}m).")
+                raise ValidationError("Start Time must be before End Time.")
+            if start_time < timezone.now():
+                raise ValidationError("Start Time cannot be in the past.")
+            window_mins = (end_time - start_time).total_seconds() / 60
+            if duration and duration > window_mins:
+                raise ValidationError(
+                    f"Duration ({duration} min) cannot exceed the scheduling window ({int(window_mins)} min)."
+                )
         return cleaned_data
 ```
 
 ### 2.2 `ExamLifelineConfigFormSet`
-Inline formset enabling the Designer to toggle and configure specific lifelines per exam.
-
 ```python
-# exams/forms.py
 from django.forms import inlineformset_factory
 from exams.models import Exam, ExamLifelineConfig
 
@@ -107,122 +104,186 @@ ExamLifelineConfigFormSet = inlineformset_factory(
     can_delete=False,
     widgets={
         'lifeline_type': forms.Select(attrs={'class': 'form-select'}),
-        'is_enabled': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
-        'max_allowed': forms.NumberInput(attrs={'class': 'form-input', 'min': 1, 'max': 10}),
+        'is_enabled':    forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
+        'max_allowed':   forms.NumberInput(attrs={'class': 'form-input', 'min': 1, 'max': 10}),
     }
 )
 ```
 
 ---
 
-## 3. Question Authoring Forms & Dynamic Widgets
+## 3. Participant Roster Forms *(NEW — GAP-01 Resolution)*
 
-### 3.1 MCQ Question Form with Dynamic Options FormSet
+### 3.1 `RosterCSVImportForm`
+```python
+# apps/exams/forms.py
+class RosterCSVImportForm(forms.Form):
+    """
+    Allows Designer to bulk-import participant roster from a CSV file.
+    Expected CSV columns: registration_number, first_name, last_name, email
+    """
+    csv_file = forms.FileField(
+        label="Upload Participant Roster CSV",
+        widget=forms.FileInput(attrs={
+            'class': 'form-input-file',
+            'accept': '.csv',
+            'id': 'id-roster-csv',
+            'aria-label': 'Upload Participant CSV File'
+        }),
+        help_text="CSV format: registration_number, first_name, last_name, email"
+    )
+    overwrite_existing = forms.BooleanField(
+        required=False,
+        label="Overwrite existing roster entries",
+        widget=forms.CheckboxInput(attrs={'class': 'form-checkbox', 'id': 'id-overwrite-roster'})
+    )
+
+    def clean_csv_file(self):
+        csv_file = self.cleaned_data['csv_file']
+        if not csv_file.name.endswith('.csv'):
+            raise ValidationError("Only CSV files are accepted.")
+        if csv_file.size > 5 * 1024 * 1024:  # 5MB max
+            raise ValidationError("CSV file must be smaller than 5MB.")
+        return csv_file
+```
+
+### 3.2 `RosterManualAddForm`
+```python
+class RosterManualAddForm(forms.Form):
+    """Manually add a single participant to an exam roster."""
+    username = forms.CharField(
+        label="Participant Username",
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Existing system username'})
+    )
+    registration_number = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Optional: override registration #'})
+    )
+```
+
+---
+
+## 4. Question Authoring Forms
+
+### 4.1 `MCQQuestionForm` with Dynamic Option FormSet
 
 ```python
-# questions/forms.py
+# apps/questions/forms.py
 from django import forms
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, BaseInlineFormSet
 from django.core.exceptions import ValidationError
 from questions.models import Question, QuestionOption, QuestionType
 
 class MCQQuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ['bank', 'section', 'question_type', 'prompt', 'points', 'negative_points', 'difficulty', 'hint_text']
+        fields = ['bank', 'question_type', 'prompt', 'image_asset', 'points',
+                  'negative_points', 'difficulty', 'blooms_level', 'hint_text', 'topic_tags']
         widgets = {
-            'bank': forms.Select(attrs={'class': 'form-select'}),
-            'section': forms.Select(attrs={'class': 'form-select'}),
-            'question_type': forms.Select(attrs={'class': 'form-select'}),
-            'prompt': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 4, 'placeholder': 'Type your question statement...'}),
-            'points': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.5'}),
-            'negative_points': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.25'}),
-            'difficulty': forms.Select(attrs={'class': 'form-select'}),
-            'hint_text': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Optional hint for Hint Token lifeline'}),
+            'bank':          forms.Select(attrs={'class': 'form-select', 'id': 'id-question-bank'}),
+            'question_type': forms.Select(attrs={'class': 'form-select', 'id': 'id-question-type'}),
+            'prompt':        forms.Textarea(attrs={'class': 'form-textarea', 'rows': 5, 'id': 'id-prompt',
+                                                   'placeholder': 'Type your question statement...'}),
+            'points':        forms.NumberInput(attrs={'class': 'form-input', 'step': '0.25', 'min': '0'}),
+            'negative_points': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.25', 'min': '0'}),
+            'difficulty':    forms.Select(attrs={'class': 'form-select'}),
+            'blooms_level':  forms.Select(attrs={'class': 'form-select'}),
+            'hint_text':     forms.TextInput(attrs={'class': 'form-input',
+                                                    'placeholder': 'Optional hint for Hint Token lifeline'}),
+            'topic_tags':    forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. normalization, joins'}),
         }
 
-class BaseQuestionOptionFormSet(forms.BaseInlineFormSet):
+class BaseOptionFormSet(BaseInlineFormSet):
     def clean(self):
         super().clean()
         if any(self.errors):
             return
+        non_empty = [f for f in self.forms if f.cleaned_data and not f.cleaned_data.get('DELETE', False)]
+        correct   = [f for f in non_empty if f.cleaned_data.get('is_correct', False)]
+
+        if len(non_empty) < 2:
+            raise ValidationError("At least 2 options are required for an MCQ.")
         
-        correct_count = 0
-        non_empty_options = 0
-        
-        for form in self.forms:
-            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
-                non_empty_options += 1
-                if form.cleaned_data.get('is_correct', False):
-                    correct_count += 1
-        
-        if non_empty_options < 2:
-            raise ValidationError("An MCQ question must provide at least 2 options.")
-        
-        # Validate based on single vs multiple choice
         question_type = self.instance.question_type if self.instance else None
-        if question_type == QuestionType.MCQ_SINGLE and correct_count != 1:
-            raise ValidationError(f"Single Choice MCQ must have exactly 1 correct option. Found {correct_count}.")
-        elif question_type == QuestionType.MCQ_MULTIPLE and correct_count < 1:
-            raise ValidationError("Multiple Choice MCQ must have at least 1 correct option.")
+        if question_type == QuestionType.MCQ_SINGLE and len(correct) != 1:
+            raise ValidationError(f"Single-choice MCQ must have exactly 1 correct option. Found: {len(correct)}")
+        elif question_type == QuestionType.MCQ_MULTIPLE and len(correct) < 1:
+            raise ValidationError("Multiple-choice MCQ must have at least 1 correct option.")
+        elif question_type == QuestionType.IMAGE_MCQ and len(correct) != 1:
+            raise ValidationError("Image MCQ must have exactly 1 correct option.")
 
 QuestionOptionFormSet = inlineformset_factory(
-    Question,
-    QuestionOption,
-    formset=BaseQuestionOptionFormSet,
+    Question, QuestionOption,
+    formset=BaseOptionFormSet,
     fields=['option_text', 'option_image', 'is_correct', 'order', 'explanation'],
-    extra=4,
-    can_delete=True,
+    extra=4, can_delete=True,
     widgets={
-        'option_text': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Option text'}),
-        'is_correct': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
-        'order': forms.NumberInput(attrs={'class': 'form-input-sm', 'min': 1}),
-        'explanation': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Explanation for review'}),
+        'option_text':  forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Option text'}),
+        'is_correct':   forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
+        'order':        forms.NumberInput(attrs={'class': 'form-input-sm', 'min': 1}),
+        'explanation':  forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Explanation (shown in review)'}),
     }
 )
 ```
 
-### 3.2 Long Essay & Rubric Matrix Authoring Form
-
+### 4.2 `ShortAnswerQuestionForm`
 ```python
-# questions/forms.py
+class ShortAnswerQuestionForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = ['bank', 'prompt', 'points', 'word_limit', 'difficulty',
+                  'blooms_level', 'model_answer', 'hint_text', 'topic_tags']
+        widgets = {
+            'prompt':       forms.Textarea(attrs={'class': 'form-textarea', 'rows': 4}),
+            'word_limit':   forms.NumberInput(attrs={'class': 'form-input', 'min': 10, 'max': 500,
+                                                     'placeholder': 'e.g. 150 words maximum'}),
+            'model_answer': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 5,
+                                                  'placeholder': 'Model answer for Grader reference...'}),
+        }
+```
+
+### 4.3 `LongEssayQuestionForm` with `RubricFormSet`
+```python
 from questions.models import QuestionRubric
 
 class LongEssayQuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ['bank', 'section', 'prompt', 'points', 'difficulty', 'model_answer', 'hint_text']
+        fields = ['bank', 'prompt', 'image_asset', 'points', 'difficulty',
+                  'blooms_level', 'model_answer', 'hint_text', 'topic_tags']
         widgets = {
-            'prompt': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 6}),
-            'model_answer': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 8, 'placeholder': 'Detailed model solution for Graders...'}),
-            'points': forms.NumberInput(attrs={'class': 'form-input', 'step': '1.0'}),
+            'prompt':       forms.Textarea(attrs={'class': 'form-textarea', 'rows': 6}),
+            'model_answer': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 10,
+                                                  'placeholder': 'Detailed step-by-step model solution...'}),
         }
 
+    def clean(self):
+        cleaned_data = super().clean()
+        # Validate that total rubric marks don't exceed question points (done in view after formset validation)
+        return cleaned_data
+
 QuestionRubricFormSet = inlineformset_factory(
-    Question,
-    QuestionRubric,
+    Question, QuestionRubric,
     fields=['criteria_title', 'description', 'max_points', 'order'],
-    extra=3,
-    can_delete=True,
+    extra=3, can_delete=True,
     widgets={
-        'criteria_title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. Theoretical Accuracy'}),
-        'description': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Scoring instructions for grader'}),
-        'max_points': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.5'}),
-        'order': forms.NumberInput(attrs={'class': 'form-input-sm'}),
+        'criteria_title': forms.TextInput(attrs={'class': 'form-input',
+                                                  'placeholder': 'e.g. Theoretical Accuracy'}),
+        'description':    forms.TextInput(attrs={'class': 'form-input',
+                                                  'placeholder': 'What does full marks look like?'}),
+        'max_points':     forms.NumberInput(attrs={'class': 'form-input', 'step': '0.5'}),
+        'order':          forms.NumberInput(attrs={'class': 'form-input-sm', 'min': 1}),
     }
 )
 ```
 
 ---
 
-## 4. Grader Evaluation Forms
+## 5. Grader Evaluation Forms
 
-### 4.1 `QuestionScoreForm`
-Used inside the split-screen evaluation studio for grading subjective short/long questions.
-
+### 5.1 `QuestionScoreForm`
 ```python
-# grading/forms.py
-from django import forms
+# apps/grading/forms.py
 from grading.models import QuestionScore
 
 class QuestionScoreForm(forms.ModelForm):
@@ -230,41 +291,97 @@ class QuestionScoreForm(forms.ModelForm):
         model = QuestionScore
         fields = ['marks_awarded', 'grader_notes', 'feedback_to_student', 'is_draft']
         widgets = {
-            'marks_awarded': forms.NumberInput(attrs={
-                'class': 'form-input scoring-slider-input',
-                'step': '0.25',
-                'min': '0'
+            'marks_awarded':       forms.NumberInput(attrs={
+                'class': 'form-input scoring-input',
+                'step': '0.25', 'min': '0',
+                'id': 'id-marks-awarded',
+                'aria-label': 'Marks Awarded'
             }),
-            'grader_notes': forms.Textarea(attrs={
+            'grader_notes':        forms.Textarea(attrs={
                 'class': 'form-textarea',
                 'rows': 2,
-                'placeholder': 'Confidential notes for Chief Examiner / Moderation...'
+                'placeholder': 'Private notes for Chief Examiner (not visible to student)...'
             }),
             'feedback_to_student': forms.Textarea(attrs={
                 'class': 'form-textarea',
                 'rows': 3,
-                'placeholder': 'Constructive feedback visible to the student...'
+                'placeholder': 'Constructive feedback visible to student after result publication...'
             }),
-            'is_draft': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
+            'is_draft':            forms.CheckboxInput(attrs={'class': 'form-checkbox', 'id': 'id-is-draft'}),
         }
+
+    def clean_marks_awarded(self):
+        marks = self.cleaned_data.get('marks_awarded')
+        # max_marks is passed via form __init__ from the view
+        max_marks = getattr(self, 'max_marks', None)
+        if max_marks is not None and marks > max_marks:
+            raise ValidationError(f"Marks awarded ({marks}) cannot exceed maximum ({max_marks}).")
+        if marks < 0:
+            raise ValidationError("Marks cannot be negative.")
+        return marks
 ```
 
-### 4.2 `GraderAllocationForm`
-Allows the Designer to assign candidate batches (e.g. 1–100, 101–200) to specific graders.
-
+### 5.2 `GraderAllocationForm`
 ```python
-# grading/forms.py
-from django import forms
 from grading.models import GraderAllocation
 
 class GraderAllocationForm(forms.ModelForm):
     class Meta:
         model = GraderAllocation
-        fields = ['grader', 'candidate_range_start', 'candidate_range_end', 'deadline']
+        fields = ['grader', 'candidate_range_start', 'candidate_range_end', 'section_scope', 'deadline']
         widgets = {
-            'grader': forms.Select(attrs={'class': 'form-select'}),
-            'candidate_range_start': forms.NumberInput(attrs={'class': 'form-input', 'min': 1, 'placeholder': 'e.g. 1'}),
-            'candidate_range_end': forms.NumberInput(attrs={'class': 'form-input', 'min': 1, 'placeholder': 'e.g. 100'}),
-            'deadline': forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local'}),
+            'grader':                forms.Select(attrs={'class': 'form-select', 'id': 'id-grader'}),
+            'candidate_range_start': forms.NumberInput(attrs={'class': 'form-input', 'min': 1, 'id': 'id-range-start',
+                                                              'placeholder': 'e.g. 1'}),
+            'candidate_range_end':   forms.NumberInput(attrs={'class': 'form-input', 'min': 1, 'id': 'id-range-end',
+                                                              'placeholder': 'e.g. 100'}),
+            'section_scope':         forms.Select(attrs={'class': 'form-select'}),
+            'deadline':              forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local',
+                                                                'id': 'id-grader-deadline'}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get('candidate_range_start')
+        end   = cleaned_data.get('candidate_range_end')
+        if start and end and start > end:
+            raise ValidationError("Range start must be less than or equal to range end.")
+        return cleaned_data
 ```
+
+---
+
+## 6. Result Publication Form *(NEW — GAP-02 Resolution)*
+```python
+# apps/exams/forms.py
+class ResultPublicationForm(forms.ModelForm):
+    """
+    Designer uses this form to explicitly release exam results to participants.
+    """
+    class Meta:
+        model = Exam
+        fields = ['results_published', 'show_grader_feedback']
+        widgets = {
+            'results_published':  forms.CheckboxInput(attrs={'class': 'form-checkbox', 'id': 'id-publish-results'}),
+            'show_grader_feedback': forms.CheckboxInput(attrs={'class': 'form-checkbox', 'id': 'id-show-feedback'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('results_published') and not self.instance.pk:
+            raise ValidationError("Cannot publish results for an unsaved exam.")
+        return cleaned_data
+```
+
+---
+
+## 7. Form Validation Summary
+
+| Form | Key Validation Rules |
+|---|---|
+| `ExamForm` | `start_time < end_time`, `duration ≤ window`, `start_time not in past` |
+| `MCQQuestionForm` + `BaseOptionFormSet` | Single: exactly 1 correct; Multiple: ≥ 1 correct; ≥ 2 options total |
+| `LongEssayQuestionForm` + `RubricFormSet` | Sum of `rubric.max_points` ≤ `question.points` |
+| `GraderAllocationForm` | `range_start ≤ range_end`, grader must belong to tenant, grader has `GRADER` role |
+| `QuestionScoreForm` | `marks_awarded ≥ 0`, `marks_awarded ≤ question.points`, `is_draft` state-lock |
+| `RosterCSVImportForm` | `.csv` extension only, size ≤ 5MB, valid headers required |

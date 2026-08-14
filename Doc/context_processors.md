@@ -1,5 +1,5 @@
 # Template Context Processors Specification — OptiExam Global UI State
-**Document Version:** 1.0.0  
+**Document Version:** 2.0.0  
 **Project:** OptiExam Assessment Platform  
 **Document Purpose:** Defines all global context processors injected into Django templates automatically, eliminating boilerplate view context variables across the application.
 
@@ -160,23 +160,88 @@ def active_exam_context(request):
 ---
 
 ### 2.5 `system_settings_context(request)`
-Injects platform version, offline asset status, and dark mode preferences.
+Injects platform version, offline asset status, and user dark mode preferences.
 
 ```python
 # apps/core/context_processors.py
 from django.conf import settings
 
 def system_settings_context(request):
+    # Read user's preferred theme from session (toggled via top-nav theme button)
+    user_theme = 'dark'  # default
+    if request.user.is_authenticated:
+        user_theme = request.session.get('ui_theme', 'dark')
+
     return {
         'OPTIEXAM_VERSION': getattr(settings, 'OPTIEXAM_VERSION', '1.0.0'),
         'IS_OFFLINE_READY': True,
         'SITE_TITLE': 'OptiExam',
+        'ui_theme': user_theme,              # 'dark' or 'light'
+        'is_dark_mode': user_theme == 'dark',
     }
 ```
 
 ---
 
-## 3. Registration in `optiexam/settings/base.py`
+---
+
+## 3. Performance & Caching Strategy
+
+> [!WARNING]
+> Each context processor runs on **every HTTP request**. Without caching, `notification_context` and `tenant_context` will hit the database on every page load. Apply the following caching strategies:
+
+### 3.1 Feature Flags Caching
+Cache tenant feature flags using Django's cache framework (avoids N+1 query per request):
+```python
+from django.core.cache import cache
+
+def tenant_context(request):
+    tenant = getattr(request, 'tenant', None)
+    if not tenant:
+        return {...}  # defaults
+
+    cache_key = f'tenant_feature_flags_{tenant.pk}'
+    feature_flags = cache.get(cache_key)
+    if feature_flags is None:
+        feature_flags = {
+            flag.feature_key: flag.is_enabled
+            for flag in tenant.feature_flags.all()
+        }
+        cache.set(cache_key, feature_flags, timeout=300)  # 5 minute TTL
+    return {..., 'tenant_feature_flags': feature_flags}
+```
+
+### 3.2 Notification Count Caching
+Cache unread notification count per user (invalidated when new notification is created):
+```python
+from django.core.cache import cache
+
+def notification_context(request):
+    if not request.user.is_authenticated:
+        return {'unread_notifications_count': 0, 'recent_notifications': []}
+
+    cache_key = f'unread_notif_count_{request.user.pk}'
+    unread_count = cache.get(cache_key)
+    if unread_count is None:
+        unread_count = Notification.objects.filter(
+            recipient=request.user, is_read=False
+        ).count()
+        cache.set(cache_key, unread_count, timeout=60)  # 1 minute TTL
+
+    recent_alerts = Notification.objects.filter(
+        recipient=request.user, is_read=False
+    ).order_by('-created_at')[:5]
+
+    return {'unread_notifications_count': unread_count, 'recent_notifications': recent_alerts}
+```
+
+> [!TIP]
+> Invalidate the notification cache in `notification_service.dispatch_notification()`:
+> `cache.delete(f'unread_notif_count_{recipient.pk}')`
+
+---
+
+## 4. Registration in `optiexam/settings/base.py`
 
 ```python
 # optiexam/settings/base.py
@@ -207,7 +272,7 @@ TEMPLATES = [
 
 ---
 
-## 4. Master Template Usage Examples
+## 5. Master Template Usage Examples
 
 ### 4.1 Top Navigation Bar (`templates/includes/top_nav.html`)
 ```html
