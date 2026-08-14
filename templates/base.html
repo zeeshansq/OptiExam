@@ -1,0 +1,31 @@
+{% load static optiexam_tags %}
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ ui_theme|default:'dark' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>{% block title %}OptiExam Assessment Platform{% endblock %}</title>
+
+  <!-- 100% Offline Static Stylesheets (Zero CDN) -->
+  <link rel="stylesheet" href="{% static 'css/optiexam-core.css' %}">
+  <link rel="stylesheet" href="{% static 'css/optiexam-theme.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/navbar.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/cards.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/forms.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/badges.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/tables.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/pagination.css' %}">
+
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/optiexam-logo.svg' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% block body_content %}{% endblock %}
+
+  <!-- Core Offline Scripts -->
+  <script src="{% static 'js/optiexam-core.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

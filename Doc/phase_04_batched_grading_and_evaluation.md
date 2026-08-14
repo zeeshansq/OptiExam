@@ -179,6 +179,17 @@ sequenceDiagram
 
 ---
 
+### 4.1 UI/UX Split-Screen Evaluation Studio (Full Screen Width)
+1. **100% Full-Width Split-Screen Studio**:
+   * Uses 100% full screen width layout (`width: 100%; max-width: 100%;`).
+   * **Left Panel (50% Full-Width):** Candidate Subjective Answer text, formatted code blocks, or diagram image attachments with inline zoom.
+   * **Right Panel (50% Full-Width):** Model Answer, Rubric Criteria Matrix (1-click point selectors), and Grader Feedback textarea.
+2. **Double-Blind Candidate Strip**:
+   * Top bar spans full screen width showing anonymized index (e.g. `Candidate #042`), question navigation tabs, and grading progress bar.
+
+---
+
+
 ## 5. Verification & Automated Test Plan
 
 ### Test Suite Execution

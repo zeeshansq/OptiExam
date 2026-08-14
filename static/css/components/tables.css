@@ -1,0 +1,165 @@
+/* High-Density Data Tables */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-glass-border);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.data-table thead {
+  background: var(--color-surface-elevated);
+  border-bottom: 2px solid var(--color-glass-border);
+}
+
+.data-table th {
+  padding: 14px 16px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-glass-border);
+  color: var(--color-text-primary);
+  vertical-align: middle;
+}
+
+.data-table tbody tr {
+  transition: background var(--transition-fast);
+}
+
+.data-table tbody tr:hover {
+  background: rgba(79, 70, 229, 0.06);
+}
+
+/* Sortable Headers */
+.table-sort-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.table-sort-header:hover {
+  color: var(--color-primary);
+}
+
+.table-sort-header.sort-active {
+  color: var(--color-primary);
+}
+
+.sort-indicator {
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.table-sort-header.sort-active .sort-indicator {
+  opacity: 1;
+  font-weight: 900;
+}
+
+/* Filter Toolbar — Single-Line Layout */
+.table-filter-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.filter-row-single {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  flex-wrap: nowrap;
+}
+
+.filter-row-single .form-input,
+.filter-row-single .form-select {
+  height: 38px;
+  padding: 6px 12px;
+  font-size: 0.88rem;
+}
+
+.filter-search-field {
+  min-width: 240px;
+  max-width: 360px;
+  flex: 1 1 auto;
+}
+
+.filter-dropdown-field {
+  min-width: 140px;
+  max-width: 180px;
+  flex: 0 1 auto;
+}
+
+.filter-actions-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-icon-action {
+  height: 38px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+}
+
+/* Active Filter Chips */
+.active-filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+.filter-chip a {
+  color: var(--color-danger);
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 4px;
+}
+
+/* Row Action Menus */
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

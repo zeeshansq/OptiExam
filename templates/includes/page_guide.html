@@ -1,0 +1,10 @@
+{% load static optiexam_tags %}
+<div class="page-guide-card">
+  <div class="page-guide-icon">
+    {% icon guide_icon|default:'school' 'icon-lg' %}
+  </div>
+  <div class="page-guide-content">
+    <h4>{{ guide_title|default:"Module Guide" }}</h4>
+    <p>{{ guide_text|default:"Configure settings according to your examination rules and guidelines." }}</p>
+  </div>
+</div>

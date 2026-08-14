@@ -223,6 +223,17 @@ static/
 
 ---
 
+### 4.1 UI/UX Cockpit & Live Ops Matrix (Full Screen Width)
+1. **Edge-to-Edge Candidate Cockpit**:
+   * Uses 100% full screen width (`width: 100vw; height: 100vh;`) under browser fullscreen lockdown.
+   * Left Question Navigator drawer (fluid 260px) + Expansive 100% fluid Question Response Area + Fixed Persistent Timer bar at top.
+2. **Live Ops Control Room (Designer)**:
+   * 100% full screen width candidate monitoring matrix displaying hundreds of concurrent candidates in high-density grid.
+   * Real-time search filter and instant action buttons (Grant +5m Bonus, Force Disconnect) across full width.
+
+---
+
+
 ## 5. Verification & Automated Test Plan
 
 ### Test Suite Execution

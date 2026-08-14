@@ -1,0 +1,31 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Authoring Studio — {{ tenant_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">
+    {% icon 'file-text' 'icon-xl' %}
+    <div>
+      <h2>Item Writer Authoring Studio</h2>
+      <p class="page-subtitle">Institution: <strong>{{ tenant_name }}</strong> (Item Writer: {{ request.user.username }})</p>
+    </div>
+  </div>
+</div>
+
+{% include "includes/page_guide.html" with guide_icon="file-text" guide_title="Question Authoring Center" guide_text="Author single & multi-choice MCQs, diagram questions, short answers, and long essays with scoring rubrics." %}
+
+<div class="grid grid-cols-2 gap-6">
+  <div class="glass-card" style="padding: 24px;">
+    <h3 style="margin-bottom: 8px;">Question Banks</h3>
+    <p>Organize subject repositories, taxonomies, and difficulty tiers.</p>
+    <span class="badge badge-primary">Phase 2 Module</span>
+  </div>
+  <div class="glass-card" style="padding: 24px;">
+    <h3 style="margin-bottom: 8px;">Bulk Question Ingestion</h3>
+    <p>Upload questions via CSV, Excel, or ZIP bundles with diagram images.</p>
+    <span class="badge badge-success">Phase 2 Module</span>
+  </div>
+</div>
+{% endblock %}

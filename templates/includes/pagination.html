@@ -1,0 +1,65 @@
+{% load static optiexam_tags %}
+{% if is_paginated and page_obj %}
+<div class="pagination-wrapper flex items-center justify-between" style="margin-top: 24px; padding: 16px 20px; background: var(--color-surface); border: 1px solid var(--color-glass-border); border-radius: var(--radius-md); flex-wrap: wrap; gap: 16px;">
+  <!-- Left: Summary Metrics & Page Size Selector -->
+  <div class="flex items-center gap-4">
+    <span class="pagination-summary" style="font-size: 0.88rem; color: var(--color-text-secondary);">
+      Showing <strong>{{ page_obj.start_index }}</strong> to <strong>{{ page_obj.end_index }}</strong> of <strong>{{ paginator.count }}</strong> total entries
+    </span>
+
+    <div class="flex items-center gap-2">
+      <label for="id-per-page" style="font-size: 0.82rem; color: var(--color-text-muted);">Per page:</label>
+      <select id="id-per-page" class="form-select form-select-sm" style="width: auto; padding: 4px 8px; font-size: 0.85rem;" onchange="location.href='?{% query_transform page=1 %}&page_size=' + this.value;">
+        <option value="10" {% if request.GET.page_size == '10' or not request.GET.page_size %}selected{% endif %}>10</option>
+        <option value="25" {% if request.GET.page_size == '25' %}selected{% endif %}>25</option>
+        <option value="50" {% if request.GET.page_size == '50' %}selected{% endif %}>50</option>
+        <option value="100" {% if request.GET.page_size == '100' %}selected{% endif %}>100</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Right: Navigation Controls -->
+  <nav class="pagination-nav flex items-center gap-1" aria-label="Table Navigation">
+    {% if page_obj.has_previous %}
+      <!-- First Page -->
+      <a href="?{% query_transform page=1 %}" class="btn btn-sm btn-ghost pagination-btn" title="First Page" aria-label="First Page">
+        « First
+      </a>
+      <!-- Previous Page -->
+      <a href="?{% query_transform page=page_obj.previous_page_number %}" class="btn btn-sm btn-ghost pagination-btn" title="Previous Page" aria-label="Previous Page">
+        ‹ Prev
+      </a>
+    {% else %}
+      <span class="btn btn-sm btn-ghost pagination-btn disabled" aria-disabled="true">« First</span>
+      <span class="btn btn-sm btn-ghost pagination-btn disabled" aria-disabled="true">‹ Prev</span>
+    {% endif %}
+
+    <!-- Windowed Page Numbers -->
+    {% for p in paginator.page_range %}
+      {% if p == page_obj.number %}
+        <span class="btn btn-sm btn-primary pagination-btn active" aria-current="page">{{ p }}</span>
+      {% elif p >= page_obj.number|add:"-2" and p <= page_obj.number|add:"2" %}
+        <a href="?{% query_transform page=p %}" class="btn btn-sm btn-ghost pagination-btn">{{ p }}</a>
+      {% elif p == 1 or p == paginator.num_pages %}
+        <a href="?{% query_transform page=p %}" class="btn btn-sm btn-ghost pagination-btn">{{ p }}</a>
+      {% elif p == page_obj.number|add:"-3" or p == page_obj.number|add:"3" %}
+        <span class="pagination-ellipsis" style="padding: 0 6px; color: var(--color-text-muted);">…</span>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <!-- Next Page -->
+      <a href="?{% query_transform page=page_obj.next_page_number %}" class="btn btn-sm btn-ghost pagination-btn" title="Next Page" aria-label="Next Page">
+        Next ›
+      </a>
+      <!-- Last Page -->
+      <a href="?{% query_transform page=paginator.num_pages %}" class="btn btn-sm btn-ghost pagination-btn" title="Last Page" aria-label="Last Page">
+        Last »
+      </a>
+    {% else %}
+      <span class="btn btn-sm btn-ghost pagination-btn disabled" aria-disabled="true">Next ›</span>
+      <span class="btn btn-sm btn-ghost pagination-btn disabled" aria-disabled="true">Last »</span>
+    {% endif %}
+  </nav>
+</div>
+{% endif %}

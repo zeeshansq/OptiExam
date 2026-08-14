@@ -1,0 +1,47 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Designer Studio — {{ tenant_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'layers' 'icon-xl' %}
+    <div>
+      <h2>Examination Designer Studio</h2>
+      <p class="page-subtitle">Institution: <strong>{{ tenant_name }}</strong> (Tenant Admin: {{ request.user.username }})</p>
+    </div>
+  </div>
+</div>
+
+{% include "includes/page_guide.html" with guide_icon="layers" guide_title="Designer Control Center" guide_text="Create exam blueprints, configure section weightages, manage candidate rosters, and supervise live exam operations." %}
+
+<div class="grid grid-cols-3 gap-6" style="margin-bottom: 24px;">
+  <div class="glass-card" style="padding: 24px;">
+    <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+      {% icon 'file-text' 'icon' %}
+      <span>Exam Blueprints</span>
+    </h3>
+    <p>Construct multi-section exams, passing thresholds, and anti-cheating security policies.</p>
+    <span class="badge badge-primary">Phase 2 Module</span>
+  </div>
+
+  <div class="glass-card" style="padding: 24px;">
+    <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+      {% icon 'upload' 'icon' %}
+      <span>Candidate Rosters</span>
+    </h3>
+    <p>Bulk import participant lists via CSV/Excel or manage manual student registrations.</p>
+    <span class="badge badge-success">Phase 2 Module</span>
+  </div>
+
+  <div class="glass-card" style="padding: 24px;">
+    <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+      {% icon 'activity' 'icon' %}
+      <span>Live Exam Ops</span>
+    </h3>
+    <p>Real-time candidate monitoring, bonus time extensions, and broadcast announcements.</p>
+    <span class="badge badge-warning">Phase 3 Module</span>
+  </div>
+</div>
+{% endblock %}

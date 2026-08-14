@@ -1,0 +1,117 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Audit Logs Explorer — OptiExam{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'activity' 'icon-xl' %}
+    <div>
+      <h2>Platform Audit Log Explorer</h2>
+      <p class="page-subtitle">Immutable security, authentication, and operational event trails</p>
+    </div>
+  </div>
+  <div>
+    <a href="{% url 'tenants:super_admin_dashboard' %}" class="btn btn-ghost">
+      <span>Back to SaaS Hub</span>
+    </a>
+  </div>
+</div>
+
+{% include "includes/page_guide.html" with guide_icon="activity" guide_title="Audit Trail Inspector" guide_text="Search authentication events, administrative actions, live proctoring violations, and grading operations." %}
+
+<div class="glass-card" style="padding: 24px;">
+  <!-- Filter Toolbar (Single-Line Layout) -->
+  <form method="get" class="table-filter-toolbar">
+    <div class="filter-row-single">
+      <div class="filter-search-field">
+        {{ filter_form.q }}
+      </div>
+      <div class="filter-dropdown-field">
+        {{ filter_form.category }}
+      </div>
+      <div class="filter-actions-group">
+        <button type="submit" class="btn btn-primary btn-icon-action" title="Apply Log Filters">
+          {% icon 'search' 'icon' %}
+          <span>Filter Logs</span>
+        </button>
+        {% if active_search_query or active_category_filter %}
+          <a href="{% url 'tenants:audit_logs' %}" class="btn btn-ghost btn-icon-action" title="Clear log filters" style="color: var(--color-danger); border-color: rgba(239, 68, 68, 0.3);">
+            {% icon 'rotate-ccw' 'icon' %}
+            <span>Clear</span>
+          </a>
+        {% else %}
+          <a href="{% url 'tenants:audit_logs' %}" class="btn btn-ghost btn-icon-action" title="Reset filters">
+            {% icon 'rotate-ccw' 'icon' %}
+            <span>Reset</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="flex-shrink: 0;">
+      <span style="font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap;">
+        Found <strong>{{ paginator.count|default:0 }}</strong> event record{{ paginator.count|pluralize }}
+      </span>
+    </div>
+  </form>
+
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Institution</th>
+          <th>User</th>
+          <th>Category</th>
+          <th>Action</th>
+          <th>IP Address</th>
+          <th>User Agent</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in audit_logs %}
+          <tr>
+            <td style="font-size: 0.82rem; font-family: var(--font-mono); color: var(--color-text-muted); white-space: nowrap;">
+              {{ log.timestamp|date:"Y-m-d H:i:s" }}
+            </td>
+            <td>
+              {% if log.tenant %}
+                <span style="font-weight: 600;">{{ log.tenant.name }}</span>
+              {% else %}
+                <span class="badge badge-secondary">Platform</span>
+              {% endif %}
+            </td>
+            <td style="font-weight: 600;">
+              {{ log.user.username|default:"Anonymous" }}
+            </td>
+            <td>
+              <span class="badge badge-primary">{{ log.get_category_display }}</span>
+            </td>
+            <td style="color: var(--color-text-primary);">
+              {{ log.action }}
+            </td>
+            <td style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--color-text-secondary);">
+              {{ log.ip_address|default:"-" }}
+            </td>
+            <td style="font-size: 0.78rem; color: var(--color-text-muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              {{ log.user_agent|default:"-" }}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" style="padding: 48px; text-align: center; color: var(--color-text-muted);">
+              No audit records match your query.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "includes/pagination.html" %}
+</div>
+{% endblock %}

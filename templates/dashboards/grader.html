@@ -1,0 +1,24 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Grading Queue — {{ tenant_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">
+    {% icon 'check-circle' 'icon-xl' %}
+    <div>
+      <h2>Grader Evaluation Queue</h2>
+      <p class="page-subtitle">Institution: <strong>{{ tenant_name }}</strong> (Evaluation Officer: {{ request.user.username }})</p>
+    </div>
+  </div>
+</div>
+
+{% include "includes/page_guide.html" with guide_icon="check-circle" guide_title="Evaluation & Rubric Studio" guide_text="Score assigned candidate batches using double-blind evaluation, rubric criteria matrices, and model answers." %}
+
+<div class="glass-card" style="padding: 28px; text-align: center;">
+  <h3>No Active Grading Batches Assigned</h3>
+  <p>When an Examination Designer allocates candidate batches to your account, they will appear here with SLA deadlines.</p>
+  <span class="badge badge-info">Phase 4 Module</span>
+</div>
+{% endblock %}

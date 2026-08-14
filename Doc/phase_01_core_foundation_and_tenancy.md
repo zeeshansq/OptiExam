@@ -191,9 +191,21 @@ Implement the 5 specialized context processors in `apps/core/context_processors.
    * `ITEM_WRITER` → `/{tenant_slug}/questions/`
    * `GRADER` → `/{tenant_slug}/grading/`
    * `PARTICIPANT` → `/{tenant_slug}/lobby/`
-4. Build `SuperAdminDashboardView` in `apps/tenants/views/tenant_views.py` displaying tenant health matrix, quota utilization, and creation modal.
 
-### Task 1.7: Bulk Faculty & User CSV/Excel Import Hub (`apps/accounts`)
+### Task 1.7: Super Admin Complete CRUD & Advanced Interactive Matrix (`apps/tenants`)
+1. **Full CRUD View Suite**:
+   * `SuperAdminDashboardView`: High-density directory matrix with multi-field search (`q`), tier filter, status filter, two-way column sorting, and full pagination (`10/25/50/100` page size).
+   * `TenantCreateView`: Categorized 4-section smart form (Identity, Quotas, Branding, Security) with color presets palette and auto-slugify.
+   * `TenantUpdateView`: Comprehensive institution editor with live feature flag matrix toggles.
+   * `TenantDetailView`: Deep inspection cockpit for quotas, storage metrics, and feature flags.
+   * `TenantDeleteView`: Safe deactivation / soft delete with glassmorphic modal confirmation.
+   * `TenantFeatureFlagToggleView`: AJAX 1-click feature toggle endpoint.
+2. **Audit Log Explorer Hub (`AuditLogListView`)**:
+   * Global and tenant-filtered event logs with category filter pills, IP search, date range picker, and pagination.
+3. **Tenant User Management Hub (`TenantUserListView`, `TenantUserCreateView`, `TenantUserUpdateView`)**:
+   * Multi-role user administration with role filters, status badges, password reset, and deactivation.
+
+### Task 1.8: Bulk Faculty & User CSV/Excel Import Hub (`apps/accounts`)
 1. Implement `FacultyUserImportForm` and dedicated User Import View at `/{tenant_slug}/admin/users/import/`.
 2. Build dynamic template downloader providing `sample_faculty_users.csv` and `sample_faculty_users.xlsx` with instructions.
 3. Implement `import_faculty_users_service(file, tenant)`:
@@ -202,6 +214,7 @@ Implement the 5 specialized context processors in `apps/core/context_processors.
    * On confirmation: provisions users, generates activation tokens, and logs `DataImportJob`.
 
 ---
+
 
 
 ## 4. Detailed Data Models Implemented in Phase 1
@@ -245,12 +258,16 @@ Implement the 5 specialized context processors in `apps/core/context_processors.
 
 ## 5. UI/UX Design System Specifications
 
-### Master Template Hierarchy
-1. **`base.html`**: Zero-CDN HTML5 container. Loads local CSS tokens, fonts, and favicon. Defines blocks: `{% block title %}`, `{% block extra_css %}`, `{% block content %}`, `{% block extra_js %}`.
-2. **`base_app.html`**: Extends `base.html`. Renders top navigation bar with tenant brand, active exam resume banner, theme toggle button, notification dropdown, and user profile badge.
-3. **Page Guide Partial (`includes/page_guide.html`)**: Included at top of every admin page, rendering colorful icons and explanatory guidance text explaining options.
+### 5.1 Master Template Hierarchy & Full Screen Width Layout
+1. **Full-Screen Width Fluid Containers (`.container`, `.container-fluid`)**:
+   * Uses `width: 100%; max-width: 100%;` with `28px` gutter padding to maximize horizontal screen real estate across all displays.
+   * Tables, grids, and dashboards expand fluidly to fill 100% of the viewport width.
+2. **`base.html`**: Zero-CDN HTML5 container. Loads local CSS tokens, fonts, and favicon. Defines blocks: `{% block title %}`, `{% block extra_css %}`, `{% block content %}`, `{% block extra_js %}`.
+3. **`base_app.html`**: Extends `base.html`. Renders top navigation bar with tenant brand, active exam resume banner, theme toggle button, notification dropdown, and user profile badge.
+4. **Page Guide Partial (`includes/page_guide.html`)**: Included at top of every admin page, rendering colorful icons and explanatory guidance text explaining options.
 
 ---
+
 
 ## 6. Verification & Automated Test Plan
 

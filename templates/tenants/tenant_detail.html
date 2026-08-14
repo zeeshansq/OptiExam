@@ -1,0 +1,134 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}{{ tenant_obj.name }} — Institution Inspection{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'school' 'icon-xl' %}
+    <div>
+      <h2>{{ tenant_obj.name }}</h2>
+      <p class="page-subtitle">
+        URL Slug: <code>/{{ tenant_obj.slug }}/</code> &nbsp;|&nbsp; 
+        Tier: <span class="badge badge-primary">{{ tenant_obj.get_tier_display }}</span> &nbsp;|&nbsp;
+        Status: {% if tenant_obj.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Suspended</span>{% endif %}
+      </p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="{% url 'tenants:tenant_update' tenant_obj.pk %}" class="btn btn-primary">
+      {% icon 'settings' 'icon' %}
+      <span>Edit Institution</span>
+    </a>
+    <a href="{% url 'tenants:tenant_delete' tenant_obj.pk %}" class="btn btn-ghost" style="color: var(--color-danger);">
+      {% icon 'x' 'icon' %}
+      <span>Deactivate / Delete</span>
+    </a>
+    <a href="{% url 'tenants:super_admin_dashboard' %}" class="btn btn-ghost">
+      <span>Back to Directory</span>
+    </a>
+  </div>
+</div>
+
+<div class="grid grid-cols-3 gap-6" style="margin-bottom: 28px;">
+  <!-- Summary Card -->
+  <div class="glass-card" style="padding: 24px;">
+    <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+      {% icon 'shield' 'icon' %}
+      <span>Institutional Profile</span>
+    </h3>
+    <div style="font-size: 0.9rem; line-height: 1.8;">
+      <p><strong>Primary Color:</strong> <span style="display: inline-block; width: 14px; height: 14px; background: {{ tenant_obj.primary_color }}; vertical-align: middle; border-radius: 3px; box-shadow: 0 0 6px {{ tenant_obj.primary_color }};"></span> {{ tenant_obj.primary_color }}</p>
+      <p><strong>Domain:</strong> {{ tenant_obj.domain|default:"Default Platform Subpath" }}</p>
+      <p><strong>Max Capacity:</strong> {{ tenant_obj.max_concurrent_candidates }} Concurrent Candidates</p>
+      <p><strong>Registered Users:</strong> {{ tenant_users_count|default:0 }} accounts</p>
+      <p><strong>Contact Email:</strong> {{ tenant_obj.contact_email|default:"N/A" }}</p>
+      <p><strong>Provisioned Date:</strong> {{ tenant_obj.created_at|date:"M d, Y H:i" }}</p>
+    </div>
+  </div>
+
+  <!-- Feature Flag Matrix -->
+  <div class="glass-card" style="grid-column: span 2; padding: 24px;">
+    <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+      {% icon 'layers' 'icon' %}
+      <span>Live Feature Flag Controls</span>
+    </h3>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Feature Name</th>
+            <th>Key</th>
+            <th>State</th>
+            <th style="text-align: right;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for flag in feature_flags %}
+            <tr>
+              <td style="font-weight: 600;">{{ flag.get_feature_key_display }}</td>
+              <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--color-text-muted);">{{ flag.feature_key }}</td>
+              <td>
+                {% if flag.is_enabled %}
+                  <span class="badge badge-success" id="badge-{{ flag.feature_key }}">Enabled</span>
+                {% else %}
+                  <span class="badge badge-secondary" id="badge-{{ flag.feature_key }}">Disabled</span>
+                {% endif %}
+              </td>
+              <td style="text-align: right;">
+                <form action="{% url 'tenants:tenant_flag_toggle' tenant_obj.pk flag.feature_key %}" method="post" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm {% if flag.is_enabled %}btn-ghost{% else %}btn-accent{% endif %}">
+                    {% if flag.is_enabled %}Disable{% else %}Enable{% endif %}
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--color-text-muted);">No feature flags defined for this tenant.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Tenant Audit Trail -->
+<div class="glass-card" style="padding: 24px;">
+  <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+    {% icon 'activity' 'icon' %}
+    <span>Recent Institutional Audit Logs</span>
+  </h3>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>User</th>
+          <th>Category</th>
+          <th>Action</th>
+          <th>IP Address</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in recent_tenant_logs %}
+          <tr>
+            <td style="font-size: 0.82rem; color: var(--color-text-muted);">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+            <td style="font-weight: 600;">{{ log.user.username|default:"System" }}</td>
+            <td><span class="badge badge-primary">{{ log.get_category_display }}</span></td>
+            <td>{{ log.action }}</td>
+            <td style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--color-text-secondary);">{{ log.ip_address|default:"-" }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--color-text-muted);">No audit logs recorded for this institution yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

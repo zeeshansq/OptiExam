@@ -248,6 +248,53 @@ The top-nav is the primary UI chrome for all logged-in roles. It must contain (l
 
 ---
 
+### 3.5 Full-Screen Width Fluid Layout Architecture
+All application layouts, dashboards, exam cockpits, and grading studios are engineered to utilize **100% full screen width** (`width: 100%; max-width: 100%;`) with responsive gutter padding (`28px` on desktop). 
+* **Data Density Optimization:** High-resolution desktop monitors (1080p, 2K, 4K) utilize the complete horizontal viewport real estate without artificial narrow constraints (no `1280px` boxed containers).
+* **Live Ops Real Estate:** Enables wide, multi-column candidate monitoring matrices and status gauges.
+* **Split-Screen Studio:** Allocates full 50%/50% width to student submissions and grading rubric criteria side-by-side.
+
+---
+
+### 3.6 Categorized Smart Forms & Helper Elements Standard
+All forms across SaaS Admin, Designer, Authoring, and User Management must be structured into **logical, categorized card sections** with advance helping UI elements:
+1. **Visual Grouping & Section Hierarchy:**
+   * Forms are divided into clearly titled sections (e.g. `1. Institution Identity`, `2. Quotas & Capacity`, `3. Branding & Theme`, `4. Security & Feature Toggles`).
+   * Each section has an icon, section subtitle, and contextual help cards (`page-guide`).
+2. **Smart Prefilled Values & Defaults:**
+   * Intelligent pre-filled suggestions (e.g. sensible concurrent candidate quotas based on tier, default brand colors, auto-slugify on title input).
+   * 1-Click Color Preset Palettes for brand color selection with live hex preview.
+3. **Advanced Helping UI Elements:**
+   * Live character counters for textareas and questions.
+   * Visual input state indicators (green checkmark on valid format, warning badge on duplicate slug).
+   * Password strength meters and 1-click password generator with show/hide toggle.
+   * Clear file dropzones with instant file type / size validation and image preview thumbnail.
+
+---
+
+### 3.7 Interactive Data Tables, Advanced Search, Multi-Filters & Pagination Standard
+All tabular data views (Tenants, Users, Question Banks, Blueprints, Attempts, Grading Batches, Audit Logs) must implement high-density interactive tables:
+1. **Advanced Searching & Multi-Field Querying:**
+   * Debounced real-time / submit search across multiple fields (e.g. search query matches name, slug, domain, email, registration number simultaneously).
+   * Instant search clearing button (`x`) and search query persistence in URL query parameters (`?q=...`).
+2. **Multi-Parameter Filter Toolbar:**
+   * Filter bars containing dropdown selectors (e.g. Tier, Role, Status, Date Range, Department).
+   * **Active Filter Chips:** Visual badge pills above table displaying current active filters with 1-click individual removal or "Clear All Filters" button.
+3. **Multi-Column Clickable Sorting:**
+   * Clickable column headers with sort indicators (`↑` ascending, `↓` descending, `↕` sortable) preserving active filters across pagination (`?sort=name&order=desc`).
+4. **Full-Featured Pagination System:**
+   * **Summary Metric:** Displays `"Showing X to Y of Z total entries"`.
+   * **Page Size Selector:** Configurable page size selector (`10`, `25`, `50`, `100` items per page).
+   * **Navigation Controls:** First (`«`), Previous (`‹`), Smart windowed page numbers (e.g. `1 ... 4 5 6 ... 20`), Next (`›`), and Last (`»`).
+   * Direct page jump input for rapid navigation across hundreds of pages.
+5. **Interactive Row Actions & Modals:**
+   * Action dropdown menus per row (View, Edit, Manage Features, Deactivate, Delete).
+   * Destructive actions require a glassmorphic confirmation modal displaying the target resource name before execution.
+
+---
+
+
+
 ## 4. Examination Cockpit & Anti-Cheating Suite
 
 ### 4.1 Anti-Cheating Architecture

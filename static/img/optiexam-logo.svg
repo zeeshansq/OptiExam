@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="optiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="24" fill="url(#optiGrad)" />
+  <!-- Stylized Shield & Pen/Check -->
+  <path d="M50 20 L75 32 V52 C75 68 50 82 50 82 C50 82 25 68 25 52 V32 Z" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" />
+  <polyline points="40 50 47 58 62 42" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

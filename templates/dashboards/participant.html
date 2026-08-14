@@ -1,0 +1,31 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Examination Lobby — {{ tenant_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">
+    {% icon 'school' 'icon-xl' %}
+    <div>
+      <h2>Candidate Examination Lobby</h2>
+      <p class="page-subtitle">Welcome, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong> ({{ tenant_name }})</p>
+    </div>
+  </div>
+</div>
+
+{% include "includes/page_guide.html" with guide_icon="school" guide_title="Candidate Assessment Portal" guide_text="Review upcoming exams, enter scheduled examination cockpits, and access published scorecards." %}
+
+<div class="grid grid-cols-2 gap-6">
+  <div class="glass-card" style="padding: 24px;">
+    <h3 style="margin-bottom: 8px;">Scheduled Examinations</h3>
+    <p>View pre-exam instructions, scheduling windows, and allowed lifelines.</p>
+    <span class="badge badge-primary">Phase 3 Module</span>
+  </div>
+  <div class="glass-card" style="padding: 24px;">
+    <h3 style="margin-bottom: 8px;">Completed Exams & Results</h3>
+    <p>Access released scorecards, section breakdowns, and grader feedback.</p>
+    <span class="badge badge-success">Phase 5 Module</span>
+  </div>
+</div>
+{% endblock %}

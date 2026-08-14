@@ -285,3 +285,15 @@ def tenant():
 def request_factory():
     return RequestFactory()
 ```
+
+---
+
+## 7. Whole-Project UI/UX & Architectural Invariants
+
+Whenever an AI agent implements any view, form, or template across Phase 1 to Phase 5:
+1. **100% Full-Screen Width Layout:** Always use `.container` or `.container-fluid` (`width: 100%; max-width: 100%;`). Never introduce narrow boxed layout containers.
+2. **Single-Line Filter Toolbar:** Filter bars on tabular pages must fit search, dropdowns, submit button, and clear button (`rotate-ccw`) in a single line (`.filter-row-single`).
+3. **Interactive Sorting & Windowed Pagination:** All list queries must be paginated with `{% include "includes/pagination.html" %}` and table column headers must use `{% sort_header 'field' 'Label' %}`.
+4. **Categorized Smart Forms:** Multi-field forms must use `.form-section-card` groupings with sensible prefilled defaults and smart helpers.
+5. **Zero CDN Compliance:** 100% offline static assets (local SVG sprite via `{% icon 'name' %}`).
+

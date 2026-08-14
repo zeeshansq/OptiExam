@@ -94,3 +94,8 @@ MANDATORY RULES (DO NOT VIOLATE):
     - Render a 10-row confirmation preview grid and row-by-row error table on validation failure.
     - Record all import jobs in DataImportJob (apps.core.models) with metrics and error logs.
 
+16. WHOLE-PROJECT UI/UX, SINGLE-LINE FILTERS & PAGINATION INVARIANTS:
+    - 100% Full-Screen Width Fluid Layout (.container, .container-fluid). Never use fixed narrow max-widths.
+    - Single-Line Filter Toolbar (.filter-row-single) with search input, dropdowns, [Filter] button, and [Clear] icon button (rotate-ccw).
+    - Interactive Data Tables with clickable two-way column sorting ({% sort_header %}) and full-featured windowed pagination ({% include 'includes/pagination.html' %}).
+    - Categorized Smart Forms (.form-section-card) with sensible prefilled defaults, auto-slugification, and color preset swatches.

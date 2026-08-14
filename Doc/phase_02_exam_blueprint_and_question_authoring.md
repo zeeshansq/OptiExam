@@ -201,13 +201,17 @@ apps/
 
 ## 5. UI/UX Design System Specifications for Authoring & Blueprinting
 
-1. **Question Authoring UI**:
+1. **Full-Screen Width Studio Architecture**:
+   * Uses 100% full screen width layout (`.container`, `.container-fluid`) to provide expansive horizontal authoring space.
+   * Multi-column Question Bank and Blueprint grids expand across the full viewport width.
+2. **Question Authoring UI**:
    * Dynamic Alpine.js or Vanilla JS formset manager for adding/removing options without page refresh.
-   * Rich preview card updating live as Item Writer types.
+   * Wide split preview card updating live as Item Writer types.
    * Model answer accordion with clear "Confidential to Graders" warning badge.
-2. **Exam Blueprint UI**:
+3. **Exam Blueprint UI**:
    * Multi-step wizard with visual progress breadcrumb (`Details → Security → Sections & Questions → Lifelines → Roster`).
-   * Visual weightage distribution pie chart / summary bar.
+   * Visual weightage distribution summary bar and full-width Question Bank picker table.
+
    * Interactive CSV dropzone with instantaneous row count validation.
 
 ---

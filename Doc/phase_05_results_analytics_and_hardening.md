@@ -176,6 +176,18 @@ templates/
 
 ---
 
+### 4.1 UI/UX Analytics Dashboard & Scorecards (Full Screen Width)
+1. **100% Full-Width Cohort Analytics Grid**:
+   * Uses 100% full screen width layout (`width: 100%; max-width: 100%;`).
+   * Visual score distribution histograms, section performance gauges, and Bloom's Taxonomy breakdown matrices spanning the entire screen.
+2. **Item Discrimination Matrix Table**:
+   * Expansive full-width data table for Item Analysis ($p$-value facility index, $r_{\text{pbis}}$ discrimination index, distractor frequency) with sortable columns and search filters.
+3. **Printable / PDF Scorecard Transcript**:
+   * Responsive full-width scorecard with clean `@media print` CSS rules for high-resolution paper output.
+
+---
+
+
 ## 5. Definition of Done (DoD) for Phase 5
 * [ ] Designer can publish results explicitly and control feedback visibility.
 * [ ] Participants can view rich scorecards, section breakdowns, and print clean transcripts.

@@ -255,3 +255,29 @@ Run via: `python manage.py auto_submit_expired`
 3. **Atomic Batch Commits:** Bulk imports must execute within `with transaction.atomic():` to ensure an unexpected failure on row 450 rolls back the entire batch cleanly.
 4. **Audit & Error Logging:** Every import job must record a `DataImportJob` entry storing metrics (total rows, processed, failed) and a line-by-line JSON error log.
 
+---
+
+## 13. Whole-Project Architectural & UI/UX Invariants (Mandatory Across All 5 Phases)
+
+1. **100% Full-Screen Width Fluid Layout Invariant:**
+   * Never constrain application views to fixed narrow containers (e.g. `1280px`).
+   * All `.container` and `.container-fluid` classes MUST span `width: 100%; max-width: 100%;` with responsive `28px` gutter padding.
+   * All tables, dashboards, Question Banks, Exam Cockpits, Live Ops matrices, and Split-Screen grading studios MUST fluidly utilize the full horizontal viewport real estate.
+
+2. **Single-Line Filter Toolbar & Icon Clear Invariant:**
+   * Every filter toolbar on any tabular data page MUST fit entirely in a **single horizontal line** using `.filter-row-single`.
+   * Search input (`.filter-search-field`), dropdown filters (`.filter-dropdown-field`), the primary **Filter** submit button, and the **Clear/Reset** icon button (`rotate-ccw`) MUST sit side-by-side on the same row with consistent `38px` component heights.
+   * When active filters exist, display **Active Filter Chips** above the table with 1-click `×` removal.
+
+3. **Full-Featured Windowed Pagination & Clickable Column Sorting Invariant:**
+   * Never render an unpaginated query for lists (Tenants, Users, Questions, Blueprints, Attempts, Grading Batches, Audit Logs).
+   * Always paginate via Django (`paginate_by = 10|25|50|100`) and include `{% include "includes/pagination.html" %}`.
+   * Column headers must support two-way ascending/descending sorting via `{% sort_header 'field' 'Label' %}` (`?sort=field&order=asc|desc`), preserving all active search query parameters across pagination.
+
+4. **Categorized Smart Form & Helper Standard:**
+   * Multi-field forms must be partitioned into **categorized card sections** (`.form-section-card`) with header icons, subtitles, and contextual guide boxes.
+   * Supply sensible prefilled defaults for required fields (e.g. default quotas, default brand colors `#4F46E5`).
+   * Provide interactive helper UI elements: 1-click color preset swatches, auto-slugification listeners, character counters, and password show/hide toggles.
+   * Destructive actions (Deactivation, Deletion) must always require explicit confirmation via a dedicated modal or confirmation view.
+
+

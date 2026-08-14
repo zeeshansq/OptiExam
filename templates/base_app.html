@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static optiexam_tags %}
+
+{% block body_content %}
+  <!-- Universal Top Navigation Bar -->
+  {% include "includes/top_nav.html" %}
+
+  <main class="main-content">
+    <div class="container">
+      <!-- Flash Messages -->
+      {% if messages %}
+        <div class="alert-container">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }}">
+              {% if message.tags == 'success' %}
+                {% icon 'check-circle' 'icon' %}
+              {% elif message.tags == 'error' or message.tags == 'danger' %}
+                {% icon 'alert-triangle' 'icon' %}
+              {% else %}
+                {% icon 'activity' 'icon' %}
+              {% endif %}
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+{% endblock %}

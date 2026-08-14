@@ -1,0 +1,71 @@
+{% load static optiexam_tags %}
+<header class="top-nav" style="border-top: 3px solid {{ tenant_primary_color|default:'#4F46E5' }};">
+  <div class="container top-nav-inner">
+    <!-- Brand / Tenant Identity -->
+    <a href="{% url 'accounts:role_redirect' %}" class="nav-brand">
+      {% if tenant_logo %}
+        <img src="{{ tenant_logo }}" alt="{{ tenant_name }}">
+      {% else %}
+        <img src="{% static 'img/optiexam-logo.svg' %}" alt="OptiExam">
+      {% endif %}
+      <span class="nav-brand-text">
+        {{ tenant_name|default:"OptiExam Platform" }}
+      </span>
+    </a>
+
+    <!-- Active Live Exam Resume Banner (if candidate has exam in progress) -->
+    {% if active_exam_attempt %}
+      <div class="active-exam-pill">
+        <span class="pulse-dot"></span>
+        <span>Active Exam: {{ active_exam_attempt.exam.title }}</span>
+        <a href="#" class="btn btn-sm btn-primary" style="padding: 3px 10px; font-size: 0.75rem;">Resume Cockpit</a>
+      </div>
+    {% endif %}
+
+    <!-- Navigation Action Chrome -->
+    <div class="nav-actions">
+      <!-- Fullscreen Toggle Icon -->
+      <button id="btn-fullscreen-toggle" class="nav-icon-btn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
+        {% icon 'maximize' 'icon' %}
+      </button>
+
+      <!-- Dark / Light Theme Toggle Icon -->
+      <button id="btn-theme-toggle" class="nav-icon-btn" title="Toggle Theme" aria-label="Toggle Dark/Light Mode">
+        {% if is_dark_mode %}
+          {% icon 'sun' 'icon' %}
+        {% else %}
+          {% icon 'moon' 'icon' %}
+        {% endif %}
+      </button>
+
+      <!-- In-App Notification Bell -->
+      <div style="position: relative;">
+        <button id="notification-bell" class="nav-icon-btn" title="Notifications" aria-label="View Notifications">
+          {% icon 'bell' 'icon' %}
+          {% if unread_notifications_count > 0 %}
+            <span class="nav-badge-count">{{ unread_notifications_count }}</span>
+          {% endif %}
+        </button>
+        {% include "includes/notification_drawer.html" %}
+      </div>
+
+      <!-- User Profile Badge & Logout -->
+      <div class="user-profile-badge">
+        <img src="{{ user_avatar|default:'/static/img/default-avatar.svg' }}" alt="{{ request.user.username }}" class="user-avatar-img">
+        <div style="display: flex; flex-direction: column;">
+          <span style="font-size: 0.85rem; font-weight: 700; color: var(--color-text-primary); line-height: 1.1;">
+            {{ request.user.get_full_name|default:request.user.username }}
+          </span>
+          <span class="user-role-tag">{{ user_role_name|default:"User" }}</span>
+        </div>
+      </div>
+
+      <form action="{% url 'accounts:logout' %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="nav-icon-btn" title="Sign Out" aria-label="Sign Out">
+          {% icon 'log-out' 'icon' %}
+        </button>
+      </form>
+    </div>
+  </div>
+</header>

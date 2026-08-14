@@ -1,0 +1,33 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Confirm Deactivation — {{ tenant_obj.name }}{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center" style="min-height: 60vh;">
+  <div class="glass-card" style="max-width: 540px; padding: 36px 32px; text-align: center; border-color: rgba(239, 68, 68, 0.4);">
+    <div style="color: var(--color-danger); margin-bottom: 16px;">
+      {% icon 'alert-triangle' 'icon-xl' %}
+    </div>
+
+    <h2 style="color: var(--color-danger); margin-bottom: 8px;">Deactivate Institution?</h2>
+    <p style="color: var(--color-text-secondary); margin-bottom: 20px;">
+      You are about to remove <strong>{{ tenant_obj.name }}</strong> (<code>/{{ tenant_obj.slug }}/</code>). 
+      This will suspend faculty and candidate access to all associated examination blueprints and live sessions.
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="flex items-center justify-center gap-4">
+        <button type="submit" class="btn btn-danger btn-lg">
+          {% icon 'x' 'icon' %}
+          <span>Confirm & Remove Institution</span>
+        </button>
+        <a href="{% url 'tenants:tenant_detail' tenant_obj.pk %}" class="btn btn-ghost btn-lg">
+          <span>Cancel</span>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+# ==============================================================================
+# OptiExam Production Requirements
+# Python: 3.12+ / Target: C:\venv\envoptiexam
+# ==============================================================================
+Django>=5.0,<6.0
+django-environ>=0.11.2
+Pillow>=10.4.0
+openpyxl>=3.1.5
+python-dateutil>=2.9.0
+cryptography>=42.0.0

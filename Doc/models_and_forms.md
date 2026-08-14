@@ -249,6 +249,85 @@ class ExamBlueprintImportForm(forms.Form):
 
 ---
 
+## 4. Super Admin Management & Advanced Filter Forms
+
+### 4.1 `TenantForm` & `TenantUpdateForm` (Categorized Smart Form)
+```python
+# apps/tenants/forms.py
+class TenantForm(forms.ModelForm):
+    """
+    Categorized form with prefilled defaults, color palettes, and slug generator.
+    """
+    class Meta:
+        model = Tenant
+        fields = [
+            'name', 'slug', 'domain', 'tier',
+            'max_concurrent_candidates', 'primary_color',
+            'contact_email', 'logo', 'is_active'
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'e.g. National Engineering College',
+                'id': 'id-tenant-name',
+                'data-slug-target': '#id-tenant-slug'
+            }),
+            'slug': forms.TextInput(attrs={
+                'class': 'form-input font-mono',
+                'placeholder': 'e.g. nec',
+                'id': 'id-tenant-slug'
+            }),
+            'domain': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. exams.nec.edu'}),
+            'tier': forms.Select(attrs={'class': 'form-select', 'id': 'id-tenant-tier'}),
+            'max_concurrent_candidates': forms.NumberInput(attrs={'class': 'form-input', 'id': 'id-max-candidates'}),
+            'primary_color': forms.TextInput(attrs={
+                'class': 'form-input color-input-field',
+                'type': 'color',
+                'value': '#4F46E5',
+                'id': 'id-primary-color'
+            }),
+            'contact_email': forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'dean.exams@institution.edu'}),
+            'logo': forms.FileInput(attrs={'class': 'form-input-file', 'accept': 'image/*'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox', 'id': 'id-tenant-active'}),
+        }
+```
+
+### 4.2 `TenantFilterForm` & `UserFilterForm`
+```python
+# apps/tenants/forms.py
+class TenantFilterForm(forms.Form):
+    """
+    Advanced search and multi-filter toolbar for Super Admin Institution Directory.
+    """
+    q = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-input search-input',
+            'placeholder': 'Search by institution name, slug, domain...',
+            'id': 'id-tenant-search'
+        })
+    )
+    tier = forms.ChoiceField(
+        choices=[('', 'All Tiers')] + list(Tenant.Tier.choices),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id-filter-tier'})
+    )
+    status = forms.ChoiceField(
+        choices=[('', 'All Statuses'), ('active', 'Active Only'), ('inactive', 'Suspended Only')],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id-filter-status'})
+    )
+    page_size = forms.ChoiceField(
+        choices=[('10', '10 / page'), ('25', '25 / page'), ('50', '50 / page'), ('100', '100 / page')],
+        initial='10',
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id-page-size'})
+    )
+```
+
+---
+
+
 ## 4. Question Authoring Forms
 
 
