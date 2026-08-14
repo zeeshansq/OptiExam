@@ -1,0 +1,100 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}{% if form.instance.pk %}Edit {{ form.instance.name }}{% else %}New Question Bank{% endif %} — OptiExam{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'database' 'icon-xl' %}
+    <div>
+      <h2>{% if form.instance.pk %}Edit {{ form.instance.name }}{% else %}Create Question Bank Repository{% endif %}</h2>
+      <p class="page-subtitle">Configure academic subject discipline and bank metadata</p>
+    </div>
+  </div>
+  <div>
+    <a href="{% url 'questions:bank_list' %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Repositories</span>
+    </a>
+  </div>
+</div>
+
+<form method="post" style="width: 100%;">
+  {% csrf_token %}
+
+  <!-- Balanced Two-Column Full-Width Form Layout -->
+  <div class="grid grid-cols-2 gap-6">
+    
+    <!-- LEFT COLUMN: Identity & Code -->
+    <div class="flex flex-col gap-6">
+      <div class="form-section-card" style="height: 100%; margin-bottom: 0;">
+        <div class="form-section-header">
+          {% icon 'database' 'icon-lg' %}
+          <div>
+            <h3>1. Bank Title & Course Code</h3>
+            <p>Specify the official repository title and course identifier.</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Question Bank Name <span style="color: var(--color-danger);">*</span></label>
+          {{ form.name }}
+          {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+          <div class="form-help">e.g. Computer Science Fundamentals, Clinical Pharmacology II</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Course / Bank Code</label>
+          {{ form.code }}
+          {% if form.code.errors %}<div class="form-error">{{ form.code.errors.0 }}</div>{% endif %}
+          <div class="form-help">Unique catalog abbreviation (e.g. <code>CS101-BANK</code>, <code>MED-PHARM</code>).</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Subject & Scope -->
+    <div class="flex flex-col gap-6">
+      <div class="form-section-card" style="height: 100%; margin-bottom: 0;">
+        <div class="form-section-header">
+          {% icon 'file-text' 'icon-lg' %}
+          <div>
+            <h3>2. Academic Subject & Topics Scope</h3>
+            <p>Categorize by discipline and outline covered curriculum units.</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Subject Discipline <span style="color: var(--color-danger);">*</span></label>
+          {{ form.subject }}
+          {% if form.subject.errors %}<div class="form-error">{{ form.subject.errors.0 }}</div>{% endif %}
+          <div class="form-help">e.g. Computer Science, Medicine, Mathematics, Law</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Curriculum Description & Notes</label>
+          {{ form.description }}
+          {% if form.description.errors %}<div class="form-error">{{ form.description.errors.0 }}</div>{% endif %}
+          <div class="form-help">Guidance on topics included for faculty item writers.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Full-Width Bottom Actions Bar -->
+  <div class="glass-card flex items-center justify-between" style="padding: 20px 24px; margin-top: 24px;">
+    <div style="font-size: 0.85rem; color: var(--color-text-muted);">
+      {% icon 'shield' 'icon' %}
+      <span>All questions added to this bank are securely isolated to {{ tenant_name }}.</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="{% url 'questions:bank_list' %}" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary btn-lg">
+        {% icon 'check' 'icon' %}
+        <span>{% if form.instance.pk %}Save Changes{% else %}Create Question Bank{% endif %}</span>
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}

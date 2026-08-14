@@ -14,6 +14,15 @@ urlpatterns = [
     # Root redirect to login
     path('', RedirectView.as_view(pattern_name='accounts:login', permanent=False), name='index'),
 
+    # Core Global Services & Template Downloads (/core/templates/...)
+    path('core/', include('apps.core.urls', namespace='core')),
+
+    # Academic Question Authoring & Repositories (/questions/...)
+    path('questions/', include('apps.questions.urls', namespace='questions')),
+
+    # Academic Exam Blueprinting & Rosters (/exams/...)
+    path('exams/', include('apps.exams.urls', namespace='exams')),
+
     # Tenant-Scoped Dashboards & SaaS Workspace
     path('', include('apps.tenants.urls', namespace='tenants')),
 ]

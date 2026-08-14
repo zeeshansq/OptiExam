@@ -1,0 +1,101 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Assign Questions to {{ section.title }} — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'layers' 'icon-xl' %}
+    <div>
+      <h2>Assign Questions to {{ section.title }}</h2>
+      <p class="page-subtitle">{{ exam.title }} ({{ exam.code }}) • Current Assigned: {{ section.assignments.count }} questions</p>
+    </div>
+  </div>
+  <div>
+    <a href="{% url 'exams:exam_detail' exam.pk %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Blueprint</span>
+    </a>
+  </div>
+</div>
+
+<div class="glass-card" style="padding: 24px;">
+  <!-- Question Bank Filter -->
+  <div class="flex items-center justify-between" style="border-bottom: 1px solid var(--color-glass-border); padding-bottom: 16px; margin-bottom: 20px;">
+    <div class="flex items-center gap-3">
+      <span style="font-size: 0.88rem; font-weight: 600; color: var(--color-text-secondary);">Filter by Question Bank:</span>
+      <div class="flex items-center gap-2">
+        <a href="{% url 'exams:question_picker' section.pk %}" class="btn btn-sm {% if not selected_bank_id %}btn-primary{% else %}btn-ghost{% endif %}">
+          All Banks
+        </a>
+        {% for b in banks %}
+          <a href="{% url 'exams:question_picker' section.pk %}?bank={{ b.pk }}" class="btn btn-sm {% if selected_bank_id == b.pk|stringformat:'s' %}btn-primary{% else %}btn-ghost{% endif %}">
+            {{ b.name }} ({{ b.total_questions }})
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Available Questions Table -->
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Question Prompt</th>
+          <th>Bank</th>
+          <th>Format</th>
+          <th>Difficulty</th>
+          <th>Bloom's</th>
+          <th>Points</th>
+          <th style="text-align: right;">Assignment Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for q in questions %}
+          <tr>
+            <td>
+              <span style="font-weight: 600; color: var(--color-text-primary);">
+                {{ q.prompt|truncatechars:75 }}
+              </span>
+              {% if q.topic_tags %}
+                <span style="display: block; font-size: 0.76rem; color: var(--color-text-muted);">
+                  🏷️ {{ q.topic_tags }}
+                </span>
+              {% endif %}
+            </td>
+            <td><span class="badge badge-primary">{{ q.bank.name|truncatechars:20 }}</span></td>
+            <td><span class="badge badge-secondary">{{ q.get_question_type_display }}</span></td>
+            <td><span class="badge badge-primary">{{ q.get_difficulty_display }}</span></td>
+            <td><span class="badge badge-secondary">{{ q.get_blooms_level_display }}</span></td>
+            <td style="font-family: var(--font-mono); font-weight: 700; color: var(--color-primary);">
+              {{ q.points }} pts
+            </td>
+            <td style="text-align: right;">
+              {% if q.pk in assigned_question_ids %}
+                <span class="badge badge-success" style="padding: 6px 12px;">✓ Assigned</span>
+              {% else %}
+                <form method="post" style="display: inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="question_id" value="{{ q.pk }}">
+                  <button type="submit" class="btn btn-primary btn-sm">
+                    {% icon 'plus' 'icon' %}
+                    <span>Assign</span>
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" style="padding: 36px; text-align: center; color: var(--color-text-muted);">
+              No questions found in this bank.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -13,6 +13,29 @@
       </span>
     </a>
 
+    <!-- Quick Module Navigation Links -->
+    <nav class="flex items-center gap-2" style="margin-left: 20px;">
+      {% if is_super_admin %}
+        <a href="{% url 'tenants:super_admin_dashboard' %}" class="btn btn-ghost btn-sm">SaaS Hub</a>
+        <a href="{% url 'tenants:audit_logs' %}" class="btn btn-ghost btn-sm">Audit Logs</a>
+      {% endif %}
+      {% if is_designer %}
+        <a href="{% url 'exams:exam_list' %}" class="btn btn-ghost btn-sm">
+          {% icon 'calendar' 'icon' %}
+          <span>Exam Blueprints</span>
+        </a>
+        <a href="{% url 'questions:bank_list' %}" class="btn btn-ghost btn-sm">
+          {% icon 'database' 'icon' %}
+          <span>Question Banks</span>
+        </a>
+      {% elif is_item_writer %}
+        <a href="{% url 'questions:bank_list' %}" class="btn btn-ghost btn-sm">
+          {% icon 'database' 'icon' %}
+          <span>Question Banks</span>
+        </a>
+      {% endif %}
+    </nav>
+
     <!-- Active Live Exam Resume Banner (if candidate has exam in progress) -->
     {% if active_exam_attempt %}
       <div class="active-exam-pill">

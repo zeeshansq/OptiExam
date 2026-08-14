@@ -1,0 +1,181 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Bulk Import Questions — {{ bank.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'upload' 'icon-xl' %}
+    <div>
+      <h2>Bulk Import Questions into {{ bank.name }}</h2>
+      <p class="page-subtitle">Two-Stage Ingestion Pipeline with Schema Validation & 10-Row Safety Preview</p>
+    </div>
+  </div>
+  <div>
+    <a href="{% url 'questions:bank_detail' bank.pk %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Bank</span>
+    </a>
+  </div>
+</div>
+
+<!-- Download Sample Templates Section -->
+<div class="glass-card flex items-center justify-between" style="padding: 20px 24px; margin-bottom: 24px; border-color: rgba(79, 70, 229, 0.3);">
+  <div class="flex items-center gap-3">
+    {% icon 'download' 'icon-lg' style="color: var(--color-primary);" %}
+    <div>
+      <h4 style="margin-bottom: 2px;">Need the official import format template?</h4>
+      <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 0;">
+        Download sample files prefilled with 5 question format examples (MCQ Single, Multi, Diagram, Short Answer, Long Essay).
+      </p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="{% url 'core:sample_template_download' 'questions' %}?format=csv" class="btn btn-primary btn-sm">
+      {% icon 'download' 'icon' %}
+      <span>Download .CSV Template</span>
+    </a>
+    <a href="{% url 'core:sample_template_download' 'questions' %}?format=xlsx" class="btn btn-ghost btn-sm">
+      {% icon 'download' 'icon' %}
+      <span>Download .XLSX Template</span>
+    </a>
+  </div>
+</div>
+
+{% if stage == 'upload' %}
+  <!-- STAGE 1: File Upload & Field Format Guide -->
+  <div class="grid grid-cols-2 gap-6">
+    <!-- Left Column: Upload Form -->
+    <div class="glass-card" style="padding: 28px;">
+      <h3 style="margin-bottom: 16px;">Stage 1: Upload File for Dry-Run Validation</h3>
+      <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 20px;">
+        Upload your completed CSV or Excel spreadsheet. The system will perform schema validation without writing to the database.
+      </p>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="validate">
+        
+        <div class="form-group">
+          <label class="form-label">Select File (.CSV, .XLSX, or .ZIP) <span style="color: var(--color-danger);">*</span></label>
+          {{ form.file }}
+          {% if form.file.errors %}<div class="form-error">{{ form.file.errors.0 }}</div>{% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="margin-top: 16px;">
+          {% icon 'check' 'icon' %}
+          <span>Validate File & Preview</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Right Column: Supported Columns Reference -->
+    <div class="glass-card" style="padding: 28px;">
+      <h3 style="margin-bottom: 16px;">Column Specification Reference</h3>
+      <div style="font-size: 0.85rem; line-height: 1.8;">
+        <p><strong>question_type:</strong> <code>MCQ_SINGLE</code>, <code>MCQ_MULTIPLE</code>, <code>IMAGE_MCQ</code>, <code>SHORT_ANSWER</code>, <code>LONG_ESSAY</code></p>
+        <p><strong>prompt:</strong> Full text of the question or task.</p>
+        <p><strong>points:</strong> Numerical score (e.g. <code>2.0</code>, <code>5.0</code>).</p>
+        <p><strong>negative_points:</strong> Penalty points (e.g. <code>0.5</code>, <code>0.0</code>).</p>
+        <p><strong>difficulty:</strong> <code>EASY</code>, <code>MEDIUM</code>, <code>HARD</code></p>
+        <p><strong>blooms_level:</strong> <code>REMEMBER</code>, <code>UNDERSTAND</code>, <code>APPLY</code>, <code>ANALYZE</code>, <code>EVALUATE</code>, <code>CREATE</code></p>
+        <p><strong>options:</strong> Choices separated by pipe: <code>A) Opt 1 | B) Opt 2 | C) Opt 3</code></p>
+        <p><strong>correct_options:</strong> Correct letter(s): <code>A</code> or <code>A, C</code></p>
+        <p><strong>rubric_criteria:</strong> Criteria with points: <code>Methodology: 3.0 | Output: 2.0</code></p>
+      </div>
+    </div>
+  </div>
+
+{% elif stage == 'preview' %}
+  <!-- STAGE 2: 10-Row Safety Preview & Commit Form -->
+  <div class="glass-card" style="padding: 28px; margin-bottom: 24px;">
+    <div class="flex items-center justify-between" style="margin-bottom: 20px;">
+      <div>
+        <h3>Stage 2: Validation Results & 10-Row Safety Preview</h3>
+        <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 0;">
+          Source file: <strong>{{ filename }}</strong> • Valid Rows: <strong style="color: var(--color-accent);">{{ result.valid_count }}</strong> / {{ result.total_rows }}
+        </p>
+      </div>
+      <div>
+        {% if result.valid %}
+          <span class="badge badge-success" style="font-size: 0.9rem; padding: 6px 14px;">✓ Schema Validation Passed</span>
+        {% else %}
+          <span class="badge badge-danger" style="font-size: 0.9rem; padding: 6px 14px;">⚠️ Schema Validation Issues Detected</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Error Table if any -->
+    {% if result.errors %}
+      <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px;">
+        <h4 style="color: var(--color-danger); margin-bottom: 8px;">Validation Errors ({{ result.errors|length }} issue{{ result.errors|pluralize }})</h4>
+        <ul style="margin-bottom: 0; padding-left: 20px; font-size: 0.85rem; color: var(--color-text-primary);">
+          {% for err in result.errors %}
+            <li>Row {{ err.row }}: {{ err.error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <!-- 10-Row Preview Grid -->
+    {% if result.preview_rows %}
+      <h4 style="margin-bottom: 12px;">First 10 Parsed Question Records (Preview)</h4>
+      <div class="table-responsive" style="margin-bottom: 24px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Row #</th>
+              <th>Format</th>
+              <th>Prompt Statement</th>
+              <th>Points</th>
+              <th>Difficulty</th>
+              <th>Bloom's</th>
+              <th>Choices / Criteria Summary</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in result.preview_rows %}
+              <tr>
+                <td style="font-family: var(--font-mono); font-size: 0.82rem;">{{ row.row_number }}</td>
+                <td><span class="badge badge-secondary">{{ row.question_type }}</span></td>
+                <td style="font-weight: 600;">{{ row.prompt|truncatechars:65 }}</td>
+                <td style="font-family: var(--font-mono); color: var(--color-primary); font-weight: 700;">{{ row.points }} pts</td>
+                <td><span class="badge badge-primary">{{ row.difficulty }}</span></td>
+                <td><span class="badge badge-secondary">{{ row.blooms_level }}</span></td>
+                <td style="font-size: 0.82rem; color: var(--color-text-secondary);">
+                  {% if row.options %}
+                    {{ row.options|length }} options (Correct: {% for o in row.options %}{% if o.is_correct %}{{ o.option_text|truncatechars:15 }}{% endif %}{% endfor %})
+                  {% elif row.rubrics %}
+                    {{ row.rubrics|length }} rubric criteria
+                  {% else %}
+                    Holistic / Text
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+
+    <!-- Commit Actions -->
+    <div class="flex items-center justify-between" style="border-top: 1px solid var(--color-glass-border); padding-top: 20px;">
+      <a href="{% url 'questions:bank_import' bank.pk %}" class="btn btn-ghost">
+        {% icon 'rotate-ccw' 'icon' %}
+        <span>Re-upload Different File</span>
+      </a>
+      {% if result.valid_count > 0 %}
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="commit">
+          <button type="submit" class="btn btn-primary btn-lg">
+            {% icon 'check' 'icon' %}
+            <span>Commit Import ({{ result.valid_count }} Question{{ result.valid_count|pluralize }})</span>
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

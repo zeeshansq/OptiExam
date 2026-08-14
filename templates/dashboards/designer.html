@@ -19,20 +19,38 @@
 <div class="grid grid-cols-3 gap-6" style="margin-bottom: 24px;">
   <div class="glass-card" style="padding: 24px;">
     <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-      {% icon 'file-text' 'icon' %}
+      {% icon 'calendar' 'icon' %}
       <span>Exam Blueprints</span>
     </h3>
-    <p>Construct multi-section exams, passing thresholds, and anti-cheating security policies.</p>
-    <span class="badge badge-primary">Phase 2 Module</span>
+    <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 16px;">
+      Construct multi-section exams, passing thresholds, anti-cheating policies, and lifeline configs.
+    </p>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'exams:exam_list' %}" class="btn btn-primary btn-sm">
+        {% icon 'eye' 'icon' %}
+        <span>View Blueprints</span>
+      </a>
+      <a href="{% url 'exams:exam_create' %}" class="btn btn-ghost btn-sm">
+        {% icon 'plus' 'icon' %}
+        <span>Create Exam</span>
+      </a>
+    </div>
   </div>
 
   <div class="glass-card" style="padding: 24px;">
     <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-      {% icon 'upload' 'icon' %}
-      <span>Candidate Rosters</span>
+      {% icon 'database' 'icon' %}
+      <span>Question Repositories</span>
     </h3>
-    <p>Bulk import participant lists via CSV/Excel or manage manual student registrations.</p>
-    <span class="badge badge-success">Phase 2 Module</span>
+    <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 16px;">
+      Browse institutional question banks, review item quality, and link questions to exam sections.
+    </p>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'questions:bank_list' %}" class="btn btn-primary btn-sm">
+        {% icon 'eye' 'icon' %}
+        <span>Question Banks</span>
+      </a>
+    </div>
   </div>
 
   <div class="glass-card" style="padding: 24px;">
@@ -40,7 +58,9 @@
       {% icon 'activity' 'icon' %}
       <span>Live Exam Ops</span>
     </h3>
-    <p>Real-time candidate monitoring, bonus time extensions, and broadcast announcements.</p>
+    <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 16px;">
+      Real-time candidate matrix, bonus time injection, and live proctoring control room.
+    </p>
     <span class="badge badge-warning">Phase 3 Module</span>
   </div>
 </div>

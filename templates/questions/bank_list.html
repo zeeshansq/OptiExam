@@ -1,0 +1,156 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Question Banks — OptiExam{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'database' 'icon-xl' %}
+    <div>
+      <h2>Question Bank Repositories</h2>
+      <p class="page-subtitle">Curated academic item repositories categorized by subject and discipline</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="{% url 'questions:bank_create' %}" class="btn btn-primary">
+      {% icon 'plus' 'icon' %}
+      <span>Create Question Bank</span>
+    </a>
+  </div>
+</div>
+
+{% include "includes/page_guide.html" with guide_icon="database" guide_title="Question Bank Workspace" guide_text="Author, organize, and version questions across 5 academic formats. Assigned questions are dynamically linked to Exam Blueprints." %}
+
+<div class="glass-card" style="padding: 24px;">
+  <!-- Single-Line Filter Toolbar -->
+  <form method="get" class="table-filter-toolbar">
+    <div class="filter-row-single">
+      <div class="filter-search-field">
+        {{ filter_form.q }}
+      </div>
+      <div class="filter-dropdown-field">
+        {{ filter_form.subject }}
+      </div>
+      <div class="filter-actions-group">
+        <button type="submit" class="btn btn-primary btn-icon-action" title="Apply Filters">
+          {% icon 'search' 'icon' %}
+          <span>Filter</span>
+        </button>
+        {% if active_search_query or active_subject_filter %}
+          <a href="{% url 'questions:bank_list' %}" class="btn btn-ghost btn-icon-action" title="Clear all filters" style="color: var(--color-danger); border-color: rgba(239, 68, 68, 0.3);">
+            {% icon 'rotate-ccw' 'icon' %}
+            <span>Clear</span>
+          </a>
+        {% else %}
+          <a href="{% url 'questions:bank_list' %}" class="btn btn-ghost btn-icon-action" title="Reset filters">
+            {% icon 'rotate-ccw' 'icon' %}
+            <span>Reset</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="flex-shrink: 0;">
+      <span style="font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap;">
+        Found <strong>{{ paginator.count|default:0 }}</strong> repository{{ paginator.count|pluralize:"ies,y" }}
+      </span>
+    </div>
+  </form>
+
+  <!-- Active Filter Chips -->
+  {% if active_search_query or active_subject_filter %}
+    <div class="active-filters-bar">
+      <span style="font-size: 0.8rem; color: var(--color-text-muted);">Active filters:</span>
+      {% if active_search_query %}
+        <span class="filter-chip">
+          Search: "{{ active_search_query }}"
+          <a href="{% query_transform q='' %}" title="Remove search filter">×</a>
+        </span>
+      {% endif %}
+      {% if active_subject_filter %}
+        <span class="filter-chip">
+          Subject: "{{ active_subject_filter }}"
+          <a href="{% query_transform subject='' %}" title="Remove subject filter">×</a>
+        </span>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- Data Table -->
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>{% sort_header 'name' 'Bank Name & Code' %}</th>
+          <th>{% sort_header 'subject' 'Subject Discipline' %}</th>
+          <th>Total Questions</th>
+          <th>Author / Created By</th>
+          <th>{% sort_header 'created_at' 'Created Date' %}</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bank in banks %}
+          <tr>
+            <td>
+              <a href="{% url 'questions:bank_detail' bank.pk %}" style="font-weight: 700; color: var(--color-text-primary); text-decoration: none;">
+                {{ bank.name }}
+              </a>
+              {% if bank.code %}
+                <span style="display: block; font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-text-muted);">
+                  {{ bank.code }}
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge badge-primary">{{ bank.subject }}</span>
+            </td>
+            <td>
+              <span style="font-weight: 600; font-family: var(--font-mono); color: var(--color-text-primary);">
+                {{ bank.total_questions|default:bank.question_count }}
+              </span> questions
+            </td>
+            <td style="color: var(--color-text-secondary); font-size: 0.85rem;">
+              {{ bank.created_by.get_full_name|default:bank.created_by.username|default:"Faculty" }}
+            </td>
+            <td style="color: var(--color-text-muted); font-size: 0.82rem;">
+              {{ bank.created_at|date:"M d, Y" }}
+            </td>
+            <td style="text-align: right;">
+              <div class="row-actions">
+                <a href="{% url 'questions:bank_detail' bank.pk %}" class="action-btn action-btn-inspect" data-tooltip="Inspect" aria-label="Inspect">
+                  {% icon 'eye' 'icon' %}
+                </a>
+                <a href="{% url 'questions:bank_import' bank.pk %}" class="action-btn action-btn-success" data-tooltip="Import" aria-label="Import">
+                  {% icon 'upload' 'icon' %}
+                </a>
+                <a href="{% url 'questions:bank_update' bank.pk %}" class="action-btn action-btn-edit" data-tooltip="Edit" aria-label="Edit">
+                  {% icon 'edit' 'icon' %}
+                </a>
+                <a href="{% url 'questions:bank_delete' bank.pk %}" class="action-btn action-btn-delete" data-tooltip="Delete" aria-label="Delete">
+                  {% icon 'trash-2' 'icon' %}
+                </a>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">
+              {% icon 'database' 'icon-xl' %}
+              <h4 style="margin-top: 12px; margin-bottom: 4px; color: var(--color-text-secondary);">No Question Banks Found</h4>
+              <p style="font-size: 0.85rem; margin-bottom: 16px;">Create your first academic question repository to begin authoring items.</p>
+              <a href="{% url 'questions:bank_create' %}" class="btn btn-primary btn-sm">
+                {% icon 'plus' 'icon' %}
+                <span>Create Question Bank</span>
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "includes/pagination.html" %}
+</div>
+{% endblock %}

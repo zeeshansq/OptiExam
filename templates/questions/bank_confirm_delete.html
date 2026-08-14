@@ -1,0 +1,33 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Delete Question Bank — {{ object.name }}{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center" style="min-height: 60vh;">
+  <div class="glass-card" style="max-width: 540px; padding: 36px 32px; text-align: center; border-color: rgba(239, 68, 68, 0.4);">
+    <div style="color: var(--color-danger); margin-bottom: 16px;">
+      {% icon 'alert-triangle' 'icon-xl' %}
+    </div>
+
+    <h2 style="color: var(--color-danger); margin-bottom: 8px;">Delete Question Bank?</h2>
+    <p style="color: var(--color-text-secondary); margin-bottom: 20px;">
+      You are about to delete <strong>{{ object.name }}</strong> ({{ object.questions.count }} question{{ object.questions.count|pluralize }}). 
+      This action cannot be undone.
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="flex items-center justify-center gap-4">
+        <button type="submit" class="btn btn-danger btn-lg">
+          {% icon 'trash-2' 'icon' %}
+          <span>Confirm & Delete Bank</span>
+        </button>
+        <a href="{% url 'questions:bank_list' %}" class="btn btn-ghost btn-lg">
+          <span>Cancel</span>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

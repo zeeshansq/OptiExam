@@ -1,0 +1,168 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Import Candidate Roster — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'upload' 'icon-xl' %}
+    <div>
+      <h2>Import Candidate Roster: {{ exam.title }}</h2>
+      <p class="page-subtitle">Two-Stage Ingestion Pipeline with Schema Validation & 10-Row Safety Preview</p>
+    </div>
+  </div>
+  <div>
+    <a href="{% url 'exams:roster_hub' exam.pk %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Roster</span>
+    </a>
+  </div>
+</div>
+
+<!-- Download Sample Templates Section -->
+<div class="glass-card flex items-center justify-between" style="padding: 20px 24px; margin-bottom: 24px; border-color: rgba(79, 70, 229, 0.3);">
+  <div class="flex items-center gap-3">
+    {% icon 'download' 'icon-lg' style="color: var(--color-primary);" %}
+    <div>
+      <h4 style="margin-bottom: 2px;">Need the official candidate roster template?</h4>
+      <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 0;">
+        Download sample files prefilled with 5 realistic student records and correct column headers.
+      </p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="{% url 'core:sample_template_download' 'roster' %}?format=csv" class="btn btn-primary btn-sm">
+      {% icon 'download' 'icon' %}
+      <span>Download .CSV Template</span>
+    </a>
+    <a href="{% url 'core:sample_template_download' 'roster' %}?format=xlsx" class="btn btn-ghost btn-sm">
+      {% icon 'download' 'icon' %}
+      <span>Download .XLSX Template</span>
+    </a>
+  </div>
+</div>
+
+{% if stage == 'upload' %}
+  <!-- STAGE 1: File Upload & Column Reference -->
+  <div class="grid grid-cols-2 gap-6">
+    <!-- Left Column: Upload Form -->
+    <div class="glass-card" style="padding: 28px;">
+      <h3 style="margin-bottom: 16px;">Stage 1: Upload Candidate Roster for Validation</h3>
+      <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 20px;">
+        Upload your roster spreadsheet (.CSV or .XLSX). Dry-run validation will inspect email formats and check for registration number collisions without modifying the database.
+      </p>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="validate">
+        
+        <div class="form-group">
+          <label class="form-label">Select Roster File (.CSV or .XLSX) <span style="color: var(--color-danger);">*</span></label>
+          {{ form.file }}
+          {% if form.file.errors %}<div class="form-error">{{ form.file.errors.0 }}</div>{% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="margin-top: 16px;">
+          {% icon 'check' 'icon' %}
+          <span>Validate File & Preview</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Right Column: Supported Columns Reference -->
+    <div class="glass-card" style="padding: 28px;">
+      <h3 style="margin-bottom: 16px;">Required Column Specifications</h3>
+      <div style="font-size: 0.85rem; line-height: 1.8;">
+        <p><strong>registration_number:</strong> Unique student identification code (e.g. <code>REG-2026-001</code>).</p>
+        <p><strong>email:</strong> Institutional student email address.</p>
+        <p><strong>first_name:</strong> Student given name.</p>
+        <p><strong>last_name:</strong> Student surname.</p>
+        <p><strong>department:</strong> Academic department (e.g. <code>Computer Science</code>).</p>
+        <p><strong>batch_year:</strong> Graduation cohort year (e.g. <code>2026</code>).</p>
+      </div>
+    </div>
+  </div>
+
+{% elif stage == 'preview' %}
+  <!-- STAGE 2: 10-Row Safety Preview & Commit Form -->
+  <div class="glass-card" style="padding: 28px; margin-bottom: 24px;">
+    <div class="flex items-center justify-between" style="margin-bottom: 20px;">
+      <div>
+        <h3>Stage 2: Validation Results & 10-Row Safety Preview</h3>
+        <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 0;">
+          Source file: <strong>{{ filename }}</strong> • Valid Candidates: <strong style="color: var(--color-accent);">{{ result.valid_count }}</strong> / {{ result.total_rows }}
+        </p>
+      </div>
+      <div>
+        {% if result.valid %}
+          <span class="badge badge-success" style="font-size: 0.9rem; padding: 6px 14px;">✓ Schema Validation Passed</span>
+        {% else %}
+          <span class="badge badge-danger" style="font-size: 0.9rem; padding: 6px 14px;">⚠️ Schema Validation Issues Detected</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Error Table if any -->
+    {% if result.errors %}
+      <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px;">
+        <h4 style="color: var(--color-danger); margin-bottom: 8px;">Validation Errors ({{ result.errors|length }} issue{{ result.errors|pluralize }})</h4>
+        <ul style="margin-bottom: 0; padding-left: 20px; font-size: 0.85rem; color: var(--color-text-primary);">
+          {% for err in result.errors %}
+            <li>Row {{ err.row }}: {{ err.error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <!-- 10-Row Preview Grid -->
+    {% if result.preview_rows %}
+      <h4 style="margin-bottom: 12px;">First 10 Parsed Candidate Records (Preview)</h4>
+      <div class="table-responsive" style="margin-bottom: 24px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Row #</th>
+              <th>Registration #</th>
+              <th>Student Name</th>
+              <th>Email Address</th>
+              <th>Department</th>
+              <th>Cohort</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in result.preview_rows %}
+              <tr>
+                <td style="font-family: var(--font-mono); font-size: 0.82rem;">{{ row.row_number }}</td>
+                <td style="font-family: var(--font-mono); font-weight: 700; color: var(--color-primary);">{{ row.registration_number }}</td>
+                <td style="font-weight: 600;">{{ row.first_name }} {{ row.last_name }}</td>
+                <td>{{ row.email }}</td>
+                <td>{{ row.department }}</td>
+                <td>{{ row.batch_year }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+
+    <!-- Commit Actions -->
+    <div class="flex items-center justify-between" style="border-top: 1px solid var(--color-glass-border); padding-top: 20px;">
+      <a href="{% url 'exams:roster_import' exam.pk %}" class="btn btn-ghost">
+        {% icon 'rotate-ccw' 'icon' %}
+        <span>Re-upload Different File</span>
+      </a>
+      {% if result.valid_count > 0 %}
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="commit">
+          <button type="submit" class="btn btn-primary btn-lg">
+            {% icon 'check' 'icon' %}
+            <span>Commit Roster Enrollment ({{ result.valid_count }} Candidate{{ result.valid_count|pluralize }})</span>
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,284 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}{% if is_create %}New Exam Blueprint{% else %}Edit {{ exam.title }}{% endif %} — OptiExam{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'calendar' 'icon-xl' %}
+    <div>
+      <h2>{% if is_create %}Create Exam Blueprint{% else %}Configure Exam Blueprint: {{ exam.title }}{% endif %}</h2>
+      <p class="page-subtitle">Multi-section scheduling, anti-cheating lockdown policies, and lifeline controls</p>
+    </div>
+  </div>
+  <div>
+    <a href="{% url 'exams:exam_list' %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Exams</span>
+    </a>
+  </div>
+</div>
+
+<form method="post" style="width: 100%;">
+  {% csrf_token %}
+
+  <!-- Balanced Two-Column Full-Width Form Layout -->
+  <div class="grid grid-cols-2 gap-6">
+    
+    <!-- LEFT COLUMN: Identity, Schedule & Instructions -->
+    <div class="flex flex-col gap-6">
+      
+      <!-- Section 1: Exam Identity & Subject -->
+      <div class="form-section-card" style="margin-bottom: 0;">
+        <div class="form-section-header">
+          {% icon 'file-text' 'icon-lg' %}
+          <div>
+            <h3>1. Assessment Identity & Course</h3>
+            <p>Title, course discipline, and unique exam code.</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Exam Title <span style="color: var(--color-danger);">*</span></label>
+          {{ form.title }}
+          {% if form.title.errors %}<div class="form-error">{{ form.title.errors.0 }}</div>{% endif %}
+          <div class="form-help">e.g. Midterm Assessment 2026: Operating Systems</div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">Exam Code <span style="color: var(--color-danger);">*</span></label>
+            {{ form.code }}
+            {% if form.code.errors %}<div class="form-error">{{ form.code.errors.0 }}</div>{% endif %}
+            <div class="form-help">e.g. <code>CS201-MID</code></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Subject Discipline <span style="color: var(--color-danger);">*</span></label>
+            {{ form.subject }}
+            {% if form.subject.errors %}<div class="form-error">{{ form.subject.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Scheduling Window & Duration -->
+      <div class="form-section-card" style="margin-bottom: 0;">
+        <div class="form-section-header">
+          {% icon 'clock' 'icon-lg' %}
+          <div>
+            <h3>2. Permitted Schedule Window & Timing</h3>
+            <p>Define when the examination lobby opens/closes and duration per student.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">Start Time (Lobby Opens) <span style="color: var(--color-danger);">*</span></label>
+            {{ form.start_time }}
+            {% if form.start_time.errors %}<div class="form-error">{{ form.start_time.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Time (Lobby Closes) <span style="color: var(--color-danger);">*</span></label>
+            {{ form.end_time }}
+            {% if form.end_time.errors %}<div class="form-error">{{ form.end_time.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4" style="margin-bottom: 0;">
+          <div class="form-group">
+            <label class="form-label">Duration (Mins) <span style="color: var(--color-danger);">*</span></label>
+            {{ form.duration_minutes }}
+            {% if form.duration_minutes.errors %}<div class="form-error">{{ form.duration_minutes.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Total Marks <span style="color: var(--color-danger);">*</span></label>
+            {{ form.total_marks }}
+            {% if form.total_marks.errors %}<div class="form-error">{{ form.total_marks.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pass Threshold (%)</label>
+            {{ form.passing_percentage }}
+            {% if form.passing_percentage.errors %}<div class="form-error">{{ form.passing_percentage.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Lobby Instructions -->
+      <div class="form-section-card" style="margin-bottom: 0;">
+        <div class="form-section-header">
+          {% icon 'shield' 'icon-lg' %}
+          <div>
+            <h3>3. Pre-Exam Candidate Lobby Instructions</h3>
+            <p>Rules and guidance presented to candidates before clicking Start Exam.</p>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          {{ form.instructions }}
+          {% if form.instructions.errors %}<div class="form-error">{{ form.instructions.errors.0 }}</div>{% endif %}
+          <div class="form-help">e.g. Ensure your camera is enabled, full screen mode is required, scratch paper is allowed.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Anti-Cheating, Shuffling & Sections -->
+    <div class="flex flex-col gap-6">
+
+      <!-- Section 4: Anti-Cheating & Proctoring Shields -->
+      <div class="form-section-card" style="margin-bottom: 0;">
+        <div class="form-section-header">
+          {% icon 'shield' 'icon-lg' %}
+          <div>
+            <h3>4. Anti-Cheating & Security Policies</h3>
+            <p>Lockdown triggers and client-side anti-tamper controls.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <label class="flex items-center gap-3" style="cursor: pointer;">
+            {{ form.enforce_fullscreen }}
+            <div>
+              <span style="font-weight: 600; color: var(--color-text-primary);">Enforce Full-Screen Lockdown</span>
+              <span style="display: block; font-size: 0.78rem; color: var(--color-text-muted);">Exiting full-screen logs a security violation.</span>
+            </div>
+          </label>
+
+          <label class="flex items-center gap-3" style="cursor: pointer;">
+            {{ form.lock_copy_paste }}
+            <div>
+              <span style="font-weight: 600; color: var(--color-text-primary);">Lock Copy / Paste / Context Menu</span>
+              <span style="display: block; font-size: 0.78rem; color: var(--color-text-muted);">Blocks clipboard hijacking and right-click inspections.</span>
+            </div>
+          </label>
+
+          <label class="flex items-center gap-3" style="cursor: pointer;">
+            {{ form.shuffle_questions }}
+            <div>
+              <span style="font-weight: 600; color: var(--color-text-primary);">Randomize Question Order</span>
+              <span style="display: block; font-size: 0.78rem; color: var(--color-text-muted);">Delivers dynamic shuffled question sequences per student.</span>
+            </div>
+          </label>
+
+          <label class="flex items-center gap-3" style="cursor: pointer;">
+            {{ form.shuffle_options }}
+            <div>
+              <span style="font-weight: 600; color: var(--color-text-primary);">Randomize Choice Options</span>
+              <span style="display: block; font-size: 0.78rem; color: var(--color-text-muted);">Scrambles A/B/C/D option ordering.</span>
+            </div>
+          </label>
+
+          <label class="flex items-center gap-3" style="cursor: pointer;">
+            {{ form.allow_back_navigation }}
+            <div>
+              <span style="font-weight: 600; color: var(--color-text-primary);">Allow Back Navigation</span>
+              <span style="display: block; font-size: 0.78rem; color: var(--color-text-muted);">Candidates can revisit and alter prior answers before submission.</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="form-group" style="margin-top: 16px; margin-bottom: 0;">
+          <label class="form-label">Max Allowed Tab Switch Violations</label>
+          {{ form.max_tab_switch_limit }}
+          {% if form.max_tab_switch_limit.errors %}<div class="form-error">{{ form.max_tab_switch_limit.errors.0 }}</div>{% endif %}
+          <div class="form-help">Exceeding this threshold triggers automatic exam termination.</div>
+        </div>
+      </div>
+
+      <!-- Section 5: Exam Sections Formset -->
+      <div class="form-section-card" style="margin-bottom: 0;">
+        <div class="form-section-header">
+          {% icon 'layers' 'icon-lg' %}
+          <div>
+            <h3>5. Exam Sections & Weightages</h3>
+            <p>Partition exam into distinct academic sections.</p>
+          </div>
+        </div>
+
+        {{ section_formset.management_form }}
+        {% if section_formset.non_form_errors %}
+          <div class="form-error" style="margin-bottom: 12px; font-weight: 600;">
+            {{ section_formset.non_form_errors.0 }}
+          </div>
+        {% endif %}
+
+        <div class="flex flex-col gap-3">
+          {% for s_form in section_formset %}
+            <div class="glass-card" style="padding: 12px 16px; border-radius: var(--radius-sm);">
+              {{ s_form.id }}
+              <div class="flex items-center gap-3">
+                <div style="flex: 1;">
+                  <label class="form-label" style="font-size: 0.78rem;">Section Title</label>
+                  {{ s_form.title }}
+                </div>
+                <div>
+                  <label class="form-label" style="font-size: 0.78rem;">Weight %</label>
+                  {{ s_form.weightage }}
+                </div>
+                <div>
+                  <label class="form-label" style="font-size: 0.78rem;">Order</label>
+                  {{ s_form.order }}
+                </div>
+              </div>
+              {% if s_form.instance.pk %}
+                <div style="margin-top: 6px; text-align: right; font-size: 0.78rem; color: var(--color-danger);">
+                  <label>{{ s_form.DELETE }} Remove section</label>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Section 6: Lifeline Configs if editing -->
+      {% if lifeline_formset %}
+        <div class="form-section-card" style="margin-bottom: 0;">
+          <div class="form-section-header">
+            {% icon 'activity' 'icon-lg' %}
+            <div>
+              <h3>6. Lifeline Assistance Rules</h3>
+              <p>Configure permitted lifelines (50:50, Skip, Hint, Bookmark).</p>
+            </div>
+          </div>
+
+          {{ lifeline_formset.management_form }}
+          <div class="flex flex-col gap-2">
+            {% for lf_form in lifeline_formset %}
+              <div class="glass-card flex items-center justify-between" style="padding: 10px 14px; border-radius: var(--radius-sm);">
+                {{ lf_form.id }}
+                <div class="flex items-center gap-3">
+                  {{ lf_form.is_enabled }}
+                  <span style="font-weight: 600; color: var(--color-text-primary); font-size: 0.85rem;">
+                    {{ lf_form.instance.get_lifeline_type_display }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span style="font-size: 0.8rem; color: var(--color-text-muted);">Max uses:</span>
+                  {{ lf_form.max_allowed }}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+
+  <!-- Full-Width Bottom Actions Bar -->
+  <div class="glass-card flex items-center justify-between" style="padding: 20px 24px; margin-top: 24px;">
+    <div style="font-size: 0.85rem; color: var(--color-text-muted);">
+      {% icon 'shield' 'icon' %}
+      <span>After saving, assign questions from Question Banks and import candidate rosters.</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="{% url 'exams:exam_list' %}" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary btn-lg">
+        {% icon 'check' 'icon' %}
+        <span>{% if is_create %}Create Blueprint{% else %}Save Blueprint Changes{% endif %}</span>
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}

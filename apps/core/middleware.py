@@ -2,6 +2,12 @@ from django.http import HttpResponseForbidden
 from django.utils.deprecation import MiddlewareMixin
 from apps.tenants.models import Tenant
 
+SYSTEM_PREFIXES = {
+    'admin', 'auth', 'django-admin', 'static', 'media', 'api',
+    'core', 'questions', 'exams', 'grading', 'analytics', 'submissions', 'healthz',
+    'favicon.ico', '__debug__'
+}
+
 class TenantResolutionMiddleware(MiddlewareMixin):
     """
     Middleware that determines the active tenant for the incoming HTTP request.
@@ -25,9 +31,7 @@ class TenantResolutionMiddleware(MiddlewareMixin):
         path_parts = request.path.strip('/').split('/')
         if path_parts and len(path_parts) > 0 and path_parts[0]:
             first_part = path_parts[0]
-            # Exclude known system and root auth routes
-            system_prefixes = {'admin', 'auth', 'django-admin', 'static', 'media', 'api'}
-            if first_part not in system_prefixes:
+            if first_part not in SYSTEM_PREFIXES:
                 return first_part
 
         # 2. Check session or cookie safely

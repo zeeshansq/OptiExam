@@ -18,14 +18,36 @@
 
 <div class="grid grid-cols-2 gap-6">
   <div class="glass-card" style="padding: 24px;">
-    <h3 style="margin-bottom: 8px;">Question Banks</h3>
-    <p>Organize subject repositories, taxonomies, and difficulty tiers.</p>
-    <span class="badge badge-primary">Phase 2 Module</span>
+    <h3 style="margin-bottom: 8px;">Question Bank Repositories</h3>
+    <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 16px;">
+      Organize subject repositories, taxonomies, Bloom's levels, and author questions in 5 formats.
+    </p>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'questions:bank_list' %}" class="btn btn-primary btn-sm">
+        {% icon 'eye' 'icon' %}
+        <span>Browse Question Banks</span>
+      </a>
+      <a href="{% url 'questions:bank_create' %}" class="btn btn-ghost btn-sm">
+        {% icon 'plus' 'icon' %}
+        <span>Create Bank</span>
+      </a>
+    </div>
   </div>
   <div class="glass-card" style="padding: 24px;">
-    <h3 style="margin-bottom: 8px;">Bulk Question Ingestion</h3>
-    <p>Upload questions via CSV, Excel, or ZIP bundles with diagram images.</p>
-    <span class="badge badge-success">Phase 2 Module</span>
+    <h3 style="margin-bottom: 8px;">Quick Question Bank Creation</h3>
+    <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 16px;">
+      Launch a new academic repository and start populating single MCQs, diagram items, and essay rubrics.
+    </p>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'questions:bank_create' %}" class="btn btn-primary btn-sm">
+        {% icon 'plus' 'icon' %}
+        <span>Create Question Bank</span>
+      </a>
+      <a href="{% url 'core:sample_template_download' 'questions' %}" class="btn btn-ghost btn-sm">
+        {% icon 'download' 'icon' %}
+        <span>Download CSV Template</span>
+      </a>
+    </div>
   </div>
 </div>
 {% endblock %}

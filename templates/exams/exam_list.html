@@ -1,0 +1,185 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Exam Blueprints — OptiExam{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'calendar' 'icon-xl' %}
+    <div>
+      <h2>Exam Blueprints & Assessments</h2>
+      <p class="page-subtitle">Multi-section examination blueprints, scheduling windows, and anti-cheating configurations</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="{% url 'exams:exam_create' %}" class="btn btn-primary">
+      {% icon 'plus' 'icon' %}
+      <span>Create Exam Blueprint</span>
+    </a>
+  </div>
+</div>
+
+{% include "includes/page_guide.html" with guide_icon="calendar" guide_title="Exam Blueprint Hub" guide_text="Design structured exams with section weightages, anti-cheat lockdown policies, and lifeline rules. Ingest candidate rosters via CSV for sequential double-blind grading index allocation." %}
+
+<div class="glass-card" style="padding: 24px;">
+  <!-- Single-Line Filter Toolbar -->
+  <form method="get" class="table-filter-toolbar">
+    <div class="filter-row-single">
+      <div class="filter-search-field">
+        {{ filter_form.q }}
+      </div>
+      <div class="filter-dropdown-field">
+        {{ filter_form.subject }}
+      </div>
+      <div class="filter-dropdown-field">
+        {{ filter_form.status }}
+      </div>
+      <div class="filter-actions-group">
+        <button type="submit" class="btn btn-primary btn-icon-action" title="Apply Filters">
+          {% icon 'search' 'icon' %}
+          <span>Filter</span>
+        </button>
+        {% if active_search_query or active_subject_filter or active_status_filter %}
+          <a href="{% url 'exams:exam_list' %}" class="btn btn-ghost btn-icon-action" title="Clear all filters" style="color: var(--color-danger); border-color: rgba(239, 68, 68, 0.3);">
+            {% icon 'rotate-ccw' 'icon' %}
+            <span>Clear</span>
+          </a>
+        {% else %}
+          <a href="{% url 'exams:exam_list' %}" class="btn btn-ghost btn-icon-action" title="Reset filters">
+            {% icon 'rotate-ccw' 'icon' %}
+            <span>Reset</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="flex-shrink: 0;">
+      <span style="font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap;">
+        Found <strong>{{ paginator.count|default:0 }}</strong> blueprint{{ paginator.count|pluralize }}
+      </span>
+    </div>
+  </form>
+
+  <!-- Active Filter Chips -->
+  {% if active_search_query or active_subject_filter or active_status_filter %}
+    <div class="active-filters-bar">
+      <span style="font-size: 0.8rem; color: var(--color-text-muted);">Active filters:</span>
+      {% if active_search_query %}
+        <span class="filter-chip">
+          Search: "{{ active_search_query }}"
+          <a href="{% query_transform q='' %}" title="Remove search filter">×</a>
+        </span>
+      {% endif %}
+      {% if active_subject_filter %}
+        <span class="filter-chip">
+          Subject: "{{ active_subject_filter }}"
+          <a href="{% query_transform subject='' %}" title="Remove subject filter">×</a>
+        </span>
+      {% endif %}
+      {% if active_status_filter %}
+        <span class="filter-chip">
+          Status: {{ active_status_filter }}
+          <a href="{% query_transform status='' %}" title="Remove status filter">×</a>
+        </span>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- Data Table -->
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>{% sort_header 'title' 'Exam Title & Code' %}</th>
+          <th>{% sort_header 'subject' 'Subject' %}</th>
+          <th>{% sort_header 'start_time' 'Permitted Schedule Window' %}</th>
+          <th>{% sort_header 'duration_minutes' 'Duration' %}</th>
+          <th>{% sort_header 'total_marks' 'Marks' %}</th>
+          <th>Enrolled Roster</th>
+          <th>Status</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for exam in exams %}
+          <tr>
+            <td>
+              <a href="{% url 'exams:exam_detail' exam.pk %}" style="font-weight: 700; color: var(--color-text-primary); text-decoration: none;">
+                {{ exam.title }}
+              </a>
+              <span style="display: block; font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-text-muted);">
+                {{ exam.code }}
+              </span>
+            </td>
+            <td>
+              <span class="badge badge-primary">{{ exam.subject }}</span>
+            </td>
+            <td style="font-size: 0.82rem; color: var(--color-text-secondary);">
+              <div><strong>Start:</strong> {{ exam.start_time|date:"M d, Y H:i" }}</div>
+              <div><strong>End:</strong> {{ exam.end_time|date:"M d, Y H:i" }}</div>
+            </td>
+            <td>
+              <span style="font-weight: 600; font-family: var(--font-mono); color: var(--color-text-primary);">
+                {{ exam.duration_minutes }} min
+              </span>
+            </td>
+            <td>
+              <span style="font-weight: 700; font-family: var(--font-mono); color: var(--color-primary);">
+                {{ exam.total_marks }} pts
+              </span>
+              <span style="display: block; font-size: 0.75rem; color: var(--color-text-muted);">
+                Pass: {{ exam.passing_percentage }}%
+              </span>
+            </td>
+            <td>
+              <a href="{% url 'exams:roster_hub' exam.pk %}" style="font-weight: 600; font-family: var(--font-mono); color: var(--color-accent); text-decoration: none;">
+                👥 {{ exam.total_enrolled|default:exam.total_enrolled_candidates }} students
+              </a>
+            </td>
+            <td>
+              {% if exam.results_published %}
+                <span class="badge badge-accent">Results Published</span>
+              {% elif exam.is_active %}
+                <span class="badge badge-success">Active</span>
+              {% else %}
+                <span class="badge badge-warning">Draft</span>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              <div class="row-actions">
+                <a href="{% url 'exams:exam_detail' exam.pk %}" class="action-btn action-btn-inspect" data-tooltip="Inspect" aria-label="Inspect">
+                  {% icon 'eye' 'icon' %}
+                </a>
+                <a href="{% url 'exams:roster_hub' exam.pk %}" class="action-btn action-btn-success" data-tooltip="Roster" aria-label="Roster">
+                  {% icon 'users' 'icon' %}
+                </a>
+                <a href="{% url 'exams:exam_update' exam.pk %}" class="action-btn action-btn-edit" data-tooltip="Edit" aria-label="Edit">
+                  {% icon 'edit' 'icon' %}
+                </a>
+                <a href="{% url 'exams:exam_delete' exam.pk %}" class="action-btn action-btn-delete" data-tooltip="Delete" aria-label="Delete">
+                  {% icon 'trash-2' 'icon' %}
+                </a>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">
+              {% icon 'calendar' 'icon-xl' %}
+              <h4 style="margin-top: 12px; margin-bottom: 4px; color: var(--color-text-secondary);">No Exam Blueprints Found</h4>
+              <p style="font-size: 0.85rem; margin-bottom: 16px;">Configure your first examination blueprint to schedule assessments.</p>
+              <a href="{% url 'exams:exam_create' %}" class="btn btn-primary btn-sm">
+                {% icon 'plus' 'icon' %}
+                <span>Create Exam Blueprint</span>
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "includes/pagination.html" %}
+</div>
+{% endblock %}

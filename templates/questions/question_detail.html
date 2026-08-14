@@ -1,0 +1,148 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Inspect Question #{{ question.pk }} — {{ question.bank.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'file-text' 'icon-xl' %}
+    <div>
+      <h2>Question Inspection Cockpit</h2>
+      <p class="page-subtitle">{{ question.bank.name }} • {{ question.get_question_type_display }} • {{ question.points }} Points</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    {% if question.is_mcq %}
+      <a href="{% url 'questions:question_update_mcq' question.pk %}" class="btn btn-primary">
+        {% icon 'edit' 'icon' %}
+        <span>Edit Question</span>
+      </a>
+    {% else %}
+      <a href="{% url 'questions:question_update_subjective' question.pk %}" class="btn btn-primary">
+        {% icon 'edit' 'icon' %}
+        <span>Edit Question</span>
+      </a>
+    {% endif %}
+    <a href="{% url 'questions:bank_detail' question.bank.pk %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Bank</span>
+    </a>
+  </div>
+</div>
+
+<div class="grid grid-cols-3 gap-6" style="margin-bottom: 24px;">
+  <!-- Left 2 Cols: Question Body, Options & Rubrics -->
+  <div style="grid-column: span 2;" class="flex flex-col gap-6">
+    
+    <!-- Question Statement Card -->
+    <div class="glass-card" style="padding: 24px;">
+      <div class="flex items-center justify-between" style="margin-bottom: 16px;">
+        <span class="badge badge-primary">{{ question.get_question_type_display }}</span>
+        <span style="font-weight: 700; font-family: var(--font-mono); color: var(--color-primary); font-size: 1.1rem;">
+          {{ question.points }} pts
+        </span>
+      </div>
+      <h3 style="font-size: 1.15rem; line-height: 1.6; margin-bottom: 16px;">
+        {{ question.prompt }}
+      </h3>
+      {% if question.image_asset %}
+        <div style="margin-top: 16px; text-align: center;">
+          <img src="{{ question.image_asset.url }}" alt="Diagram" style="max-height: 320px; border-radius: var(--radius-md); border: 1px solid var(--color-glass-border);">
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Choices or Rubric Matrix -->
+    {% if question.is_mcq %}
+      <div class="glass-card" style="padding: 24px;">
+        <h4 style="margin-bottom: 16px;">Choice Options & Answer Key</h4>
+        <div class="flex flex-col gap-3">
+          {% for opt in question.options.all %}
+            <div class="glass-card" style="padding: 12px 16px; border-radius: var(--radius-sm); border-color: {% if opt.is_correct %}rgba(16, 185, 129, 0.4){% else %}var(--color-glass-border){% endif %};">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  {% if opt.is_correct %}
+                    <span class="badge badge-success">✓ Correct Key</span>
+                  {% else %}
+                    <span class="badge badge-secondary">Choice</span>
+                  {% endif %}
+                  <span style="font-weight: 600; color: var(--color-text-primary);">{{ opt.option_text }}</span>
+                </div>
+              </div>
+              {% if opt.explanation %}
+                <p style="margin-top: 6px; margin-bottom: 0; font-size: 0.8rem; color: var(--color-text-muted);">
+                  💡 {{ opt.explanation }}
+                </p>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% elif question.is_subjective %}
+      <div class="glass-card" style="padding: 24px;">
+        <h4 style="margin-bottom: 16px;">Evaluation Rubric Criteria Matrix</h4>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Criterion</th>
+                <th>Grading Guidelines</th>
+                <th style="text-align: right;">Max Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rub in question.rubrics.all %}
+                <tr>
+                  <td style="font-weight: 600;">{{ rub.criteria_title }}</td>
+                  <td style="color: var(--color-text-secondary); font-size: 0.85rem;">{{ rub.description|default:"-" }}</td>
+                  <td style="text-align: right; font-weight: 700; color: var(--color-primary);">{{ rub.max_points }} pts</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="3" style="text-align: center; color: var(--color-text-muted);">No rubric criteria defined. Grader evaluates holistic total score.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Model Answer -->
+    {% if question.model_answer %}
+      <div class="glass-card" style="padding: 24px; border-color: rgba(79, 70, 229, 0.3);">
+        <h4 style="margin-bottom: 12px; color: var(--color-primary);">Confidential Model Solution & Rubric Guide</h4>
+        <p style="line-height: 1.7; color: var(--color-text-primary); margin-bottom: 0;">
+          {{ question.model_answer|linebreaks }}
+        </p>
+      </div>
+    {% endif %}
+
+  </div>
+
+  <!-- Right 1 Col: Meta & Pedagogical Classification -->
+  <div class="flex flex-col gap-6">
+    <div class="glass-card" style="padding: 24px;">
+      <h4 style="margin-bottom: 16px;">Pedagogical Classification</h4>
+      <div style="font-size: 0.88rem; line-height: 2;">
+        <p><strong>Difficulty:</strong> <span class="badge badge-primary">{{ question.get_difficulty_display }}</span></p>
+        <p><strong>Bloom's Taxonomy:</strong> <span class="badge badge-secondary">{{ question.get_blooms_level_display }}</span></p>
+        <p><strong>Negative Penalty:</strong> <span style="color: var(--color-danger); font-family: var(--font-mono); font-weight: 600;">-{{ question.negative_points }} pts</span></p>
+        <p><strong>Topic Tags:</strong> {{ question.topic_tags|default:"None" }}</p>
+        <p><strong>Author:</strong> {{ question.created_by.get_full_name|default:question.created_by.username|default:"Faculty" }}</p>
+        <p><strong>Created Date:</strong> {{ question.created_at|date:"M d, Y H:i" }}</p>
+      </div>
+    </div>
+
+    {% if question.hint_text %}
+      <div class="glass-card" style="padding: 20px;">
+        <h5 style="margin-bottom: 8px; color: var(--color-warning);">💡 Hint Token Content</h5>
+        <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 0;">
+          {{ question.hint_text }}
+        </p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

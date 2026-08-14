@@ -1,0 +1,212 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}{{ exam.title }} — Blueprint Details{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'calendar' 'icon-xl' %}
+    <div>
+      <h2>{{ exam.title }}</h2>
+      <p class="page-subtitle">{{ exam.subject }} • Code: <code>{{ exam.code }}</code> • {{ exam.duration_minutes }} Mins • {{ exam.total_marks }} Marks</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="{% url 'exams:roster_hub' exam.pk %}" class="btn btn-accent">
+      {% icon 'users' 'icon' %}
+      <span>Candidate Roster ({{ exam.total_enrolled_candidates }})</span>
+    </a>
+    <a href="{% url 'exams:exam_update' exam.pk %}" class="btn btn-primary">
+      {% icon 'edit' 'icon' %}
+      <span>Edit Blueprint</span>
+    </a>
+    <a href="{% url 'exams:exam_list' %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>All Blueprints</span>
+    </a>
+  </div>
+</div>
+
+<!-- Overview Stats Cards Row -->
+<div class="grid grid-cols-4 gap-4" style="margin-bottom: 24px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(79, 70, 229, 0.1); color: var(--color-primary);">
+      {% icon 'calendar' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value">{{ exam.duration_minutes }}m</div>
+      <div class="stat-label">Duration Limit</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-accent);">
+      {% icon 'activity' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value">{{ exam.total_marks }}</div>
+      <div class="stat-label">Total Marks (Pass: {{ exam.passing_percentage }}%)</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(6, 182, 212, 0.1); color: var(--color-cyan, #06B6D4);">
+      {% icon 'layers' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value">{{ exam.sections.count }}</div>
+      <div class="stat-label">Sections ({{ exam.total_assigned_questions }} Questions)</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--color-warning);">
+      {% icon 'users' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value">{{ exam.total_enrolled_candidates }}</div>
+      <div class="stat-label">Enrolled Candidates</div>
+    </div>
+  </div>
+</div>
+
+<!-- Sections & Assigned Questions Architecture -->
+<div class="flex flex-col gap-6" style="margin-bottom: 24px;">
+  {% for section in exam.sections.all %}
+    <div class="glass-card" style="padding: 24px;">
+      <div class="flex items-center justify-between" style="border-bottom: 1px solid var(--color-glass-border); padding-bottom: 16px; margin-bottom: 16px;">
+        <div class="flex items-center gap-3">
+          <span class="badge badge-primary">Section {{ forloop.counter }}</span>
+          <h3 style="margin-bottom: 0;">{{ section.title }}</h3>
+          <span style="font-size: 0.85rem; color: var(--color-text-muted);">
+            (Weightage: {{ section.weightage }}% • {{ section.assignments.count }} Questions)
+          </span>
+        </div>
+        <div>
+          <a href="{% url 'exams:question_picker' section.pk %}" class="btn btn-primary btn-sm">
+            {% icon 'plus' 'icon' %}
+            <span>Assign Questions to {{ section.title }}</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Assigned Questions Table -->
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 70px;">Order</th>
+              <th>Question Prompt</th>
+              <th>Format</th>
+              <th>Difficulty</th>
+              <th>Bloom's</th>
+              <th>Marks</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for assign in section.assignments.all %}
+              <tr>
+                <td style="font-family: var(--font-mono); font-weight: 700; color: var(--color-text-muted);">
+                  #{{ assign.order }}
+                </td>
+                <td>
+                  <a href="{% url 'questions:question_detail' assign.question.pk %}" style="font-weight: 600; color: var(--color-text-primary); text-decoration: none;">
+                    {{ assign.question.prompt|truncatechars:70 }}
+                  </a>
+                </td>
+                <td><span class="badge badge-secondary">{{ assign.question.get_question_type_display }}</span></td>
+                <td><span class="badge badge-primary">{{ assign.question.get_difficulty_display }}</span></td>
+                <td><span class="badge badge-secondary">{{ assign.question.get_blooms_level_display }}</span></td>
+                <td style="font-family: var(--font-mono); font-weight: 700; color: var(--color-primary);">
+                  {{ assign.effective_marks }} pts
+                </td>
+                <td style="text-align: right;">
+                  <form action="{% url 'exams:remove_assignment' assign.pk %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="action-btn action-btn-delete" data-tooltip="Remove" aria-label="Remove">
+                      {% icon 'x' 'icon' %}
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" style="padding: 24px; text-align: center; color: var(--color-text-muted);">
+                  No questions assigned to this section yet.
+                  <a href="{% url 'exams:question_picker' section.pk %}" style="color: var(--color-primary); font-weight: 600; margin-left: 6px;">
+                    Open Question Picker & Assign
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Security Policies & Lifelines Summary Row -->
+<div class="grid grid-cols-2 gap-6">
+  <!-- Security Controls Card -->
+  <div class="glass-card" style="padding: 24px;">
+    <h4 style="margin-bottom: 16px;">Anti-Cheating & Lockdown Policies</h4>
+    <div class="flex flex-col gap-2" style="font-size: 0.88rem;">
+      <div class="flex items-center justify-between" style="padding: 6px 0; border-bottom: 1px solid var(--color-glass-border);">
+        <span>Enforce Fullscreen Mode:</span>
+        <span class="badge {% if exam.enforce_fullscreen %}badge-success{% else %}badge-secondary{% endif %}">
+          {{ exam.enforce_fullscreen|yesno:"Enabled,Disabled" }}
+        </span>
+      </div>
+      <div class="flex items-center justify-between" style="padding: 6px 0; border-bottom: 1px solid var(--color-glass-border);">
+        <span>Lock Copy/Paste/Inspect:</span>
+        <span class="badge {% if exam.lock_copy_paste %}badge-success{% else %}badge-secondary{% endif %}">
+          {{ exam.lock_copy_paste|yesno:"Enabled,Disabled" }}
+        </span>
+      </div>
+      <div class="flex items-center justify-between" style="padding: 6px 0; border-bottom: 1px solid var(--color-glass-border);">
+        <span>Randomize Question Order:</span>
+        <span class="badge {% if exam.shuffle_questions %}badge-success{% else %}badge-secondary{% endif %}">
+          {{ exam.shuffle_questions|yesno:"Enabled,Disabled" }}
+        </span>
+      </div>
+      <div class="flex items-center justify-between" style="padding: 6px 0; border-bottom: 1px solid var(--color-glass-border);">
+        <span>Randomize Choice Options:</span>
+        <span class="badge {% if exam.shuffle_options %}badge-success{% else %}badge-secondary{% endif %}">
+          {{ exam.shuffle_options|yesno:"Enabled,Disabled" }}
+        </span>
+      </div>
+      <div class="flex items-center justify-between" style="padding: 6px 0;">
+        <span>Max Tab Switch Limit:</span>
+        <span style="font-family: var(--font-mono); font-weight: 700; color: var(--color-danger);">
+          {{ exam.max_tab_switch_limit }} switches
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lifelines Summary Card -->
+  <div class="glass-card" style="padding: 24px;">
+    <h4 style="margin-bottom: 16px;">Lifeline Assistance Rules</h4>
+    <div class="flex flex-col gap-2" style="font-size: 0.88rem;">
+      {% for lf in exam.lifeline_configs.all %}
+        <div class="flex items-center justify-between" style="padding: 8px 0; border-bottom: 1px solid var(--color-glass-border);">
+          <span style="font-weight: 600;">{{ lf.get_lifeline_type_display }}</span>
+          <div class="flex items-center gap-2">
+            <span class="badge {% if lf.is_enabled %}badge-success{% else %}badge-secondary{% endif %}">
+              {{ lf.is_enabled|yesno:"Active,Inactive" }}
+            </span>
+            <span style="font-size: 0.8rem; color: var(--color-text-muted); font-family: var(--font-mono);">
+              (Max {{ lf.max_allowed }})
+            </span>
+          </div>
+        </div>
+      {% empty %}
+        <p style="color: var(--color-text-muted);">Standard lifelines will be enabled on start.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

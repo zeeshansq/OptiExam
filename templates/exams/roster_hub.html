@@ -1,0 +1,153 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Candidate Roster — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div class="page-title">
+    {% icon 'users' 'icon-xl' %}
+    <div>
+      <h2>Candidate Roster: {{ exam.title }}</h2>
+      <p class="page-subtitle">{{ exam.code }} • {{ paginator.count|default:0 }} registered candidates with double-blind evaluation indices</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="{% url 'exams:roster_import' exam.pk %}" class="btn btn-primary">
+      {% icon 'upload' 'icon' %}
+      <span>Import Candidates (CSV/Excel)</span>
+    </a>
+    <a href="{% url 'exams:exam_detail' exam.pk %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Blueprint</span>
+    </a>
+  </div>
+</div>
+
+{% include "includes/page_guide.html" with guide_icon="users" guide_title="Double-Blind Candidate Roster" guide_text="Each student is allocated a sequential candidate_index (e.g. Candidate #001) used to anonymize submissions during double-blind human grading." %}
+
+<div class="glass-card" style="padding: 24px;">
+  <!-- Single-Line Filter Toolbar -->
+  <form method="get" class="table-filter-toolbar">
+    <div class="filter-row-single">
+      <div class="filter-search-field">
+        {{ filter_form.q }}
+      </div>
+      <div class="filter-dropdown-field">
+        {{ filter_form.status }}
+      </div>
+      <div class="filter-actions-group">
+        <button type="submit" class="btn btn-primary btn-icon-action" title="Apply Filters">
+          {% icon 'search' 'icon' %}
+          <span>Filter</span>
+        </button>
+        {% if active_search_query or active_status_filter %}
+          <a href="{% url 'exams:roster_hub' exam.pk %}" class="btn btn-ghost btn-icon-action" title="Clear all filters" style="color: var(--color-danger); border-color: rgba(239, 68, 68, 0.3);">
+            {% icon 'rotate-ccw' 'icon' %}
+            <span>Clear</span>
+          </a>
+        {% else %}
+          <a href="{% url 'exams:roster_hub' exam.pk %}" class="btn btn-ghost btn-icon-action" title="Reset filters">
+            {% icon 'rotate-ccw' 'icon' %}
+            <span>Reset</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="flex-shrink: 0;">
+      <span style="font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap;">
+        Total <strong>{{ paginator.count|default:0 }}</strong> candidate{{ paginator.count|pluralize }}
+      </span>
+    </div>
+  </form>
+
+  <!-- Active Filter Chips -->
+  {% if active_search_query or active_status_filter %}
+    <div class="active-filters-bar">
+      <span style="font-size: 0.8rem; color: var(--color-text-muted);">Active filters:</span>
+      {% if active_search_query %}
+        <span class="filter-chip">
+          Search: "{{ active_search_query }}"
+          <a href="{% query_transform q='' %}" title="Remove search filter">×</a>
+        </span>
+      {% endif %}
+      {% if active_status_filter %}
+        <span class="filter-chip">
+          Status: {{ active_status_filter }}
+          <a href="{% query_transform status='' %}" title="Remove status filter">×</a>
+        </span>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- Data Table -->
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Grading Blind Index</th>
+          <th>Student Name</th>
+          <th>Registration #</th>
+          <th>Institutional Email</th>
+          <th>Department & Batch</th>
+          <th>Enrollment Status</th>
+          <th>Enrolled Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in roster_entries %}
+          <tr>
+            <td>
+              <span class="badge badge-accent" style="font-family: var(--font-mono); font-size: 0.88rem; padding: 4px 10px;">
+                #{{ entry.candidate_index|stringformat:"03d" }}
+              </span>
+            </td>
+            <td style="font-weight: 600; color: var(--color-text-primary);">
+              {{ entry.participant.get_full_name|default:entry.participant.username }}
+            </td>
+            <td style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-text-secondary);">
+              {{ entry.registration_number|default:entry.participant.profile.registration_number|default:"-" }}
+            </td>
+            <td style="font-size: 0.85rem; color: var(--color-text-muted);">
+              {{ entry.participant.email }}
+            </td>
+            <td style="font-size: 0.85rem; color: var(--color-text-secondary);">
+              {{ entry.participant.profile.department|default:"General" }}
+              {% if entry.participant.profile.batch_year %}
+                <span style="color: var(--color-text-muted);">({{ entry.participant.profile.batch_year }})</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if entry.status == 'ENROLLED' %}
+                <span class="badge badge-success">Enrolled</span>
+              {% elif entry.status == 'ABSENT' %}
+                <span class="badge badge-warning">Absent</span>
+              {% else %}
+                <span class="badge badge-danger">Revoked</span>
+              {% endif %}
+            </td>
+            <td style="color: var(--color-text-muted); font-size: 0.82rem;">
+              {{ entry.enrolled_at|date:"M d, Y" }}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">
+              {% icon 'users' 'icon-xl' %}
+              <h4 style="margin-top: 12px; margin-bottom: 4px; color: var(--color-text-secondary);">No Candidates Enrolled Yet</h4>
+              <p style="font-size: 0.85rem; margin-bottom: 16px;">Import student rosters via CSV/Excel to authorize candidates for this exam.</p>
+              <a href="{% url 'exams:roster_import' exam.pk %}" class="btn btn-primary btn-sm">
+                {% icon 'upload' 'icon' %}
+                <span>Import Candidates</span>
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "includes/pagination.html" %}
+</div>
+{% endblock %}
