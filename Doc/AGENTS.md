@@ -294,6 +294,9 @@ Whenever an AI agent implements any view, form, or template across Phase 1 to Ph
 1. **100% Full-Screen Width Layout:** Always use `.container` or `.container-fluid` (`width: 100%; max-width: 100%;`). Never introduce narrow boxed layout containers.
 2. **Single-Line Filter Toolbar:** Filter bars on tabular pages must fit search, dropdowns, submit button, and clear button (`rotate-ccw`) in a single line (`.filter-row-single`).
 3. **Interactive Sorting & Windowed Pagination:** All list queries must be paginated with `{% include "includes/pagination.html" %}` and table column headers must use `{% sort_header 'field' 'Label' %}`.
-4. **Categorized Smart Forms:** Multi-field forms must use `.form-section-card` groupings with sensible prefilled defaults and smart helpers.
-5. **Zero CDN Compliance:** 100% offline static assets (local SVG sprite via `{% icon 'name' %}`).
+4. **Balanced Full-Width Two-Column Forms:** Multi-section forms must use a balanced 2-column full-width grid (`<div class="grid grid-cols-2 gap-6">`) spanning 100% of the screen with `.form-section-card` groupings, sensible prefilled defaults, smart helpers, and full-width bottom action bars. Never constrain forms to narrow widths (such as `max-width: 900px`).
+5. **Icon-Only Colorful Table Action Buttons:** Row actions must use `.action-btn` icon-only buttons (`.action-btn-inspect`, `.action-btn-edit`, `.action-btn-delete`, `.action-btn-success`) with `data-tooltip="Descriptive Action"` instead of plain text buttons.
+6. **Zero CDN Compliance:** 100% offline static assets (local SVG sprite via `{% icon 'name' %}`).
+
+
 

@@ -274,10 +274,24 @@ Run via: `python manage.py auto_submit_expired`
    * Always paginate via Django (`paginate_by = 10|25|50|100`) and include `{% include "includes/pagination.html" %}`.
    * Column headers must support two-way ascending/descending sorting via `{% sort_header 'field' 'Label' %}` (`?sort=field&order=asc|desc`), preserving all active search query parameters across pagination.
 
-4. **Categorized Smart Form & Helper Standard:**
-   * Multi-field forms must be partitioned into **categorized card sections** (`.form-section-card`) with header icons, subtitles, and contextual guide boxes.
-   * Supply sensible prefilled defaults for required fields (e.g. default quotas, default brand colors `#4F46E5`).
-   * Provide interactive helper UI elements: 1-click color preset swatches, auto-slugification listeners, character counters, and password show/hide toggles.
-   * Destructive actions (Deactivation, Deletion) must always require explicit confirmation via a dedicated modal or confirmation view.
+4. **Balanced Full-Width Two-Column Form Invariant:**
+   * Forms MUST NEVER be restricted by artificial width constraints (e.g. `max-width: 900px`) that cause forms to appear on only the half-left side of wide monitors.
+   * Multi-section forms MUST be structured across a **balanced 2-column full-screen width grid (`<div class="grid grid-cols-2 gap-6">`)** filling 100% of the horizontal screen real estate:
+     - **Left Column:** Core entity identity, primary parameters, and capacity/configuration cards.
+     - **Right Column:** Branding, metadata, security, status, and auxiliary settings cards.
+     - **Bottom Actions Bar:** Full-width glassmorphic container (`.glass-card`) spanning both columns with cancellation and primary submit action buttons.
+5. **Icon-Only Colorful Action Buttons with Concise Hover Tooltips Invariant:**
+   * Data table row actions MUST use well-aligned, colorful icon-only action buttons (`.action-btn`) instead of raw text labels:
+     - **Inspect / View:** `.action-btn.action-btn-inspect` (Cyan tint) with `{% icon 'eye' %}` and `data-tooltip="Inspect"`
+     - **Edit / Settings:** `.action-btn.action-btn-edit` (Indigo tint) with `{% icon 'edit' %}` and `data-tooltip="Edit"`
+     - **Delete / Deactivate / Remove:** `.action-btn.action-btn-delete` (Crimson tint) with `{% icon 'trash-2' %}` and `data-tooltip="Delete"`
+     - **Enable / Success:** `.action-btn.action-btn-success` (Emerald tint) with `{% icon 'check' %}` and `data-tooltip="Enable"`
+     - **Disable / Suspend:** `.action-btn.action-btn-delete` (Crimson tint) with `{% icon 'x' %}` and `data-tooltip="Disable"`
+     - **Warning / Alert:** `.action-btn.action-btn-warning` (Amber tint) with `{% icon 'alert-triangle' %}` and `data-tooltip="Warning"`
+   * Tooltip text MUST remain **concise and direct** (action name only, e.g. `"Inspect"`, `"Edit"`, `"Delete"`) without appending dynamic row titles or extraneous details.
+   * Every action button MUST feature a premium hover tooltip via `data-tooltip="..."` with smooth micro-animation (`translateY(-2px)`), high-contrast glassmorphic surface, and arrow notch.
+
+
+
 
 

@@ -178,20 +178,21 @@
             </td>
             <td style="text-align: right;">
               <div class="row-actions">
-                <a href="{% url 'tenants:tenant_detail' tenant_item.pk %}" class="btn btn-sm btn-ghost" title="Inspect Institution">
-                  {% icon 'shield' 'icon' %}
-                  <span>Inspect</span>
+                <a href="{% url 'tenants:tenant_detail' tenant_item.pk %}" class="action-btn action-btn-inspect" data-tooltip="Inspect" aria-label="Inspect">
+                  {% icon 'eye' 'icon' %}
                 </a>
-                <a href="{% url 'tenants:tenant_update' tenant_item.pk %}" class="btn btn-sm btn-ghost" title="Edit Settings">
-                  {% icon 'settings' 'icon' %}
-                  <span>Edit</span>
+                <a href="{% url 'tenants:tenant_update' tenant_item.pk %}" class="action-btn action-btn-edit" data-tooltip="Edit" aria-label="Edit">
+                  {% icon 'edit' 'icon' %}
                 </a>
-                <a href="{% url 'tenants:tenant_delete' tenant_item.pk %}" class="btn btn-sm btn-ghost" style="color: var(--color-danger);" title="Deactivate / Delete">
-                  {% icon 'x' 'icon' %}
+                <a href="{% url 'tenants:tenant_delete' tenant_item.pk %}" class="action-btn action-btn-delete" data-tooltip="Delete" aria-label="Delete">
+                  {% icon 'trash-2' 'icon' %}
                 </a>
               </div>
             </td>
           </tr>
+
+
+
         {% empty %}
           <tr>
             <td colspan="7" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">

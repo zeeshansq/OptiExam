@@ -98,4 +98,7 @@ MANDATORY RULES (DO NOT VIOLATE):
     - 100% Full-Screen Width Fluid Layout (.container, .container-fluid). Never use fixed narrow max-widths.
     - Single-Line Filter Toolbar (.filter-row-single) with search input, dropdowns, [Filter] button, and [Clear] icon button (rotate-ccw).
     - Interactive Data Tables with clickable two-way column sorting ({% sort_header %}) and full-featured windowed pagination ({% include 'includes/pagination.html' %}).
-    - Categorized Smart Forms (.form-section-card) with sensible prefilled defaults, auto-slugification, and color preset swatches.
+    - Balanced 2-Column Full-Width Forms (<div class="grid grid-cols-2 gap-6">) with .form-section-card groupings, sensible prefilled defaults, auto-slugification, color preset swatches, and full-width bottom action bars.
+    - Icon-Only Colorful Action Buttons (.action-btn-inspect, .action-btn-edit, .action-btn-delete, .action-btn-success) with premium hover tooltips (data-tooltip="...").
+
+
