@@ -369,16 +369,14 @@ function initMarkCalculator() {
   }
 }
 
-/* ==============================================================================
-   11. Form Unsaved Changes Guard
-   ============================================================================== */
 function initUnsavedChangesGuard() {
-  const forms = document.querySelectorAll('form[method="post"]:not([data-no-guard])');
+  const forms = document.querySelectorAll('form[method="post"]:not([data-no-guard]):not(.auth-form):not(#loginForm)');
   forms.forEach((form) => {
     let isDirty = false;
     let isSubmitting = false;
 
     form.addEventListener('input', () => {
+      if (form.getAttribute('data-no-guard') === 'true') return;
       isDirty = true;
     });
 
@@ -388,6 +386,7 @@ function initUnsavedChangesGuard() {
     });
 
     window.addEventListener('beforeunload', (e) => {
+      if (form.getAttribute('data-no-guard') === 'true') return;
       if (isDirty && !isSubmitting) {
         e.preventDefault();
         e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
@@ -396,6 +395,7 @@ function initUnsavedChangesGuard() {
     });
   });
 }
+
 
 /* ==============================================================================
    12. Global Keyboard Shortcuts Hub

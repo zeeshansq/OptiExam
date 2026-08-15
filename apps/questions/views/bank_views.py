@@ -3,9 +3,11 @@ from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from apps.core.mixins import ItemWriterRequiredMixin
+from apps.tenants.models import Tenant
 from apps.questions.models import QuestionBank
 from apps.questions.forms import QuestionBankForm, QuestionBankFilterForm
 from apps.questions.selectors.question_selectors import get_tenant_question_banks
+
 
 class QuestionBankListView(ItemWriterRequiredMixin, ListView):
     model = QuestionBank
