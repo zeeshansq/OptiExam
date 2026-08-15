@@ -1,52 +1,473 @@
 /* ==============================================================================
-   OptiExam Print & Transcript Stylesheet
-   Zero CDN Dependencies
+   OptiExam High-Stakes Examination Engine
+   Institutional Vector Print Engine (A4 Portrait Transcript & A4 Landscape Certificate)
+   Zero CDN Dependencies • High-Precision Vector Typography & Geometry
    ============================================================================== */
 
+/* Screen Visibility Rules */
+.print-certificate-container,
+.print-transcript-container,
+.print-watermark {
+  display: none;
+}
+
 @media print {
-  body {
-    background: #FFF !important;
-    color: #000 !important;
-    font-family: 'Inter', sans-serif !important;
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
   }
 
+  @page transcript-page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  @page certificate-page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  html, body {
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide interactive web chrome & screen elements */
   .sidebar,
   .top-navbar,
   .breadcrumbs-bar,
-  .page-actions,
+  .page-header,
   .btn,
+  .tabs-nav,
+  .no-print,
   .notification-drawer,
-  header {
+  header,
+  footer {
     display: none !important;
   }
 
-  .main-content {
+  .main-content, .content-container, .page-wrapper {
     margin: 0 !important;
     padding: 0 !important;
     max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
   }
 
-  .glass-card {
-    background: #FFF !important;
-    border: 1px solid #CCC !important;
-    box-shadow: none !important;
+  /* Mode Switching: Print Certificate vs Print Transcript */
+  body.printing-certificate .web-scorecard-view,
+  body.printing-certificate .print-transcript-container {
+    display: none !important;
+  }
+
+  body.printing-certificate .print-certificate-container {
+    display: block !important;
+    page: certificate-page;
+    width: 297mm;
+    height: 210mm;
+    max-height: 210mm;
+    padding: 8mm;
+    box-sizing: border-box;
+    page-break-after: avoid;
     page-break-inside: avoid;
   }
 
-  .badge {
-    border: 1px solid #000 !important;
-    color: #000 !important;
-    background: transparent !important;
+  body.printing-transcript .web-scorecard-view,
+  body.printing-transcript .print-certificate-container {
+    display: none !important;
   }
 
-  .print-only-header {
+  body.printing-transcript .print-transcript-container {
     display: block !important;
-    margin-bottom: 24px;
-    border-bottom: 2px solid #000;
+    page: transcript-page;
+  }
+
+  /* Default print fallback */
+  .print-certificate-container {
+    display: none;
+  }
+  .print-transcript-container {
+    display: block !important;
+  }
+
+  /* ==========================================================================
+     1. OFFICIAL ROYAL CERTIFICATE (A4 Landscape Full Expansion)
+     ========================================================================== */
+  .certificate-frame {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px 38px 20px 38px;
+    background: #FFFFFF;
+    border: 8px double #1E3A8A;
+    border-radius: 4px;
+    outline: 2.5px solid #D97706;
+    outline-offset: -12px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .cert-corner-ornament {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    border: 3.5px solid #D97706;
+  }
+  .cert-tl { top: 16px; left: 16px; border-right: none; border-bottom: none; }
+  .cert-tr { top: 16px; right: 16px; border-left: none; border-bottom: none; }
+  .cert-bl { bottom: 16px; left: 16px; border-right: none; border-top: none; }
+  .cert-br { bottom: 16px; right: 16px; border-left: none; border-top: none; }
+
+  .cert-super-title {
+    font-size: 11pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: #D97706;
+    margin-top: 4px;
+    margin-bottom: 2px;
+  }
+
+  .cert-institution-title {
+    font-size: 23pt;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    color: #1E3A8A;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .cert-main-title {
+    font-size: 29pt;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    font-style: italic;
+    color: #0F172A;
+    margin: 6px 0;
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+  }
+
+  .cert-conferred-text {
+    font-size: 11.5pt;
+    color: #475569;
+    font-style: italic;
+    margin-bottom: 2px;
+  }
+
+  .cert-recipient-name {
+    font-size: 27pt;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 800;
+    color: #1E293B;
+    border-bottom: 2.5px solid #D97706;
+    display: inline-block;
+    padding: 0 45px 4px 45px;
+    margin: 4px 0 6px 0;
+  }
+
+  .cert-reg-badge {
+    font-size: 10pt;
+    font-family: ui-monospace, monospace;
+    font-weight: 600;
+    color: #64748B;
+    margin-bottom: 8px;
+  }
+
+  .cert-body-text {
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #334155;
+    max-width: 88%;
+    margin: 0 auto 10px auto;
+  }
+
+  .cert-metrics-ribbon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    padding: 8px 30px;
+    background: #F8FAFC;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 8px;
+    margin: 0 auto 12px auto;
+  }
+
+  .cert-metric-item strong {
+    display: block;
+    font-size: 14pt;
+    font-family: ui-monospace, monospace;
+    color: #1E3A8A;
+  }
+
+  .cert-metric-item span {
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748B;
+  }
+
+  .cert-footer-signatures {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 32px;
+    margin-top: 4px;
+  }
+
+  .cert-sig-block {
+    text-align: center;
+    width: 210px;
+  }
+
+  .cert-sig-line {
+    border-top: 1.5px solid #475569;
+    padding-top: 5px;
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #1E293B;
+  }
+
+  .cert-sig-title {
+    font-size: 8pt;
+    color: #64748B;
+  }
+
+  .cert-gold-seal {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    border: 3.5px solid #D97706;
+    background: radial-gradient(circle, #FDE68A 0%, #F59E0B 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.2);
+    margin: 0 auto;
+  }
+
+  .cert-seal-text {
+    font-size: 6pt;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #78350F;
+    text-align: center;
+  }
+
+  .cert-qr-verify {
+    font-size: 7.5pt;
+    font-family: ui-monospace, monospace;
+    color: #64748B;
+    margin-top: 6px;
+  }
+
+
+  /* ==========================================================================
+     2. INSTITUTIONAL ACADEMIC TRANSCRIPT (A4 Portrait Luxury Format)
+     ========================================================================== */
+  .transcript-page-frame {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0;
+    color: #0F172A;
+  }
+
+  .transcript-header-band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid #1E3A8A;
     padding-bottom: 12px;
+    margin-bottom: 14px;
+  }
+
+  .transcript-institution-name {
+    font-size: 16pt;
+    font-weight: 900;
+    color: #1E3A8A;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  .transcript-document-title {
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: #0F172A;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 2px 0 0 0;
+  }
+
+  .transcript-meta-box {
+    text-align: right;
+    font-size: 8pt;
+    color: #475569;
+    line-height: 1.4;
+  }
+
+  /* Candidate & Examination Particulars Grid */
+  .transcript-info-grid {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 14px;
+    background: #F8FAFC;
+    border: 1px solid #CBD5E1;
+    border-radius: 4px;
+  }
+
+  .transcript-info-grid td {
+    padding: 6px 10px;
+    font-size: 8.5pt;
+    border: 1px solid #E2E8F0;
+    vertical-align: top;
+  }
+
+  .transcript-info-label {
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+    font-size: 7pt;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .transcript-info-value {
+    font-weight: 600;
+    color: #0F172A;
+    font-size: 9pt;
+  }
+
+  /* Performance Summary Matrix Table */
+  .transcript-score-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #EFF6FF;
+    border: 1.5px solid #BFDBFE;
+    border-radius: 6px;
+    padding: 10px 18px;
+    margin-bottom: 14px;
+  }
+
+  .transcript-score-pill {
+    text-align: center;
+  }
+  .transcript-score-pill .label {
+    font-size: 7pt;
+    font-weight: 700;
+    color: #1E40AF;
+    text-transform: uppercase;
+    display: block;
+  }
+  .transcript-score-pill .val {
+    font-size: 13pt;
+    font-weight: 800;
+    color: #1E3A8A;
+    font-family: ui-monospace, monospace;
+  }
+
+  /* Itemized Table Styling */
+  .transcript-table-heading {
+    font-size: 9pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #1E3A8A;
+    margin: 12px 0 6px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .transcript-records-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+    margin-bottom: 12px;
+  }
+
+  .transcript-records-table th {
+    background: #1E3A8A;
+    color: #FFFFFF;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 7pt;
+    padding: 6px 8px;
+    border: 1px solid #1E3A8A;
+    text-align: left;
+  }
+
+  .transcript-records-table td {
+    padding: 5px 8px;
+    border: 1px solid #CBD5E1;
+    color: #1E293B;
+  }
+
+  .transcript-records-table tr:nth-child(even) {
+    background: #F8FAFC;
+  }
+
+  /* Section Breakdown Mini Table */
+  .transcript-section-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+    margin-bottom: 14px;
+  }
+
+  .transcript-section-table th {
+    background: #E2E8F0;
+    color: #334155;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 7pt;
+    padding: 5px 8px;
+    border: 1px solid #CBD5E1;
+  }
+
+  .transcript-section-table td {
+    padding: 5px 8px;
+    border: 1px solid #E2E8F0;
+  }
+
+  /* Transcript Footer & Security Verification */
+  .transcript-footer-security {
+    border-top: 1.5px solid #CBD5E1;
+    padding-top: 8px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 7.5pt;
+    color: #64748B;
+  }
+
+  .transcript-sig-box {
+    text-align: center;
+    width: 160px;
+  }
+
+  .transcript-sig-line {
+    border-top: 1px solid #0F172A;
+    padding-top: 4px;
+    font-weight: 700;
+    color: #0F172A;
   }
 }
 
-.print-only-header {
-  display: none;
-}
+

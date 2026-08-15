@@ -1004,14 +1004,39 @@ class Command(BaseCommand):
 
             now = timezone.now()
 
-            # Helper for adding question assignments
-            def assign_questions(section, question_tags):
-                for idx, tag in enumerate(question_tags, 1):
-                    ExamQuestionAssignment.objects.create(
-                        section=section,
-                        question=q_map[tag],
-                        order=idx
-                    )
+            # Helper for adding question assignments and automatically syncing exact section marks & exam totals
+            def assign_questions_and_recalc(exam, section_assignments):
+                """
+                section_assignments is a list of tuples: (ExamSection, [list of q_tags])
+                Automatically links questions, sets section weightage based on marks,
+                and recalculates exam.total_marks to equal exact sum of all question marks.
+                """
+                total_exam_points = Decimal('0.00')
+                section_points_map = {}
+
+                for sec, q_tags in section_assignments:
+                    sec_points = Decimal('0.00')
+                    for idx, tag in enumerate(q_tags, 1):
+                        q = q_map[tag]
+                        ExamQuestionAssignment.objects.create(
+                            section=sec,
+                            question=q,
+                            order=idx
+                        )
+                        sec_points += q.points
+                    section_points_map[sec] = sec_points
+                    total_exam_points += sec_points
+
+                # Update Section weightages as exact percentage of total exam
+                for sec, pts in section_points_map.items():
+                    if total_exam_points > 0:
+                        sec.weightage = ((pts / total_exam_points) * Decimal('100.00')).quantize(Decimal('0.01'))
+                        sec.save(update_fields=['weightage'])
+
+                # Update Exam total marks to match exact question sum
+                exam.total_marks = total_exam_points
+                exam.save(update_fields=['total_marks'])
+                return total_exam_points
 
             # ── EXAM 1: CS401 (Published & Fully Graded Midterm) ─────────────
             exam_published = Exam.objects.create(
@@ -1025,7 +1050,7 @@ class Command(BaseCommand):
                 start_time=now - timedelta(days=6, hours=4),
                 end_time=now - timedelta(days=6, hours=1),
                 duration_minutes=90,
-                total_marks=Decimal('100.00'),
+                total_marks=Decimal('49.00'),  # Synced dynamically
                 passing_percentage=Decimal('50.00'),
                 enforce_fullscreen=True,
                 max_tab_switch_limit=3,
@@ -1039,20 +1064,22 @@ class Command(BaseCommand):
                 published_by=users_map['dr.sarah.khan'],
                 is_active=True
             )
-            # 4 Sections for Exam 1
+            # 4 Sections for Exam 1 (Strictly DSA-focused questions)
             sec_e1_s1 = ExamSection.objects.create(exam=exam_published, title='Section A: Algorithmic Invariants & Search (Single MCQs)', order=1, weightage=Decimal('25.00'))
             sec_e1_s2 = ExamSection.objects.create(exam=exam_published, title='Section B: Visual Trees, Sorting & Graphs (Multi & Diagram MCQs)', order=2, weightage=Decimal('35.00'))
             sec_e1_s3 = ExamSection.objects.create(exam=exam_published, title='Section C: Algorithmic Mechanics & Theoretical Proofs (Short Answers)', order=3, weightage=Decimal('20.00'))
             sec_e1_s4 = ExamSection.objects.create(exam=exam_published, title='Section D: Scalable System Architecture & Concurrent Design (Long Essay)', order=4, weightage=Decimal('20.00'))
 
-            assign_questions(sec_e1_s1, ['DSA_Q1', 'DSA_Q4', 'OS_Q1'])
-            assign_questions(sec_e1_s2, ['DSA_Q2', 'DSA_Q3', 'DSA_Q5', 'DSA_Q6'])
-            assign_questions(sec_e1_s3, ['DSA_Q7', 'DSA_Q8'])
-            assign_questions(sec_e1_s4, ['DSA_Q9', 'DSA_Q10'])
+            assign_questions_and_recalc(exam_published, [
+                (sec_e1_s1, ['DSA_Q1', 'DSA_Q4']),
+                (sec_e1_s2, ['DSA_Q2', 'DSA_Q3', 'DSA_Q5', 'DSA_Q6']),
+                (sec_e1_s3, ['DSA_Q7', 'DSA_Q8']),
+                (sec_e1_s4, ['DSA_Q9', 'DSA_Q10']),
+            ])
 
             for lt, max_u in [('SKIP_QUESTION', 2), ('FIFTY_FIFTY', 2), ('HINT_TOKEN', 2), ('BOOKMARK_FLAG', 10)]:
                 ExamLifelineConfig.objects.create(exam=exam_published, lifeline_type=lt, is_enabled=True, max_allowed=max_u)
-            self.stdout.write(f"  [+] Exam 1 [PUBLISHED]: {exam_published.title} ({exam_published.sections.count()} Sections, {exam_published.total_assigned_questions} Questions)")
+            self.stdout.write(f"  [+] Exam 1 [PUBLISHED]: {exam_published.title} ({exam_published.sections.count()} Sections, {exam_published.total_assigned_questions} Questions, {exam_published.total_marks} Marks)")
 
             # ── EXAM 2: CS302 (Grading Queue & Chief Examiner Moderation) ─────
             exam_grading = Exam.objects.create(
@@ -1066,23 +1093,25 @@ class Command(BaseCommand):
                 start_time=now - timedelta(days=2, hours=3),
                 end_time=now - timedelta(days=2),
                 duration_minutes=120,
-                total_marks=Decimal('100.00'),
+                total_marks=Decimal('24.00'),
                 passing_percentage=Decimal('50.00'),
                 results_published=False,
                 is_active=True
             )
-            # 4 Sections for Exam 2
+            # 4 Sections for Exam 2 (Strictly OS-focused questions)
             sec_e2_s1 = ExamSection.objects.create(exam=exam_grading, title='Section A: Virtual Memory & Address Translation (MCQs)', order=1, weightage=Decimal('25.00'))
             sec_e2_s2 = ExamSection.objects.create(exam=exam_grading, title='Section B: Concurrency, Deadlock & Scheduling Diagnostics', order=2, weightage=Decimal('30.00'))
             sec_e2_s3 = ExamSection.objects.create(exam=exam_grading, title='Section C: OS Kernel Mechanisms & Real-Time Anomalies (Short Answers)', order=3, weightage=Decimal('20.00'))
             sec_e2_s4 = ExamSection.objects.create(exam=exam_grading, title='Section D: Kernel Memory Allocator Architecture (Long Essay)', order=4, weightage=Decimal('25.00'))
 
-            assign_questions(sec_e2_s1, ['OS_Q1', 'PROG_Q1', 'DSA_Q4'])
-            assign_questions(sec_e2_s2, ['OS_Q2', 'OS_Q3', 'PROG_Q2'])
-            assign_questions(sec_e2_s3, ['OS_Q4', 'PROG_Q4'])
-            assign_questions(sec_e2_s4, ['OS_Q5'])
+            assign_questions_and_recalc(exam_grading, [
+                (sec_e2_s1, ['OS_Q1']),
+                (sec_e2_s2, ['OS_Q2', 'OS_Q3']),
+                (sec_e2_s3, ['OS_Q4']),
+                (sec_e2_s4, ['OS_Q5']),
+            ])
 
-            self.stdout.write(f"  [+] Exam 2 [GRADING QUEUE]: {exam_grading.title} ({exam_grading.sections.count()} Sections, {exam_grading.total_assigned_questions} Questions)")
+            self.stdout.write(f"  [+] Exam 2 [GRADING QUEUE]: {exam_grading.title} ({exam_grading.sections.count()} Sections, {exam_grading.total_assigned_questions} Questions, {exam_grading.total_marks} Marks)")
 
             # ── EXAM 3: CS204 (Live Ops Active Session) ──────────────────────
             exam_live_ops = Exam.objects.create(
@@ -1096,23 +1125,25 @@ class Command(BaseCommand):
                 start_time=now - timedelta(minutes=25),
                 end_time=now + timedelta(minutes=95),
                 duration_minutes=45,
-                total_marks=Decimal('50.00'),
+                total_marks=Decimal('15.00'),
                 passing_percentage=Decimal('40.00'),
                 enforce_fullscreen=True,
                 max_tab_switch_limit=3,
                 results_published=False,
                 is_active=True
             )
-            # 3 Sections for Exam 3
-            sec_e3_s1 = ExamSection.objects.create(exam=exam_live_ops, title='Section A: Algorithmic & Bitwise Fundamentals', order=1, weightage=Decimal('30.00'))
-            sec_e3_s2 = ExamSection.objects.create(exam=exam_live_ops, title='Section B: Tree Split Invariants & Call Traces (Diagrams)', order=2, weightage=Decimal('40.00'))
-            sec_e3_s3 = ExamSection.objects.create(exam=exam_live_ops, title='Section C: Subproblem Formulation (Short Answer)', order=3, weightage=Decimal('30.00'))
+            # 3 Sections for Exam 3 (Database and Query Optimization focused)
+            sec_e3_s1 = ExamSection.objects.create(exam=exam_live_ops, title='Section A: Hash Indexing & Asymptotic Costs', order=1, weightage=Decimal('30.00'))
+            sec_e3_s2 = ExamSection.objects.create(exam=exam_live_ops, title='Section B: B+ Tree Splits & Multidimensional Invariants', order=2, weightage=Decimal('40.00'))
+            sec_e3_s3 = ExamSection.objects.create(exam=exam_live_ops, title='Section C: Graph Shortest Path Query Engine (Short Answer)', order=3, weightage=Decimal('30.00'))
 
-            assign_questions(sec_e3_s1, ['DSA_Q1', 'PROG_Q1'])
-            assign_questions(sec_e3_s2, ['DSA_Q6', 'PROG_Q3', 'DSA_Q2'])
-            assign_questions(sec_e3_s3, ['DSA_Q8'])
+            assign_questions_and_recalc(exam_live_ops, [
+                (sec_e3_s1, ['DSA_Q4']),
+                (sec_e3_s2, ['DSA_Q6', 'DSA_Q5']),
+                (sec_e3_s3, ['DSA_Q7']),
+            ])
 
-            self.stdout.write(f"  [+] Exam 3 [LIVE OPS ACTIVE]: {exam_live_ops.title} ({exam_live_ops.sections.count()} Sections, {exam_live_ops.total_assigned_questions} Questions)")
+            self.stdout.write(f"  [+] Exam 3 [LIVE OPS ACTIVE]: {exam_live_ops.title} ({exam_live_ops.sections.count()} Sections, {exam_live_ops.total_assigned_questions} Questions, {exam_live_ops.total_marks} Marks)")
 
             # ── EXAM 4: CS101 (READY FOR CANDIDATE TO ATTEMPT TODAY!) ─────────
             exam_ready_to_attempt = Exam.objects.create(
@@ -1126,7 +1157,7 @@ class Command(BaseCommand):
                 start_time=now - timedelta(minutes=15),
                 end_time=now + timedelta(hours=4),
                 duration_minutes=50,
-                total_marks=Decimal('60.00'),
+                total_marks=Decimal('20.00'),
                 passing_percentage=Decimal('40.00'),
                 enforce_fullscreen=True,
                 max_tab_switch_limit=3,
@@ -1137,21 +1168,23 @@ class Command(BaseCommand):
                 results_published=False,
                 is_active=True
             )
-            # 4 Sections for Exam 4 (Rich variety of question types!)
+            # 4 Sections for Exam 4 (Strictly Programming Fundamentals & Systems logic)
             sec_e4_s1 = ExamSection.objects.create(exam=exam_ready_to_attempt, title='Section A: Fundamental Computational Logic (Single MCQs)', order=1, weightage=Decimal('25.00'))
-            sec_e4_s2 = ExamSection.objects.create(exam=exam_ready_to_attempt, title='Section B: Diagrammatic Traces & Multi-Choice Analysis', order=2, weightage=Decimal('35.00'))
-            sec_e4_s3 = ExamSection.objects.create(exam=exam_ready_to_attempt, title='Section C: Algorithmic Mechanics & Optimization (Short Answers)', order=3, weightage=Decimal('20.00'))
+            sec_e4_s2 = ExamSection.objects.create(exam=exam_ready_to_attempt, title='Section B: Recursion Stack & Memory Semantics (Diagrams & Multi)', order=2, weightage=Decimal('35.00'))
+            sec_e4_s3 = ExamSection.objects.create(exam=exam_ready_to_attempt, title='Section C: Tail Call & Compiler Optimization (Short Answers)', order=3, weightage=Decimal('20.00'))
             sec_e4_s4 = ExamSection.objects.create(exam=exam_ready_to_attempt, title='Section D: Concurrent Ring Buffer Implementation (Long Essay)', order=4, weightage=Decimal('20.00'))
 
-            assign_questions(sec_e4_s1, ['PROG_Q1', 'DSA_Q1', 'DSA_Q4'])
-            assign_questions(sec_e4_s2, ['PROG_Q2', 'PROG_Q3', 'DSA_Q2', 'DSA_Q3'])
-            assign_questions(sec_e4_s3, ['PROG_Q4', 'DSA_Q7'])
-            assign_questions(sec_e4_s4, ['PROG_Q5'])
+            assign_questions_and_recalc(exam_ready_to_attempt, [
+                (sec_e4_s1, ['PROG_Q1']),
+                (sec_e4_s2, ['PROG_Q2', 'PROG_Q3']),
+                (sec_e4_s3, ['PROG_Q4']),
+                (sec_e4_s4, ['PROG_Q5']),
+            ])
 
             for lt, max_u in [('SKIP_QUESTION', 2), ('FIFTY_FIFTY', 2), ('HINT_TOKEN', 2), ('BOOKMARK_FLAG', 5)]:
                 ExamLifelineConfig.objects.create(exam=exam_ready_to_attempt, lifeline_type=lt, is_enabled=True, max_allowed=max_u)
 
-            self.stdout.write(f"  [+] Exam 4 [READY FOR TEST ATTEMPT]: {exam_ready_to_attempt.title} ({exam_ready_to_attempt.sections.count()} Sections, {exam_ready_to_attempt.total_assigned_questions} Questions)")
+            self.stdout.write(f"  [+] Exam 4 [READY FOR TEST ATTEMPT]: {exam_ready_to_attempt.title} ({exam_ready_to_attempt.sections.count()} Sections, {exam_ready_to_attempt.total_assigned_questions} Questions, {exam_ready_to_attempt.total_marks} Marks)")
 
             # ── EXAM 5: KEMU Clinical Physiology Spotter Exam ────────────────
             exam_kemu = Exam.objects.create(
@@ -1165,7 +1198,7 @@ class Command(BaseCommand):
                 start_time=now - timedelta(days=1, hours=2),
                 end_time=now - timedelta(days=1),
                 duration_minutes=60,
-                total_marks=Decimal('50.00'),
+                total_marks=Decimal('20.00'),
                 passing_percentage=Decimal('50.00'),
                 results_published=False,
                 is_active=True
@@ -1174,11 +1207,14 @@ class Command(BaseCommand):
             sec_e5_s2 = ExamSection.objects.create(exam=exam_kemu, title='Section B: Neurohormonal & Renal Mechanisms (Short Conceptual)', order=2, weightage=Decimal('30.00'))
             sec_e5_s3 = ExamSection.objects.create(exam=exam_kemu, title='Section C: Critical Care Differential Diagnosis & Management (Long Essay)', order=3, weightage=Decimal('40.00'))
 
-            assign_questions(sec_e5_s1, ['MED_Q1', 'MED_Q2'])
-            assign_questions(sec_e5_s2, ['MED_Q3'])
-            assign_questions(sec_e5_s3, ['MED_Q4'])
+            assign_questions_and_recalc(exam_kemu, [
+                (sec_e5_s1, ['MED_Q1', 'MED_Q2']),
+                (sec_e5_s2, ['MED_Q3']),
+                (sec_e5_s3, ['MED_Q4']),
+            ])
 
-            self.stdout.write(f"  [+] Exam 5 [KEMU MEDICAL]: {exam_kemu.title} ({exam_kemu.sections.count()} Sections, {exam_kemu.total_assigned_questions} Questions)")
+            self.stdout.write(f"  [+] Exam 5 [KEMU MEDICAL]: {exam_kemu.title} ({exam_kemu.sections.count()} Sections, {exam_kemu.total_assigned_questions} Questions, {exam_kemu.total_marks} Marks)")
+
 
             # ------------------------------------------------------------------
             # 5. ROSTER ENROLLMENT & DETERMINISTIC STUDENT ATTEMPTS

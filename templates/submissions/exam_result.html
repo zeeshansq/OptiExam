@@ -1,130 +1,581 @@
 {% extends "base_app.html" %}
 {% load static optiexam_tags %}
 
-{% block title %}Official Scorecard — {{ exam.title }}{% endblock %}
+{% block title %}Official Scorecard & Academic Certificate — {{ exam.title }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/print.css' %}">
+<style>
+  /* Result Analytics Cards & Visual Gauges - Full Width & Theme Reactive */
+  .web-scorecard-view {
+    width: 100%;
+    margin: 0;
+    padding-bottom: 32px;
+  }
+
+  .hero-score-card {
+    position: relative;
+    padding: 22px 28px;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-glass-border);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 24px;
+    width: 100%;
+  }
+
+  .stat-mini-pill {
+    background: var(--color-bg-subtle);
+    border: 1px solid var(--color-glass-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    transition: var(--transition-fast);
+  }
+
+  .stat-mini-pill:hover {
+    border-color: var(--color-glass-border-hover);
+    background: var(--color-surface-hover);
+  }
+
+  .grade-ribbon-badge {
+    font-size: 2.4rem;
+    font-weight: 900;
+    font-family: var(--font-mono);
+    line-height: 1;
+  }
+
+  .section-perf-bar {
+    height: 7px;
+    border-radius: 4px;
+    background: var(--color-bg-subtle);
+    border: 1px solid var(--color-glass-border);
+    overflow: hidden;
+    margin-top: 6px;
+  }
+
+  .section-perf-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .item-breakdown-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-glass-border);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    box-shadow: var(--shadow-xs);
+    transition: var(--transition-fast);
+  }
+
+  .item-breakdown-card:hover {
+    border-color: var(--color-glass-border-hover);
+    box-shadow: var(--shadow-sm);
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Print Header (Visible only when printed) -->
-<div class="print-only-header">
-  <h2>{{ request.tenant.name }}</h2>
-  <h3>Official Examination Academic Transcript</h3>
-  <p>Candidate: <strong>{{ attempt.participant.get_full_name|default:attempt.participant.username }}</strong> • Date: {{ exam.published_at|date:"M d, Y" }}</p>
-</div>
+<div class="web-scorecard-view">
 
-<!-- Universal Breadcrumb Navigation -->
-<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
-  <ol class="breadcrumbs-list">
-    <li class="breadcrumb-item">
-      <a href="{% url 'accounts:role_redirect' %}">{% icon 'home' 'icon-sm' %}</a>
-      <span class="breadcrumb-separator">/</span>
-    </li>
-    <li class="breadcrumb-item">
-      <a href="{% url 'submissions:participant_history' %}">My Exam History</a>
-      <span class="breadcrumb-separator">/</span>
-    </li>
-    <li class="breadcrumb-item active">
-      <span>Official Scorecard</span>
-    </li>
-  </ol>
-</nav>
+  <!-- Universal Breadcrumb Navigation -->
+  <nav class="breadcrumbs-bar" aria-label="Breadcrumbs" style="margin-bottom: 12px;">
+    <ol class="breadcrumbs-list">
+      <li class="breadcrumb-item">
+        <a href="{% url 'accounts:role_redirect' %}">{% icon 'home' 'icon-sm' %}</a>
+        <span class="breadcrumb-separator">/</span>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'submissions:participant_history' %}">My Exam History</a>
+        <span class="breadcrumb-separator">/</span>
+      </li>
+      <li class="breadcrumb-item active">
+        <span>Official Scorecard & Certificate</span>
+      </li>
+    </ol>
+  </nav>
 
-<div class="page-header">
-  <div class="page-title">
-    <div class="page-title-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--color-success);">
-      {% icon 'award' 'icon-lg' %}
-    </div>
-    <div>
-      <h2>Official Scorecard: {{ exam.title }}</h2>
-      <p class="page-subtitle">{{ exam.code }} • {{ exam.subject }}</p>
-    </div>
-  </div>
-  <div class="page-actions">
-    <button type="button" class="btn btn-primary" onclick="window.print();">
-      {% icon 'download' 'icon' %}
-      <span>Print / Save PDF Transcript</span>
-    </button>
-  </div>
-</div>
-
-<!-- Scorecard Hero Summary Card -->
-<div class="glass-card" style="padding: 32px; margin-bottom: 28px; text-align: center; border-color: {% if moderation.is_passed %}rgba(16, 185, 129, 0.4){% else %}rgba(239, 68, 68, 0.4){% endif %};">
-  <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-muted); margin-bottom: 8px;">
-    Official Assessment Result
-  </div>
-  <div style="font-size: 3rem; font-weight: 800; font-family: var(--font-mono); color: {% if moderation.is_passed %}var(--color-success){% else %}var(--color-danger){% endif %}; margin-bottom: 8px;">
-    {{ moderation.total_final_score|default:"0.00" }} <span style="font-size: 1.25rem; font-weight: 500; color: var(--color-text-muted);">/ {{ exam.total_marks }} pts</span>
-  </div>
-
-  <div style="display: inline-flex; margin-bottom: 20px;">
-    {% if moderation.is_passed %}
-      <span class="badge badge-success" style="font-size: 1rem; padding: 6px 18px;">Passed Examination</span>
-    {% else %}
-      <span class="badge badge-danger" style="font-size: 1rem; padding: 6px 18px;">Failed</span>
-    {% endif %}
-  </div>
-
-  <div class="grid grid-cols-3 gap-4" style="max-width: 600px; margin: 0 auto; background: rgba(0, 0, 0, 0.25); padding: 14px; border-radius: var(--radius-md); font-size: 0.85rem;">
-    <div>
-      <span style="color: var(--color-text-muted); display: block;">Passing Threshold</span>
-      <strong>{{ exam.passing_percentage }}%</strong>
-    </div>
-    <div>
-      <span style="color: var(--color-text-muted); display: block;">Submission Date</span>
-      <strong>{{ attempt.submitted_at|date:"M d, Y" }}</strong>
-    </div>
-    <div>
-      <span style="color: var(--color-text-muted); display: block;">Status</span>
-      <strong class="badge badge-success">Verified & Moderated</strong>
-    </div>
-  </div>
-</div>
-
-<!-- Detailed Question-by-Question Breakdown -->
-<div class="glass-card" style="padding: 24px;">
-  <h3 style="margin-bottom: 20px;">Question Performance Breakdown</h3>
-
-  <div class="flex flex-col gap-6">
-    {% for item in question_breakdown %}
-      <div class="glass-card" style="background: rgba(0, 0, 0, 0.2); padding: 20px;">
-        <div class="flex items-center justify-between" style="margin-bottom: 12px;">
-          <span style="font-weight: 700; color: var(--color-primary);">Question {{ item.answer.order_in_attempt }} ({{ item.question.get_question_type_display }})</span>
-          <span class="badge badge-primary">Score: {{ item.answer.marks_awarded|default:"0.00" }} / {{ item.question.points }} pts</span>
-        </div>
-
-        <div style="font-size: 0.95rem; margin-bottom: 16px; color: var(--color-text-primary);">
-          {{ item.question.prompt }}
-        </div>
-
-        {% if item.question.is_mcq %}
-          <!-- Selected Options -->
-          <div style="font-size: 0.85rem; margin-bottom: 8px;">
-            <span style="color: var(--color-text-muted);">Your Selection: </span>
-            {% for opt in item.answer.selected_options.all %}
-              <span class="badge {% if opt.is_correct %}badge-success{% else %}badge-danger{% endif %}">{{ opt.option_text }}</span>
-            {% empty %}
-              <span class="badge badge-secondary">Not Attempted</span>
-            {% endfor %}
-          </div>
-        {% else %}
-          <!-- Text Answer -->
-          <div style="font-size: 0.88rem; background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 12px;">
-            <strong>Your Submitted Response:</strong>
-            <p style="margin-top: 6px; color: var(--color-text-secondary); white-space: pre-wrap;">{{ item.answer.text_response|default:"[Blank]" }}</p>
-          </div>
-        {% endif %}
-
-        {% if show_feedback and item.score_record.feedback_to_student %}
-          <div style="background: rgba(79, 70, 229, 0.1); border-left: 3px solid var(--color-primary); padding: 12px 16px; border-radius: var(--radius-sm);">
-            <strong style="font-size: 0.82rem; color: #818CF8;">Examiner Feedback:</strong>
-            <p style="font-size: 0.85rem; margin-top: 4px; margin-bottom: 0; color: var(--color-text-secondary);">{{ item.score_record.feedback_to_student }}</p>
-          </div>
-        {% endif %}
+  <!-- Page Header with Print Actions -->
+  <div class="page-header flex items-center justify-between" style="margin-bottom: 16px;">
+    <div class="page-title flex items-center gap-3">
+      <div class="page-title-icon" style="background: var(--color-accent-light); color: var(--color-accent); border-radius: var(--radius-sm); padding: 8px;">
+        {% icon 'award' 'icon-md' %}
       </div>
-    {% endfor %}
+      <div>
+        <h2 style="margin: 0; font-size: 1.3rem; font-weight: 800; color: var(--color-text-primary);">Official Examination Scorecard</h2>
+        <p class="page-subtitle" style="margin-top: 1px; font-size: 0.82rem; color: var(--color-text-muted);">{{ exam.code }} • {{ exam.title }}</p>
+      </div>
+    </div>
+    <div class="page-actions flex items-center gap-2">
+      <button type="button" class="btn btn-secondary btn-sm" onclick="printDocument('transcript');">
+        {% icon 'file-text' 'icon-xs' %}
+        <span>Print Transcript</span>
+      </button>
+      <button type="button" class="btn btn-primary btn-sm" onclick="printDocument('certificate');">
+        {% icon 'award' 'icon-xs' %}
+        <span>Print Certificate</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hero Score & Distinction Summary Card -->
+  <div class="hero-score-card">
+    <div class="grid grid-cols-12 gap-4 items-center">
+      
+      <!-- Left Metric: Score, Percentage & Letter Grade -->
+      <div class="col-span-12 md:col-span-5 flex items-center gap-5" style="border-right: 1px solid var(--color-glass-border); padding-right: 16px;">
+        <div class="text-center" style="min-width: 80px;">
+          <div class="grade-ribbon-badge" style="color: {% if is_passed %}var(--color-accent){% else %}var(--color-danger){% endif %};">
+            {{ letter_grade }}
+          </div>
+          <span style="font-size: 0.70rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); display: block; margin-top: 2px;">
+            Grade
+          </span>
+        </div>
+
+        <div>
+          <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-muted);">
+            Official Aggregate
+          </div>
+          <div style="font-size: 1.9rem; font-weight: 800; font-family: var(--font-mono); color: var(--color-text-primary); line-height: 1.1;">
+            {{ final_score }} <span style="font-size: 0.95rem; color: var(--color-text-muted); font-weight: 500;">/ {{ exam.total_marks }} pts</span>
+          </div>
+          <div class="flex items-center gap-2" style="margin-top: 4px;">
+            <span class="badge {% if is_passed %}badge-success{% else %}badge-danger{% endif %}" style="font-size: 0.78rem; padding: 2px 8px; font-weight: 700;">
+              {% if is_passed %}✓ PASSED ({{ percentage }}%){% else %}✗ FAILED ({{ percentage }}%){% endif %}
+            </span>
+            <span class="badge badge-secondary" style="font-size: 0.76rem; padding: 2px 6px;">{{ honor_badge }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center & Right: Detailed Institutional Exam Stats -->
+      <div class="col-span-12 md:col-span-7">
+        <div class="grid grid-cols-4 gap-2 text-center">
+          <div class="stat-mini-pill">
+            <span style="font-size: 0.68rem; color: var(--color-text-muted); text-transform: uppercase; display: block;">Cohort Rank</span>
+            <strong style="font-size: 0.96rem; color: var(--color-primary); font-family: var(--font-mono);">#{{ rank }} <span style="font-size: 0.70rem; color: var(--color-text-muted);">/ {{ total_candidates }}</span></strong>
+          </div>
+          <div class="stat-mini-pill">
+            <span style="font-size: 0.68rem; color: var(--color-text-muted); text-transform: uppercase; display: block;">Percentile</span>
+            <strong style="font-size: 0.96rem; color: var(--color-cyan); font-family: var(--font-mono);">{{ percentile }}%</strong>
+          </div>
+          <div class="stat-mini-pill">
+            <span style="font-size: 0.68rem; color: var(--color-text-muted); text-transform: uppercase; display: block;">Pass Line</span>
+            <strong style="font-size: 0.96rem; color: var(--color-text-primary); font-family: var(--font-mono);">{{ exam.passing_percentage }}%</strong>
+          </div>
+          <div class="stat-mini-pill">
+            <span style="font-size: 0.68rem; color: var(--color-text-muted); text-transform: uppercase; display: block;">Time Spent</span>
+            <strong style="font-size: 0.96rem; color: var(--color-text-primary); font-family: var(--font-mono);">{{ time_spent_mins }}m <span style="font-size: 0.70rem; color: var(--color-text-muted);">/ {{ exam.duration_minutes }}m</span></strong>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between" style="margin-top: 10px; font-size: 0.76rem; color: var(--color-text-muted);">
+          <span>Candidate: <strong style="color: var(--color-text-primary);">{{ attempt.participant.get_full_name|default:attempt.participant.username }}</strong> ({{ attempt.participant.profile.registration_number|default:"N/A" }})</span>
+          <span>Verification: <code style="font-size: 0.74rem;">{{ certificate_id }}</code></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Two-Column Grid: Section Performance & Cognitive Taxonomy -->
+  <div class="grid grid-cols-12 gap-4" style="margin-bottom: 20px;">
+    
+    <!-- LEFT: Section-by-Section Weighted Mastery -->
+    <div class="col-span-12 md:col-span-7">
+      <div class="hero-score-card" style="padding: 16px 20px; height: 100%; margin-bottom: 0;">
+        <div class="flex items-center justify-between" style="margin-bottom: 12px;">
+          <h3 style="font-size: 0.92rem; font-weight: 700; margin: 0; color: var(--color-text-primary);">Section Performance Matrix</h3>
+          <span class="badge badge-secondary" style="font-size: 0.72rem;">{{ section_analytics|length }} Sections</span>
+        </div>
+
+        <div class="flex flex-col gap-2.5">
+          {% for s in section_analytics %}
+            <div style="background: var(--color-bg-subtle); border: 1px solid var(--color-glass-border); padding: 8px 12px; border-radius: var(--radius-xs);">
+              <div class="flex items-center justify-between" style="font-size: 0.80rem; font-weight: 600;">
+                <span style="color: var(--color-text-primary);">{{ s.section.title }}</span>
+                <span style="font-family: var(--font-mono); color: {% if s.percentage >= 70 %}var(--color-accent){% elif s.percentage >= 50 %}var(--color-warning){% else %}var(--color-danger){% endif %};">
+                  {{ s.earned_points }} / {{ s.max_points }} pts ({{ s.percentage }}%)
+                </span>
+              </div>
+              <div class="section-perf-bar">
+                <div class="section-perf-fill" style="width: {{ s.percentage }}%; background: {% if s.percentage >= 70 %}var(--color-accent){% elif s.percentage >= 50 %}var(--color-warning){% else %}var(--color-danger){% endif %};"></div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Question Outcomes & Cognitive Bloom Breakdown -->
+    <div class="col-span-12 md:col-span-5">
+      <div class="hero-score-card" style="padding: 16px 20px; height: 100%; margin-bottom: 0;">
+        <div class="flex items-center justify-between" style="margin-bottom: 12px;">
+          <h3 style="font-size: 0.92rem; font-weight: 700; margin: 0; color: var(--color-text-primary);">Accuracy & Taxonomy</h3>
+          <span class="badge badge-primary" style="font-size: 0.72rem;">{{ total_questions }} Questions</span>
+        </div>
+
+        <!-- Question Outcome Badges - Generous Spacing & Polish -->
+        <div class="grid grid-cols-4 gap-3 text-center" style="margin-bottom: 16px;">
+          <div style="background: var(--color-accent-light); padding: 10px 8px; border-radius: var(--radius-sm); border: 1px solid rgba(16, 185, 129, 0.3);">
+            <strong style="color: var(--color-accent); font-size: 1.15rem; font-family: var(--font-mono); display: block; line-height: 1.1;">{{ correct_count }}</strong>
+            <span style="font-size: 0.70rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: block;">Correct</span>
+          </div>
+          <div style="background: var(--color-warning-light); padding: 10px 8px; border-radius: var(--radius-sm); border: 1px solid rgba(245, 158, 11, 0.3);">
+            <strong style="color: var(--color-warning); font-size: 1.15rem; font-family: var(--font-mono); display: block; line-height: 1.1;">{{ partial_count }}</strong>
+            <span style="font-size: 0.70rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: block;">Partial</span>
+          </div>
+          <div style="background: var(--color-danger-light); padding: 10px 8px; border-radius: var(--radius-sm); border: 1px solid rgba(239, 68, 68, 0.3);">
+            <strong style="color: var(--color-danger); font-size: 1.15rem; font-family: var(--font-mono); display: block; line-height: 1.1;">{{ incorrect_count }}</strong>
+            <span style="font-size: 0.70rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: block;">Incorrect</span>
+          </div>
+          <div style="background: var(--color-bg-subtle); padding: 10px 8px; border-radius: var(--radius-sm); border: 1px solid var(--color-glass-border);">
+            <strong style="color: var(--color-text-muted); font-size: 1.15rem; font-family: var(--font-mono); display: block; line-height: 1.1;">{{ unattempted_count }}</strong>
+            <span style="font-size: 0.70rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: block;">Skipped</span>
+          </div>
+        </div>
+
+
+        <!-- Bloom Taxonomy Levels -->
+        <div style="font-size: 0.74rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; margin-bottom: 6px;">
+          Bloom's Taxonomy Cognitive Distribution:
+        </div>
+        <div class="flex flex-col gap-1.5">
+          {% for level, data in blooms_breakdown.items %}
+            <div class="flex items-center justify-between" style="font-size: 0.78rem;">
+              <span style="color: var(--color-text-secondary);">{{ level }} ({{ data.count }} Qs)</span>
+              <strong style="font-family: var(--font-mono); color: var(--color-text-primary);">{{ data.earned_pts }} / {{ data.total_pts }} pts</strong>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Detailed Question-by-Question Breakdown -->
+  <div class="hero-score-card" style="padding: 20px 24px;">
+    <div class="flex items-center justify-between" style="margin-bottom: 14px;">
+      <div>
+        <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0; color: var(--color-text-primary);">Itemized Evaluation Record</h3>
+        <p style="font-size: 0.78rem; color: var(--color-text-muted); margin: 2px 0 0 0;">Review individual answers, evaluator remarks, and scoring rationale.</p>
+      </div>
+      <span class="badge badge-secondary" style="font-size: 0.74rem;">{{ question_breakdown|length }} Items</span>
+    </div>
+
+    <div class="flex flex-col gap-3.5">
+      {% for item in question_breakdown %}
+        <div class="item-breakdown-card" style="border-left: 3px solid {% if item.status == 'FULL' %}var(--color-accent){% elif item.status == 'PARTIAL' %}var(--color-warning){% elif item.status == 'UNATTEMPTED' %}var(--color-text-muted){% else %}var(--color-danger){% endif %};">
+          
+          <div class="flex items-center justify-between" style="margin-bottom: 8px;">
+            <div class="flex items-center gap-2">
+              <span class="badge badge-primary" style="font-size: 0.74rem; padding: 2px 6px;">Item #{{ item.answer.order_in_attempt }}</span>
+              <span style="font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted);">{{ item.question.get_question_type_display }} • {{ item.question.get_difficulty_display }}</span>
+            </div>
+            <span class="badge {% if item.status == 'FULL' %}badge-success{% elif item.status == 'PARTIAL' %}badge-warning{% else %}badge-danger{% endif %}" style="font-family: var(--font-mono); font-size: 0.80rem; padding: 2px 8px;">
+              {{ item.awarded }} / {{ item.question.points }} pts
+            </span>
+          </div>
+
+          <div style="font-size: 0.88rem; margin-bottom: 10px; color: var(--color-text-primary); line-height: 1.4;">
+            {{ item.question.prompt }}
+          </div>
+
+          {% if item.question.is_mcq %}
+            <!-- Candidate Selected Choice Options -->
+            <div style="font-size: 0.80rem; margin-bottom: 4px;">
+              <span style="color: var(--color-text-muted); margin-right: 4px;">Selected:</span>
+              {% for opt in item.answer.selected_options.all %}
+                <span class="badge {% if opt.is_correct %}badge-success{% else %}badge-danger{% endif %}" style="font-size: 0.76rem; padding: 2px 6px;">{{ opt.option_text }}</span>
+              {% empty %}
+                <span class="badge badge-secondary" style="font-size: 0.76rem;">Not Attempted / Blank</span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <!-- Subjective Response -->
+            <div style="font-size: 0.82rem; background: var(--color-bg-subtle); border: 1px solid var(--color-glass-border); padding: 10px 12px; border-radius: var(--radius-xs); margin-bottom: 8px;">
+              <strong style="color: var(--color-text-muted); font-size: 0.74rem; text-transform: uppercase;">Submitted Response:</strong>
+              <p style="margin-top: 3px; color: var(--color-text-primary); white-space: pre-wrap; line-height: 1.4;">{{ item.answer.text_response|default:"[No response entered]" }}</p>
+            </div>
+          {% endif %}
+
+          {% if show_feedback and item.score_record.feedback_to_student %}
+            <div style="background: var(--color-primary-light); border: 1px solid rgba(79, 70, 229, 0.2); border-radius: var(--radius-xs); padding: 8px 12px; margin-top: 8px;">
+              <div class="flex items-center gap-1" style="font-size: 0.74rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase;">
+                {% icon 'message-square' 'icon-xs' %}
+                <span>Evaluator Remarks:</span>
+              </div>
+              <p style="font-size: 0.80rem; margin-top: 2px; margin-bottom: 0; color: var(--color-text-secondary); line-height: 1.35;">{{ item.score_record.feedback_to_student }}</p>
+            </div>
+          {% endif %}
+
+        </div>
+      {% endfor %}
+    </div>
   </div>
 </div>
+
+
+
+<!-- ==========================================================================
+     PRINT-ONLY: OFFICIAL ROYAL CERTIFICATE OF ACADEMIC ACHIEVEMENT
+     ========================================================================== -->
+<div class="print-certificate-container">
+  <div class="certificate-frame">
+    <!-- Ornaments -->
+    <div class="cert-corner-ornament cert-tl"></div>
+    <div class="cert-corner-ornament cert-tr"></div>
+    <div class="cert-corner-ornament cert-bl"></div>
+    <div class="cert-corner-ornament cert-br"></div>
+
+    <!-- Institution Header -->
+    <div class="cert-super-title">{{ request.tenant.name }}</div>
+    <h1 class="cert-institution-title">Directorate of Academic Evaluations</h1>
+
+    <!-- Title -->
+    <div class="cert-main-title">Certificate of Academic Achievement</div>
+
+    <!-- Conferred To -->
+    <div class="cert-conferred-text">This official certificate is proudly conferred upon</div>
+    <div class="cert-recipient-name">{{ attempt.participant.get_full_name|default:attempt.participant.username }}</div>
+    <div class="cert-reg-badge">Registration ID: {{ attempt.participant.profile.registration_number|default:"NUST-2026-REG" }} • CNIC / ID: Verified</div>
+
+    <!-- Body text -->
+    <p class="cert-body-text">
+      for demonstrating exceptional mastery, rigorous analytical competence, and academic integrity during the
+      official high-stakes examination in <strong>{{ exam.title }}</strong> (Course Code: <code>{{ exam.code }}</code>),
+      securing an overall grade of <strong>{{ letter_grade }}</strong> (<strong>{{ percentage }}%</strong>) with <strong>{{ honor_badge }}</strong>.
+    </p>
+
+    <!-- Key Metrics Ribbon -->
+    <div class="cert-metrics-ribbon">
+      <div class="cert-metric-item">
+        <strong>{{ final_score }} / {{ exam.total_marks }}</strong>
+        <span>Official Score</span>
+      </div>
+      <div class="cert-metric-item">
+        <strong>{{ percentage }}%</strong>
+        <span>Aggregate</span>
+      </div>
+      <div class="cert-metric-item">
+        <strong>{{ letter_grade }}</strong>
+        <span>Letter Grade</span>
+      </div>
+      <div class="cert-metric-item">
+        <strong>#{{ rank }} of {{ total_candidates }}</strong>
+        <span>Cohort Standing</span>
+      </div>
+      <div class="cert-metric-item">
+        <strong>{{ attempt.submitted_at|date:"F d, Y" }}</strong>
+        <span>Date Awarded</span>
+      </div>
+    </div>
+
+    <!-- Gold Seal & Signatures -->
+    <div class="cert-footer-signatures">
+      <div class="cert-sig-block">
+        <div class="cert-sig-line">{{ exam.created_by.get_full_name|default:"Dr. Sarah Khan" }}</div>
+        <div class="cert-sig-title">Chief Academic Examiner & Dean</div>
+      </div>
+
+      <div class="cert-gold-seal">
+        <div class="cert-seal-text">OFFICIAL</div>
+        <div style="font-size: 14pt; color: #78350F; line-height: 1;">★</div>
+        <div class="cert-seal-text">SEAL</div>
+      </div>
+
+      <div class="cert-sig-block">
+        <div class="cert-sig-line">Controller of Examinations</div>
+        <div class="cert-sig-title">{{ request.tenant.name }}</div>
+      </div>
+    </div>
+
+    <!-- Verification Security Hash -->
+    <div class="cert-qr-verify">
+      Cryptographic Certificate ID: {{ certificate_id }} • Anti-Tamper Verification Protocol Active
+    </div>
+  </div>
+</div>
+
+
+<!-- ==========================================================================
+     PRINT-ONLY: OFFICIAL ACADEMIC TRANSCRIPT (A4 Portrait Luxury Format)
+     ========================================================================== -->
+<div class="print-transcript-container">
+  <div class="transcript-page-frame">
+    
+    <!-- Institutional Header Band -->
+    <div class="transcript-header-band">
+      <div>
+        <h1 class="transcript-institution-name">{{ request.tenant.name }}</h1>
+        <h2 class="transcript-document-title">Official Academic Examination Transcript</h2>
+      </div>
+      <div class="transcript-meta-box">
+        <div><strong>Issue Date:</strong> {{ exam.published_at|date:"F d, Y"|default:attempt.submitted_at|date:"F d, Y" }}</div>
+        <div><strong>Security ID:</strong> <code>{{ certificate_id }}</code></div>
+        <div><strong>Status:</strong> Verified & Moderated</div>
+      </div>
+    </div>
+
+    <!-- Candidate & Course Particulars Matrix -->
+    <table class="transcript-info-grid">
+      <tr>
+        <td style="width: 25%;">
+          <span class="transcript-info-label">Candidate Name</span>
+          <span class="transcript-info-value">{{ attempt.participant.get_full_name|default:attempt.participant.username }}</span>
+        </td>
+        <td style="width: 25%;">
+          <span class="transcript-info-label">Registration Number</span>
+          <span class="transcript-info-value">{{ attempt.participant.profile.registration_number|default:"NUST-2026-REG" }}</span>
+        </td>
+        <td style="width: 25%;">
+          <span class="transcript-info-label">Course Code & Discipline</span>
+          <span class="transcript-info-value">{{ exam.code }} ({{ exam.subject }})</span>
+        </td>
+        <td style="width: 25%;">
+          <span class="transcript-info-label">Examination Title</span>
+          <span class="transcript-info-value">{{ exam.title }}</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="transcript-info-label">Examination Date</span>
+          <span class="transcript-info-value">{{ attempt.submitted_at|date:"M d, Y" }}</span>
+        </td>
+        <td>
+          <span class="transcript-info-label">Time Duration Elapsed</span>
+          <span class="transcript-info-value">{{ time_spent_mins }} mins / {{ exam.duration_minutes }} mins</span>
+        </td>
+        <td>
+          <span class="transcript-info-label">Passing Standard</span>
+          <span class="transcript-info-value">{{ exam.passing_percentage }}% Minimum</span>
+        </td>
+        <td>
+          <span class="transcript-info-label">Institutional Status</span>
+          <span class="transcript-info-value" style="color: {% if is_passed %}#059669{% else %}#DC2626{% endif %}; font-weight: 800;">
+            {% if is_passed %}PASSED — {{ honor_badge }}{% else %}FAILED{% endif %}
+          </span>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Aggregate Performance Scorecard Band -->
+    <div class="transcript-score-card">
+      <div class="transcript-score-pill">
+        <span class="label">Marks Awarded</span>
+        <span class="val">{{ final_score }} / {{ exam.total_marks }}</span>
+      </div>
+      <div class="transcript-score-pill">
+        <span class="label">Percentage</span>
+        <span class="val">{{ percentage }}%</span>
+      </div>
+      <div class="transcript-score-pill">
+        <span class="label">Letter Grade</span>
+        <span class="val" style="color: #1E3A8A;">{{ letter_grade }}</span>
+      </div>
+      <div class="transcript-score-pill">
+        <span class="label">Cohort Rank</span>
+        <span class="val">#{{ rank }} <span style="font-size: 8pt; font-weight: 500; color: #64748B;">of {{ total_candidates }}</span></span>
+      </div>
+      <div class="transcript-score-pill">
+        <span class="label">Percentile Standing</span>
+        <span class="val">{{ percentile }}%</span>
+      </div>
+    </div>
+
+    <!-- Section-wise Performance Summary -->
+    <div class="transcript-table-heading">
+      <span>I. Section-Wise Competency & Weightage Matrix</span>
+      <span style="font-size: 7.5pt; font-weight: 600; color: #64748B;">Total Sections: {{ section_analytics|length }}</span>
+    </div>
+    <table class="transcript-section-table">
+      <thead>
+        <tr>
+          <th style="text-align: left; width: 45%;">Curricular Section</th>
+          <th style="text-align: center; width: 15%;">Questions</th>
+          <th style="text-align: center; width: 15%;">Max Points</th>
+          <th style="text-align: center; width: 15%;">Points Earned</th>
+          <th style="text-align: center; width: 10%;">Mastery %</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in section_analytics %}
+          <tr>
+            <td><strong>{{ s.section.title }}</strong></td>
+            <td style="text-align: center;">{{ s.total_questions }}</td>
+            <td style="text-align: center;">{{ s.max_points }}</td>
+            <td style="text-align: center; font-weight: 700;">{{ s.earned_points }}</td>
+            <td style="text-align: center; font-weight: 700; color: {% if s.percentage >= 70 %}#059669{% elif s.percentage >= 50 %}#D97706{% else %}#DC2626{% endif %};">
+              {{ s.percentage }}%
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Itemized Evaluation Records Table -->
+    <div class="transcript-table-heading">
+      <span>II. Itemized Assessment Evaluation Record</span>
+      <span style="font-size: 7.5pt; font-weight: 600; color: #64748B;">Evaluated Items: {{ question_breakdown|length }}</span>
+    </div>
+    <table class="transcript-records-table">
+      <thead>
+        <tr>
+          <th style="width: 5%; text-align: center;">#</th>
+          <th style="width: 50%;">Question / Assessment Prompt</th>
+          <th style="width: 15%; text-align: center;">Format</th>
+          <th style="width: 10%; text-align: center;">Max</th>
+          <th style="width: 10%; text-align: center;">Earned</th>
+          <th style="width: 10%; text-align: center;">Verdict</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in question_breakdown %}
+          <tr>
+            <td style="text-align: center; font-weight: 700;">{{ item.answer.order_in_attempt }}</td>
+            <td>{{ item.question.prompt|truncatechars:78 }}</td>
+            <td style="text-align: center; font-size: 7.5pt;">{{ item.question.get_question_type_display }}</td>
+            <td style="text-align: center;">{{ item.question.points }}</td>
+            <td style="text-align: center; font-weight: 700;">{{ item.awarded }}</td>
+            <td style="text-align: center; font-size: 7.5pt; font-weight: 700; color: {% if item.status == 'FULL' %}#059669{% elif item.status == 'PARTIAL' %}#D97706{% elif item.status == 'UNATTEMPTED' %}#64748B{% else %}#DC2626{% endif %};">
+              {% if item.status == 'FULL' %}Full Marks{% elif item.status == 'PARTIAL' %}Partial{% elif item.status == 'UNATTEMPTED' %}Blank{% else %}Incorrect{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Official Transcript Signatures & Stamp -->
+    <div class="transcript-footer-security">
+      <div>
+        <div><strong>Academic Evaluation Integrity:</strong> Verified via OptiExam Engine</div>
+        <div><strong>Verification Token:</strong> <code>{{ certificate_id }}</code></div>
+      </div>
+      <div class="transcript-sig-box">
+        <div class="transcript-sig-line">Controller of Examinations</div>
+        <div>{{ request.tenant.name }}</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function printDocument(mode) {
+    document.body.classList.remove('printing-certificate', 'printing-transcript');
+    if (mode === 'certificate') {
+      document.body.classList.add('printing-certificate');
+    } else if (mode === 'transcript') {
+      document.body.classList.add('printing-transcript');
+    }
+    window.print();
+    // Cleanup classes after print dialog opens
+    setTimeout(() => {
+      document.body.classList.remove('printing-certificate', 'printing-transcript');
+    }, 1000);
+  }
+</script>
 {% endblock %}
+
+
