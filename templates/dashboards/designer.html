@@ -179,6 +179,9 @@
                   <a href="{% url 'exams:live_ops' exam.pk %}" class="action-btn action-btn-inspect" data-tooltip="Live Ops" aria-label="Live Ops">
                     {% icon 'activity' 'icon' %}
                   </a>
+                  <a href="{% url 'grading:allocation_list' exam.pk %}" class="action-btn action-btn-success" data-tooltip="Grading Matrix" aria-label="Grading Matrix">
+                    {% icon 'check-circle' 'icon' %}
+                  </a>
                   <a href="{% url 'exams:exam_detail' exam.pk %}" class="action-btn action-btn-inspect" data-tooltip="Inspect" aria-label="Inspect">
                     {% icon 'eye' 'icon' %}
                   </a>

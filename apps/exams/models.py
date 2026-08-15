@@ -39,6 +39,15 @@ class Exam(TenantModelMixin):
 
     # Status & Life Cycle
     results_published = models.BooleanField(default=False, help_text="When True, candidates can inspect scores and feedback.")
+    show_grader_feedback = models.BooleanField(default=True, help_text="Controls if examiner feedback notes are visible to student.")
+    published_at = models.DateTimeField(null=True, blank=True)
+    published_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='published_exams'
+    )
     is_active = models.BooleanField(default=True, help_text="Controls if this exam blueprint is active.")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

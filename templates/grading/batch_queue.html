@@ -1,0 +1,96 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Batch Evaluation Queue — {{ allocation.exam.title }}{% endblock %}
+
+{% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'accounts:role_redirect' %}">{% icon 'home' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <span>Grading Queue</span>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Batch #{{ allocation.candidate_range_start|stringformat:"03d" }}–#{{ allocation.candidate_range_end|stringformat:"03d" }}</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon" style="background: rgba(79, 70, 229, 0.15); color: var(--color-primary);">
+      {% icon 'check-circle' 'icon-lg' %}
+    </div>
+    <div>
+      <h2>Double-Blind Evaluation Queue: {{ allocation.exam.title }}</h2>
+      <p class="page-subtitle">Batch Range: <strong class="badge badge-accent">Candidates #{{ allocation.candidate_range_start|stringformat:"03d" }}–#{{ allocation.candidate_range_end|stringformat:"03d" }}</strong></p>
+    </div>
+  </div>
+</div>
+
+{% include "includes/page_guide.html" with guide_icon="check-circle" guide_title="Double-Blind Grading Queue" guide_text="Student names are masked with anonymized candidate indices (e.g. CAND-0042). Click 'Evaluate Submission' to enter the split-screen rubric cockpit." %}
+
+<!-- Queue Table -->
+<div class="glass-card" style="padding: 24px;">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Blind Candidate Index</th>
+          <th>Subjective Questions</th>
+          <th>Grading Status</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in queue %}
+          <tr>
+            <td>
+              <span class="badge badge-accent" style="font-family: var(--font-mono); font-size: 0.92rem; padding: 4px 12px;">
+                {{ item.blind_code }}
+              </span>
+            </td>
+            <td>
+              <span class="metric-numeral">{{ item.graded_subjective }}</span> / <span class="metric-numeral">{{ item.total_subjective }}</span> questions marked
+            </td>
+            <td>
+              {% if item.grade_status == 'COMPLETED' %}
+                <span class="badge badge-success"><span class="status-dot"></span> Marked & Finalized</span>
+              {% elif item.grade_status == 'IN_PROGRESS' %}
+                <span class="badge badge-warning"><span class="status-dot"></span> In Progress (Drafts)</span>
+              {% elif item.grade_status == 'NO_SUBJECTIVE' %}
+                <span class="badge badge-secondary">Auto-Graded (MCQ Only)</span>
+              {% elif item.grade_status == 'NOT_STARTED' %}
+                <span class="badge badge-secondary">Candidate Not Attempted</span>
+              {% else %}
+                <span class="badge badge-primary"><span class="status-dot"></span> Pending Evaluation</span>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              {% if item.attempt and item.total_subjective > 0 %}
+                <a href="{% url 'grading:cockpit' item.attempt.pk %}" class="btn btn-primary btn-sm">
+                  {% icon 'edit' 'icon' %}
+                  <span>Evaluate Submission</span>
+                </a>
+              {% else %}
+                <span style="font-size: 0.80rem; color: var(--color-text-muted);">No action needed</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">
+              No candidates in this batch range.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

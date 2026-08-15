@@ -114,6 +114,17 @@ class ItemWriterDashboardView(ItemWriterRequiredMixin, TemplateView):
 class GraderDashboardView(GraderRequiredMixin, TemplateView):
     template_name = 'dashboards/grader.html'
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from apps.grading.models import GraderAllocation
+        from apps.grading.selectors.grader_selectors import get_grader_allocations
+
+        allocations = get_grader_allocations(self.request.user, tenant=self.request.tenant)
+        ctx['allocations'] = allocations
+        ctx['total_batches'] = len(allocations)
+        ctx['pending_batches'] = sum(1 for a in allocations if a.status != GraderAllocation.Status.COMPLETED)
+        return ctx
+
 
 class ParticipantDashboardView(ParticipantRequiredMixin, TemplateView):
     template_name = 'dashboards/participant.html'

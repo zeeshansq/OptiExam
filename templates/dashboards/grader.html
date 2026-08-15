@@ -4,9 +4,24 @@
 {% block title %}Grading Queue — {{ tenant_name }}{% endblock %}
 
 {% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'accounts:role_redirect' %}">{% icon 'home' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Evaluation Officer Queue</span>
+    </li>
+  </ol>
+</nav>
+
 <div class="page-header">
   <div class="page-title">
-    {% icon 'check-circle' 'icon-xl' %}
+    <div class="page-title-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--color-success);">
+      {% icon 'check-circle' 'icon-lg' %}
+    </div>
     <div>
       <h2>Grader Evaluation Queue</h2>
       <p class="page-subtitle">Institution: <strong>{{ tenant_name }}</strong> (Evaluation Officer: {{ request.user.username }})</p>
@@ -14,11 +29,104 @@
   </div>
 </div>
 
-{% include "includes/page_guide.html" with guide_icon="check-circle" guide_title="Evaluation & Rubric Studio" guide_text="Score assigned candidate batches using double-blind evaluation, rubric criteria matrices, and model answers." %}
+{% include "includes/page_guide.html" with guide_icon="check-circle" guide_title="Evaluation & Rubric Studio" guide_text="Score assigned candidate batches using double-blind evaluation, rubric criteria matrices, and confidential model answers." %}
 
-<div class="glass-card" style="padding: 28px; text-align: center;">
-  <h3>No Active Grading Batches Assigned</h3>
-  <p>When an Examination Designer allocates candidate batches to your account, they will appear here with SLA deadlines.</p>
-  <span class="badge badge-info">Phase 4 Module</span>
+<!-- Queue KPI Overview -->
+<div class="grid grid-cols-2 gap-4" style="margin-bottom: 24px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(79, 70, 229, 0.15); color: var(--color-primary);">
+      {% icon 'layers' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">{{ total_batches|default:0 }}</span></div>
+      <div class="stat-label">Assigned Batches</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">
+      {% icon 'clock' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">{{ pending_batches|default:0 }}</span></div>
+      <div class="stat-label">Pending SLA Queue</div>
+    </div>
+  </div>
+</div>
+
+<!-- Batches Table -->
+<div class="glass-card" style="padding: 24px;">
+  <h3 style="margin-bottom: 16px;">Assigned Candidate Batches</h3>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Examination</th>
+          <th>Batch Partition</th>
+          <th>Section Scope</th>
+          <th>SLA Deadline</th>
+          <th>Status</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alloc in allocations %}
+          <tr>
+            <td>
+              <div style="font-weight: 600; color: var(--color-text-primary);">{{ alloc.exam.title }}</div>
+              <div style="font-size: 0.78rem; font-family: var(--font-mono); color: var(--color-text-muted);">{{ alloc.exam.code }}</div>
+            </td>
+            <td>
+              <span class="badge badge-accent" style="font-family: var(--font-mono); font-size: 0.88rem;">
+                Candidates #{{ alloc.candidate_range_start|stringformat:"03d" }} — #{{ alloc.candidate_range_end|stringformat:"03d" }}
+              </span>
+            </td>
+            <td>
+              {% if alloc.section_scope %}
+                <span class="badge badge-primary">{{ alloc.section_scope.title }}</span>
+              {% else %}
+                <span class="badge badge-secondary">All Subjective Sections</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if alloc.sla_deadline %}
+                <div style="font-size: 0.85rem; color: {% if alloc.is_overdue %}var(--color-danger){% else %}var(--color-text-secondary){% endif %};">
+                  {{ alloc.sla_deadline|date:"M d, H:i" }}
+                  {% if alloc.is_overdue %}
+                    <span class="badge badge-danger" style="margin-left: 4px;">Overdue</span>
+                  {% endif %}
+                </div>
+              {% else %}
+                <span style="font-size: 0.80rem; color: var(--color-text-muted);">No SLA set</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if alloc.status == 'COMPLETED' %}
+                <span class="badge badge-success"><span class="status-dot"></span> Completed</span>
+              {% elif alloc.status == 'IN_PROGRESS' %}
+                <span class="badge badge-warning"><span class="status-dot"></span> In Progress</span>
+              {% else %}
+                <span class="badge badge-secondary"><span class="status-dot"></span> Pending</span>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              <a href="{% url 'grading:batch_queue' alloc.pk %}" class="btn btn-primary btn-sm">
+                {% icon 'edit' 'icon' %}
+                <span>Open Evaluation Queue</span>
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">
+              {% icon 'check-circle' 'icon-xl' %}
+              <h4 style="margin-top: 12px; margin-bottom: 4px; color: var(--color-text-secondary);">No Active Grading Batches Assigned</h4>
+              <p style="font-size: 0.85rem;">When an Examination Designer allocates candidate batches to your account, they will appear here with SLA deadlines.</p>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

@@ -1,0 +1,180 @@
+{% extends "base_grading.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Evaluation Cockpit — CAND-{{ attempt.id|stringformat:"04d" }}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header class="grading-header">
+  <div class="flex items-center gap-3">
+    {% icon 'award' 'icon-lg' %}
+    <div>
+      <div style="font-weight: 700; font-size: 1.05rem;">Evaluation Cockpit: {{ attempt.exam.title }}</div>
+      <div style="font-size: 0.80rem; color: var(--grading-text-muted);">
+        Candidate: <strong class="badge badge-accent" style="font-family: var(--font-mono);">CAND-{{ attempt.id|stringformat:"04d" }}</strong> (Double-Blind Anonymized)
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <a href="{% url 'accounts:role_redirect' %}" class="btn btn-ghost btn-sm">
+      {% icon 'chevron-left' 'icon' %}
+      <span>Exit to Queue</span>
+    </a>
+  </div>
+</header>
+
+<!-- Two-Pane Split Screen Layout -->
+<div class="grading-split-container">
+  <!-- Left Pane: Candidate Submission -->
+  <aside class="grading-left-pane">
+    <div style="font-size: 0.82rem; text-transform: uppercase; color: var(--grading-text-muted); letter-spacing: 0.5px; margin-bottom: 8px;">
+      Question {{ current_answer.order_in_attempt }} of {{ subjective_count }} Subjective Items
+    </div>
+    <h2 style="font-size: 1.25rem; margin-bottom: 16px; line-height: 1.5;">
+      {{ current_answer.question.prompt }}
+    </h2>
+
+    {% if current_answer.question.image_asset %}
+      <div style="text-align: center; margin-bottom: 24px;">
+        <img src="{{ current_answer.question.image_asset.url }}" alt="Question Asset" style="max-width: 100%; border-radius: var(--radius-md); border: 1px solid var(--grading-border);">
+      </div>
+    {% endif %}
+
+    <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-weight: 600; font-size: 0.90rem;">Candidate Submitted Response</span>
+      <span class="badge badge-primary">{{ current_answer.text_response|wordcount }} words</span>
+    </div>
+
+    <div class="candidate-response-card">
+      <div class="response-text-body">{{ current_answer.text_response|default:"[Candidate left this response blank]" }}</div>
+    </div>
+  </aside>
+
+  <!-- Right Pane: Model Answer & Rubric Matrix -->
+  <main class="grading-right-pane">
+    <!-- Model Answer -->
+    {% if current_answer.question.model_answer %}
+      <div class="model-answer-card">
+        <h4 style="font-size: 0.92rem; color: #818CF8; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          {% icon 'book' 'icon-sm' %}
+          <span>Confidential Model Answer & Grading Guidelines</span>
+        </h4>
+        <div style="font-size: 0.88rem; line-height: 1.6; color: #CBD5E1;">
+          {{ current_answer.question.model_answer|linebreaks }}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Rubric Matrix Form -->
+    <form method="post" id="grading-form" action="{% url 'grading:save_evaluation' current_answer.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="is_draft" id="id_is_draft" value="False">
+      <input type="hidden" name="client_version" value="{{ grade_record.version|default:1 }}">
+
+      <div style="margin-bottom: 20px;">
+        <h3 style="margin-bottom: 12px;">Rubric Evaluation Matrix (Max: {{ current_answer.question.points }} pts)</h3>
+
+        {% for rubric in rubrics %}
+          <div class="rubric-criteria-card">
+            <div class="rubric-header-row">
+              <span class="rubric-title">{{ rubric.criteria_title }}</span>
+              <span class="badge badge-primary">Max {{ rubric.max_points }} pts</span>
+            </div>
+            <p style="font-size: 0.80rem; color: var(--grading-text-muted); margin-bottom: 10px;">{{ rubric.description }}</p>
+            <div class="flex items-center gap-3">
+              <input type="range" class="rubric-slider" min="0" max="{{ rubric.max_points }}" step="0.5" value="{% if grade_record %}{{ grade_record.rubric_breakdown|get_item:rubric.id|default:0 }}{% else %}0{% endif %}" data-rubric-id="{{ rubric.id }}" style="flex: 1;">
+              <input type="number" class="form-input rubric-points-input" min="0" max="{{ rubric.max_points }}" step="0.5" value="{% if grade_record %}{{ grade_record.rubric_breakdown|get_item:rubric.id|default:0 }}{% else %}0{% endif %}" data-rubric-id="{{ rubric.id }}" name="rubric_{{{ rubric.id }}">
+            </div>
+          </div>
+        {% empty %}
+          <div class="form-group">
+            <label class="form-label">Awarded Score (Max {{ current_answer.question.points }} pts)</label>
+            <input type="number" name="awarded_marks" id="awarded-marks-input" class="form-input" min="0" max="{{ current_answer.question.points }}" step="0.5" value="{{ grade_record.awarded_marks|default:0 }}">
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Live Dynamic Totalizer -->
+      {% if rubrics %}
+        <div class="rubric-totalizer-bar">
+          <div>
+            <div style="font-size: 0.80rem; text-transform: uppercase; color: #6EE7B7; font-weight: 600;">Total Evaluated Marks</div>
+            <div style="font-size: 0.80rem; color: var(--grading-text-muted);">Max possible: {{ current_answer.question.points }} pts</div>
+          </div>
+          <div class="rubric-total-num" id="rubric-total-display">0.00</div>
+        </div>
+        <input type="hidden" name="awarded_marks" id="awarded-marks-input" value="{{ grade_record.awarded_marks|default:0 }}">
+      {% endif %}
+
+      <div class="form-group">
+        <label class="form-label">Examiner Notes (Confidential / Internal)</label>
+        <textarea name="examiner_notes" class="form-input" rows="2" placeholder="Private notes for Chief Examiner moderation...">{{ grade_record.examiner_notes|default:"" }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Constructive Feedback to Student</label>
+        <textarea name="feedback_to_student" class="form-input" rows="3" placeholder="Constructive feedback revealed to candidate after results release...">{{ grade_record.feedback_to_student|default:"" }}</textarea>
+      </div>
+
+      <!-- Fixed Bottom Action Bar -->
+      <footer class="grading-actions-bar">
+        <button type="button" id="btn-save-draft" class="btn btn-ghost">
+          {% icon 'file-text' 'icon' %}
+          <span>Save as Draft</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button type="submit" id="btn-finalize" class="btn btn-accent btn-lg">
+            {% icon 'check-circle' 'icon' %}
+            <span>Finalize & Mark Complete</span>
+          </button>
+        </div>
+      </footer>
+    </form>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Rubric Totalizer Script
+  const maxAllowed = parseFloat("{{ current_answer.question.points }}");
+  const inputs = document.querySelectorAll('.rubric-points-input');
+  const sliders = document.querySelectorAll('.rubric-slider');
+  const totalDisplay = document.getElementById('rubric-total-display');
+  const hiddenAwarded = document.getElementById('awarded-marks-input');
+
+  function calculateTotal() {
+    let sum = 0;
+    inputs.forEach(inp => {
+      sum += parseFloat(inp.value) || 0;
+    });
+    if (sum > maxAllowed) sum = maxAllowed;
+    if (totalDisplay) totalDisplay.textContent = sum.toFixed(2) + ' pts';
+    if (hiddenAwarded) hiddenAwarded.value = sum.toFixed(2);
+  }
+
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('input', () => {
+      if (sliders[idx]) sliders[idx].value = inp.value;
+      calculateTotal();
+    });
+  });
+
+  sliders.forEach((sld, idx) => {
+    sld.addEventListener('input', () => {
+      if (inputs[idx]) inputs[idx].value = sld.value;
+      calculateTotal();
+    });
+  });
+
+  calculateTotal();
+
+  // Draft vs Finalize
+  document.getElementById('btn-save-draft')?.addEventListener('click', () => {
+    document.getElementById('id_is_draft').value = 'True';
+    document.getElementById('grading-form').submit();
+  });
+</script>
+{% endblock %}

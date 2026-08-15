@@ -1,0 +1,109 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Create Grader Allocation — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">{% icon 'calendar' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_detail' exam.pk %}">{{ exam.title }}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'grading:allocation_list' exam.pk %}">Grader Matrix</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Add Allocation</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon">
+      {% icon 'check-circle' 'icon-lg' %}
+    </div>
+    <div>
+      <h2>Allocate Candidate Batch to Grader</h2>
+      <p class="page-subtitle">{{ exam.title }} ({{ exam.code }})</p>
+    </div>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'grading:allocation_list' exam.pk %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Matrix</span>
+    </a>
+  </div>
+</div>
+
+<form method="post" style="max-width: 800px; margin: 0 auto;">
+  {% csrf_token %}
+
+  <div class="form-section-card">
+    <div class="form-section-header">
+      <span class="form-step-badge">1</span>
+      <div>
+        <h3>Examiner & Candidate Partition Range</h3>
+        <p>Select the evaluation officer and assign the sequential blind index boundaries.</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">
+        <span>Designated Evaluation Officer (Grader)</span>
+        <span class="required-indicator">*</span>
+      </label>
+      {{ form.grader }}
+      {% if form.grader.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.grader.errors.0 }}</div>{% endif %}
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="form-group">
+        <label class="form-label">
+          <span>Candidate Range Start (#)</span>
+          <span class="required-indicator">*</span>
+        </label>
+        {{ form.candidate_range_start }}
+        {% if form.candidate_range_start.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.candidate_range_start.errors.0 }}</div>{% endif %}
+        <div class="form-help">e.g. <code>1</code> for Candidate #001</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">
+          <span>Candidate Range End (#)</span>
+          <span class="required-indicator">*</span>
+        </label>
+        {{ form.candidate_range_end }}
+        {% if form.candidate_range_end.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.candidate_range_end.errors.0 }}</div>{% endif %}
+        <div class="form-help">e.g. <code>100</code> for Candidate #100</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="form-group">
+        <label class="form-label">Section Scope (Optional)</label>
+        {{ form.section_scope }}
+        <div class="form-help">Leave empty to grade all subjective sections.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">SLA Evaluation Deadline</label>
+        {{ form.sla_deadline }}
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions-bar">
+    <a href="{% url 'grading:allocation_list' exam.pk %}" class="btn btn-ghost">Cancel</a>
+    <button type="submit" class="btn btn-primary btn-lg">
+      {% icon 'check' 'icon' %}
+      <span>Confirm Batch Allocation</span>
+    </button>
+  </div>
+</form>
+{% endblock %}

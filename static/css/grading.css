@@ -1,0 +1,157 @@
+/* ==============================================================================
+   OptiExam Distributed Grading & Evaluation Studio
+   50%/50% Balanced Split-Screen Cockpit with Dynamic Rubric Matrices
+   Zero CDN Dependencies (Vanilla CSS)
+   ============================================================================== */
+
+:root {
+  --grading-bg: #090D16;
+  --grading-surface: #0F172A;
+  --grading-surface-elevated: #1E293B;
+  --grading-border: rgba(255, 255, 255, 0.08);
+  --grading-text: #F8FAFC;
+  --grading-text-muted: #94A3B8;
+  --grading-accent: #4F46E5;
+  --grading-success: #10B981;
+  --grading-warning: #F59E0B;
+  --grading-danger: #EF4444;
+}
+
+body.grading-mode {
+  background-color: var(--grading-bg);
+  color: var(--grading-text);
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Header Bar */
+.grading-header {
+  height: 64px;
+  background: var(--grading-surface);
+  border-bottom: 1px solid var(--grading-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 50;
+}
+
+/* Two-Pane Split Screen Layout */
+.grading-split-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: calc(100vh - 64px);
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Left Pane: Candidate Submission */
+.grading-left-pane {
+  background: var(--grading-bg);
+  border-right: 1px solid var(--grading-border);
+  overflow-y: auto;
+  padding: 32px;
+}
+
+/* Right Pane: Model Answer & Rubric Matrix */
+.grading-right-pane {
+  background: var(--grading-surface);
+  overflow-y: auto;
+  padding: 32px 32px 100px 32px;
+  position: relative;
+}
+
+/* Candidate Response Box */
+.candidate-response-card {
+  background: var(--grading-surface);
+  border: 1px solid var(--grading-border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.response-text-body {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #E2E8F0;
+  white-space: pre-wrap;
+}
+
+/* Model Answer Accordion / Card */
+.model-answer-card {
+  background: rgba(79, 70, 229, 0.08);
+  border: 1px solid rgba(79, 70, 229, 0.3);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+/* Rubric Criteria Cards */
+.rubric-criteria-card {
+  background: var(--grading-surface-elevated);
+  border: 1px solid var(--grading-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 14px;
+}
+
+.rubric-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.rubric-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #F8FAFC;
+}
+
+.rubric-points-input {
+  width: 80px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Dynamic Sum Totalizer Bar */
+.rubric-totalizer-bar {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.rubric-total-num {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--grading-success);
+}
+
+/* Bottom Action Bar */
+.grading-actions-bar {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 50vw;
+  height: 72px;
+  background: var(--grading-surface-elevated);
+  border-top: 1px solid var(--grading-border);
+  border-left: 1px solid var(--grading-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 60;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+}

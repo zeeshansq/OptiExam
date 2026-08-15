@@ -26,8 +26,12 @@ urlpatterns = [
     # Live Examination Execution & Proctoring (/submissions/...)
     path('submissions/', include('apps.submissions.urls', namespace='submissions')),
 
+    # Distributed Grading & Evaluation Studio (/grading/...)
+    path('grading/', include('apps.grading.urls', namespace='grading')),
+
     # Tenant-Scoped Dashboards & SaaS Workspace
     path('', include('apps.tenants.urls', namespace='tenants')),
+
 
 ]
 

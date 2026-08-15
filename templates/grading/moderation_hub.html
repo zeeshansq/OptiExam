@@ -1,0 +1,125 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Chief Examiner Moderation — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">{% icon 'calendar' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_detail' exam.pk %}">{{ exam.title }}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Grade Moderation Hub</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon" style="background: rgba(79, 70, 229, 0.15); color: var(--color-primary);">
+      {% icon 'award' 'icon-lg' %}
+    </div>
+    <div>
+      <h2>Chief Examiner Grade Moderation: {{ exam.title }}</h2>
+      <p class="page-subtitle">{{ exam.code }} • Review submitted candidate marks, verify rubric criteria, and sign off official grades</p>
+    </div>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'exams:exam_detail' exam.pk %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Blueprint</span>
+    </a>
+  </div>
+</div>
+
+{% include "includes/page_guide.html" with guide_icon="award" guide_title="Chief Examiner Grade Moderation" guide_text="Review marked attempts across all examiners. Sign off on verified grades or return submissions with mandatory revision directions." %}
+
+<!-- Moderation Records Table -->
+<div class="glass-card" style="padding: 24px;">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Candidate</th>
+          <th>Total Score</th>
+          <th>Result Status</th>
+          <th>Moderation Status</th>
+          <th>Moderator</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in moderation_records %}
+          <tr>
+            <td>
+              <div style="font-weight: 600; color: var(--color-text-primary);">
+                {{ record.attempt.participant.get_full_name|default:record.attempt.participant.username }}
+              </div>
+              <div style="font-size: 0.78rem; font-family: var(--font-mono); color: var(--color-text-muted);">
+                Attempt #{{ record.attempt.id }}
+              </div>
+            </td>
+            <td>
+              <span class="metric-numeral" style="font-size: 1.05rem; font-weight: 700; color: var(--color-accent);">
+                {{ record.total_final_score|default:"0.00" }}
+              </span>
+              <span style="font-size: 0.80rem; color: var(--color-text-muted);">/ {{ exam.total_marks }} pts</span>
+            </td>
+            <td>
+              {% if record.is_passed %}
+                <span class="badge badge-success">Passed</span>
+              {% else %}
+                <span class="badge badge-danger">Failed</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if record.status == 'APPROVED' %}
+                <span class="badge badge-success"><span class="status-dot"></span> Approved</span>
+              {% elif record.status == 'RETURNED' %}
+                <span class="badge badge-warning"><span class="status-dot"></span> Returned for Revision</span>
+              {% else %}
+                <span class="badge badge-secondary"><span class="status-dot"></span> Pending Review</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if record.moderator %}
+                <span style="font-size: 0.85rem;">{{ record.moderator.username }}</span>
+                <div style="font-size: 0.75rem; color: var(--color-text-muted);">{{ record.moderated_at|date:"M d, H:i" }}</div>
+              {% else %}
+                <span style="color: var(--color-text-muted); font-size: 0.80rem;">—</span>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              <div class="row-actions">
+                {% if record.status != 'APPROVED' %}
+                  <form method="post" action="{% url 'grading:moderation_approve' record.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="action-btn action-btn-success" data-tooltip="Approve Grade" aria-label="Approve Grade">
+                      {% icon 'check' 'icon' %}
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">
+              {% icon 'award' 'icon-xl' %}
+              <h4 style="margin-top: 12px; margin-bottom: 4px; color: var(--color-text-secondary);">No Moderation Records Yet</h4>
+              <p style="font-size: 0.85rem;">Records will appear here once candidates submit their examinations and evaluations are submitted.</p>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

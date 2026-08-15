@@ -44,6 +44,14 @@
       {% icon 'users' 'icon' %}
       <span>Roster ({{ exam.total_enrolled_candidates }})</span>
     </a>
+    <a href="{% url 'grading:allocation_list' exam.pk %}" class="btn btn-ghost" title="Partition candidate batches across examiners">
+      {% icon 'check-circle' 'icon' %}
+      <span>Grading Matrix</span>
+    </a>
+    <a href="{% url 'grading:moderation_hub' exam.pk %}" class="btn btn-ghost" title="Chief Examiner grade moderation & sign-off">
+      {% icon 'award' 'icon' %}
+      <span>Grade Moderation</span>
+    </a>
     <a href="{% url 'exams:exam_update' exam.pk %}" class="btn btn-primary">
       {% icon 'edit' 'icon' %}
       <span>Edit Blueprint</span>

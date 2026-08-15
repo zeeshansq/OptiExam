@@ -33,6 +33,14 @@ def finalize_submission(
         details={'action': 'candidate_final_submit', 'is_simulation': attempt.is_simulation}
     )
 
+    # Instant Automated MCQ Scoring Engine
+    try:
+        from apps.grading.services.scoring_service import auto_grade_mcq_attempt, compute_attempt_totals
+        auto_grade_mcq_attempt(attempt)
+        compute_attempt_totals(attempt)
+    except Exception as e:
+        pass
+
     return attempt
 
 
