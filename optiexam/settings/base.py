@@ -15,6 +15,7 @@ DEBUG = env.bool('DEBUG', default=True)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
 
 OPTIEXAM_VERSION = env('OPTIEXAM_VERSION', default='1.0.0')
+ENABLE_DEMO_LOGINS = env.bool('ENABLE_DEMO_LOGINS', default=True)
 
 # Application definition
 INSTALLED_APPS = [

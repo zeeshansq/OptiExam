@@ -120,4 +120,6 @@ def system_settings_context(request):
         'SITE_TITLE': 'OptiExam',
         'ui_theme': user_theme,
         'is_dark_mode': user_theme == 'dark',
+        'ENABLE_DEMO_LOGINS': getattr(settings, 'ENABLE_DEMO_LOGINS', True),
     }
+

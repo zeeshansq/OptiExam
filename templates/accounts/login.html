@@ -48,17 +48,139 @@
       </button>
     </form>
 
-    <!-- Demo Role Guidance Box (for Local Testing) -->
-    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--color-glass-border); text-align: center;">
-      <p style="font-size: 0.78rem; color: var(--color-text-muted); margin-bottom: 6px;">Available Test Roles (Post-Seed):</p>
-      <div class="flex justify-center gap-2" style="flex-wrap: wrap;">
-        <span class="badge badge-danger">Super Admin: admin</span>
-        <span class="badge badge-primary">Designer: designer</span>
-        <span class="badge badge-warning">Writer: writer</span>
-        <span class="badge badge-info">Grader: grader</span>
-        <span class="badge badge-success">Candidate: student</span>
+    <!-- Demo Quick Login Palette (Controlled by ENABLE_DEMO_LOGINS) -->
+    {% if ENABLE_DEMO_LOGINS %}
+      <div style="margin-top: 24px; padding: 18px 16px; background: rgba(0, 0, 0, 0.25); border: 1px dashed var(--color-glass-border); border-radius: var(--radius-md); text-align: center;">
+        <div style="font-size: 0.74rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-text-muted); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          {% icon 'zap' 'icon-sm' %}
+          <span>Quick Demo Access (1-Click Fill • 2-Click Sign In)</span>
+        </div>
+
+        <div class="flex items-center justify-center gap-3" style="flex-wrap: wrap;">
+          <!-- Super Admin -->
+          <button type="button" class="btn-demo-quick" data-username="admin" data-password="OptiExam@2026!" data-role="Super Admin (admin)" title="Super Admin (admin)" style="--role-color: #EF4444;">
+            {% icon 'shield' 'icon' %}
+          </button>
+
+          <!-- Designer -->
+          <button type="button" class="btn-demo-quick" data-username="dr.sarah.khan" data-password="OptiExam@2026!" data-role="Designer / Tenant Admin (dr.sarah.khan)" title="Designer (dr.sarah.khan)" style="--role-color: #6366F1;">
+            {% icon 'calendar' 'icon' %}
+          </button>
+
+          <!-- Item Writer -->
+          <button type="button" class="btn-demo-quick" data-username="prof.ahmed.bilal" data-password="OptiExam@2026!" data-role="Item Writer (prof.ahmed.bilal)" title="Item Writer (prof.ahmed.bilal)" style="--role-color: #F59E0B;">
+            {% icon 'edit' 'icon' %}
+          </button>
+
+          <!-- Grader -->
+          <button type="button" class="btn-demo-quick" data-username="grader.zainab" data-password="OptiExam@2026!" data-role="Grader / Examiner (grader.zainab)" title="Grader (grader.zainab)" style="--role-color: #06B6D4;">
+            {% icon 'award' 'icon' %}
+          </button>
+
+          <!-- Candidate (Ready for Exam) -->
+          <button type="button" class="btn-demo-quick" data-username="ali.hassan" data-password="OptiExam@2026!" data-role="Candidate — Live Exam Ready (ali.hassan)" title="Candidate (ali.hassan)" style="--role-color: #10B981;">
+            {% icon 'zap' 'icon' %}
+          </button>
+        </div>
+
+        <div id="quick-login-hint" style="font-size: 0.76rem; color: var(--color-text-muted); margin-top: 10px; min-height: 16px;">
+          Click icon to fill • Double-click to instant login
+        </div>
       </div>
-    </div>
+    {% endif %}
   </div>
 </div>
+
+<style>
+.btn-demo-quick {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--role-color, var(--color-text-primary));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-demo-quick:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--role-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 10px var(--role-color);
+}
+.btn-demo-quick:active {
+  transform: translateY(0) scale(0.95);
+}
+.input-highlight {
+  animation: pulse-border 0.6s ease-in-out;
+}
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
+  50% { box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.4); }
+  100% { box-shadow: none; }
+}
+</style>
+
+<script>
+(function() {
+  var userInput = document.getElementById('id-login-username');
+  var passInput = document.getElementById('id-login-password');
+  var hintEl = document.getElementById('quick-login-hint');
+  var form = document.querySelector('form');
+  var clickTimer = null;
+
+  document.querySelectorAll('.btn-demo-quick').forEach(function(btn) {
+    var u = btn.getAttribute('data-username');
+    var p = btn.getAttribute('data-password');
+    var role = btn.getAttribute('data-role');
+
+    btn.addEventListener('mouseenter', function() {
+      if (hintEl) hintEl.textContent = role;
+    });
+
+    btn.addEventListener('mouseleave', function() {
+      if (hintEl) hintEl.textContent = "Click icon to fill • Double-click to instant login";
+    });
+
+    btn.addEventListener('click', function(e) {
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+        return;
+      }
+      clickTimer = setTimeout(function() {
+        if (userInput && passInput) {
+          userInput.value = u;
+          passInput.value = p;
+          userInput.classList.add('input-highlight');
+          passInput.classList.add('input-highlight');
+          setTimeout(function() {
+            userInput.classList.remove('input-highlight');
+            passInput.classList.remove('input-highlight');
+          }, 600);
+          if (hintEl) hintEl.innerHTML = "<span style='color: var(--color-success);'>Filled " + role + ". Click Sign In or double-click icon.</span>";
+        }
+        clickTimer = null;
+      }, 250);
+    });
+
+    btn.addEventListener('dblclick', function(e) {
+      e.preventDefault();
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+      }
+      if (userInput && passInput && form) {
+        userInput.value = u;
+        passInput.value = p;
+        if (hintEl) hintEl.innerHTML = "<span style='color: var(--color-success);'>Signing in as " + role + "...</span>";
+        form.submit();
+      }
+    });
+  });
+}());
+</script>
 {% endblock %}
