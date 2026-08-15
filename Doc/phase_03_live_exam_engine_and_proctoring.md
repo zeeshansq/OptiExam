@@ -193,6 +193,22 @@ static/
 2. Queries all `ExamAttempt` records where `status == IN_PROGRESS` and `started_at + duration + bonus_time < now()`.
 3. Marks them `AUTO_SUBMITTED`, updates `submitted_at = now()`, and logs audit entry.
 
+### Task 3.10: Candidate Dry-Run Simulation Studio (`apps/submissions` & `apps/exams`)
+1. **Interactive Candidate Sandbox Route:** `/{tenant_slug}/exams/{exam_id}/dry-run/`:
+   * Allows Designers (Tenant Admins) and authorized Item Writers to execute a full interactive dry run of the examination.
+   * Runs the exact same `exam_cockpit.html` interface, CSS, anti-cheat shields, timer, and question layouts that students experience.
+2. **Simulation Environment Isolation:**
+   * Creates an isolated simulation attempt with `is_simulation = True`.
+   * Completely excluded from official student rosters, grading queues, audit logs, and result statistics.
+3. **Interactive Simulation Controls:**
+   * **Simulation Floating Banner:** Non-intrusive top-right banner identifying `"DRY-RUN SIMULATION MODE"` with quick exit button.
+   * **Test Anti-Cheat Toggle:** Test fullscreen lock, tab-blur warnings, and clipboard intercept in safe sandbox mode.
+   * **Test Lifelines:** Execute 50:50 strikes, hints, and bookmark flags live.
+   * **1-Click Reset / Re-Shuffle:** Button to clear the simulation attempt and re-seed question/option shuffle to test different student variations.
+4. **Item Writer Access Control:**
+   * Automatically allows Item Writers to run simulations for exams that contain questions from their authorized question banks or where they are assigned.
+
+
 ---
 
 ## 4. Anti-Cheating & Exam Lifecycle State Machine

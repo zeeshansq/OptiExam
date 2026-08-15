@@ -89,6 +89,11 @@ All fonts declared in `optiexam-core.css` using local `@font-face`:
 2. **Non-Blocking Proctoring Logs:** `ProctoringLog.objects.create(...)` must be in `try/except` to never crash an active exam session.
 3. **Heartbeat Safety:** If heartbeat API fails, client queues to `localStorage` and retries with exponential backoff (3s, 6s, 12s).
 4. **Violation Escalation:** Violation count tracked on `ExamAttempt.violation_count`. Reaching `exam.max_tab_violations` triggers auto-submission via `submission_service.auto_submit_attempt(attempt)`.
+5. **Dry-Run Simulation Isolation:**
+   - Dry-run test attempts MUST be flagged with `is_simulation = True`.
+   - Simulation attempts are strictly excluded from all official grader queues, score averages, grade sheets, candidate logs, and analytics.
+   - Both Designers and authorized Item Writers have permission to launch simulation mode on blueprints they manage.
+
 
 ---
 

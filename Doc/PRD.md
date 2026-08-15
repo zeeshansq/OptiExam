@@ -352,6 +352,21 @@ All tabular data views (Tenants, Users, Question Banks, Blueprints, Attempts, Gr
 * Navigation is forward-only or bidirectional based on Designer's `allow_back_navigation` flag.
 * A **Summary Panel** before submission shows answered/unanswered/skipped totals and prompts confirmation.
 
+### 4.3 Candidate Simulation & Dry-Run Test Engine (Designer & Item Writer)
+* **Dedicated Route:** `/{tenant_slug}/exams/{exam_id}/dry-run/` or `/submissions/exams/{exam_id}/dry-run/`
+* **Purpose:** Allows Examination Designers (and authorized Item Writers for their assigned exams) to experience the complete candidate journey in a high-fidelity sandbox simulation before publishing or starting the exam.
+* **Fidelity & Behavior:**
+  * Renders the **identical** candidate examination cockpit with 100% of the active exam's security policies, timers, question layouts, lifelines, and restrictions.
+  * **Configurable Simulation Parameters:**
+    * **Simulated Anti-Cheat Restrictions:** Fullscreen enforcement, clipboard lock, tab-blur tracking, and warning modals operate in interactive test mode.
+    * **Simulated Lifelines:** Test 50:50 strikes, hints, and skip quotas live without mutating production student records.
+    * **Instant Reset & Replay:** Designers/Item Writers can wipe simulation state with 1 click to test different seeded shuffle iterations.
+  * **RBAC Authorization:**
+    * **Designers (Tenant Admins):** Authorized to dry-run any exam within their tenant workspace.
+    * **Item Writers:** Authorized to dry-run exams that contain questions from their authorized question banks or where explicitly assigned.
+  * **Zero Database Contamination:** Simulation attempts are tagged with `is_simulation=True` and isolated from official results, scorecards, audit logs, and grader queues.
+
+
 ---
 
 ## 5. Lifeline Engine Specification
