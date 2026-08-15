@@ -5,11 +5,23 @@
       {% icon 'bell' 'icon-sm' %}
       <span>In-App Notifications</span>
     </h4>
-    {% if unread_notifications_count > 0 %}
-      <span class="badge badge-primary">{{ unread_notifications_count }} New</span>
-    {% else %}
-      <span class="badge badge-secondary">0 New</span>
-    {% endif %}
+    <div class="flex items-center gap-2">
+      {% if unread_notifications_count > 0 %}
+        <span class="badge badge-primary">{{ unread_notifications_count }} New</span>
+        <button
+          id="btn-mark-all-read"
+          class="btn btn-ghost btn-sm"
+          style="padding: 2px 8px; font-size: 0.75rem;"
+          title="Mark all as read"
+          data-url="{% url 'accounts:notifications_mark_read' %}"
+        >
+          {% icon 'check' 'icon-sm' %}
+          <span>Mark All Read</span>
+        </button>
+      {% else %}
+        <span class="badge badge-secondary">0 New</span>
+      {% endif %}
+    </div>
   </div>
   <div class="notification-body">
     {% for alert in recent_notifications %}
@@ -38,3 +50,39 @@
     {% endfor %}
   </div>
 </div>
+<script>
+(function() {
+  var btn = document.getElementById('btn-mark-all-read');
+  if (!btn) return;
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var url = btn.getAttribute('data-url');
+    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken ? csrfToken.value : ''
+      },
+      body: JSON.stringify({})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.status === 'success') {
+        // Remove the unread badge from nav bell
+        var badge = document.querySelector('.nav-badge-count');
+        if (badge) badge.remove();
+        // Fade out mark-all-read button
+        btn.style.opacity = '0.4';
+        btn.disabled = true;
+        btn.querySelector('span').textContent = 'Done';
+        // Remove unread styling from items
+        document.querySelectorAll('.notification-item.unread').forEach(function(el) {
+          el.classList.remove('unread');
+        });
+      }
+    })
+    .catch(function() {});
+  });
+}());
+</script>

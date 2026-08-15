@@ -12,4 +12,8 @@ urlpatterns = [
     # Profile & Preferences
     path('profile/', profile_views.UserProfileView.as_view(), name='profile'),
     path('theme-toggle/', profile_views.ThemeToggleView.as_view(), name='theme_toggle'),
+
+    # In-App Notification Management
+    path('notifications/mark-read/', profile_views.MarkNotificationsReadView.as_view(), name='notifications_mark_read'),
 ]
+

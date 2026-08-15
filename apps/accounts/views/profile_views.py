@@ -48,3 +48,32 @@ class ThemeToggleView(LoginRequiredMixin, View):
         if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
             return JsonResponse({'status': 'success', 'theme': new_theme})
         return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+class MarkNotificationsReadView(LoginRequiredMixin, View):
+    """
+    AJAX endpoint to mark in-app notifications as read.
+    POST: marks all unread notifications for current user as read.
+    POST with `notification_id` in body: marks a specific one.
+    """
+    def post(self, request, *args, **kwargs):
+        from apps.accounts.models import Notification
+        import json
+        try:
+            body = json.loads(request.body or '{}')
+        except json.JSONDecodeError:
+            body = {}
+
+        notification_id = body.get('notification_id')
+        if notification_id:
+            updated = Notification.objects.filter(
+                user=request.user, id=notification_id
+            ).update(is_read=True)
+        else:
+            # Mark all as read
+            updated = Notification.objects.filter(
+                user=request.user, is_read=False
+            ).update(is_read=True)
+
+        return JsonResponse({'status': 'success', 'marked_read': updated})
+
