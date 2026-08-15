@@ -37,12 +37,21 @@ document.addEventListener('DOMContentLoaded', () => {
   if (notificationBell && notificationMenu) {
     notificationBell.addEventListener('click', (e) => {
       e.stopPropagation();
-      notificationMenu.classList.toggle('show');
+      const isShowing = notificationMenu.classList.toggle('show');
+      notificationBell.setAttribute('aria-expanded', isShowing ? 'true' : 'false');
     });
 
     document.addEventListener('click', (e) => {
-      if (!notificationMenu.contains(e.target) && e.target !== notificationBell) {
+      if (!notificationMenu.contains(e.target) && !notificationBell.contains(e.target)) {
         notificationMenu.classList.remove('show');
+        notificationBell.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && notificationMenu.classList.contains('show')) {
+        notificationMenu.classList.remove('show');
+        notificationBell.setAttribute('aria-expanded', 'false');
       }
     });
   }

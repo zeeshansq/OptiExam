@@ -4,18 +4,41 @@
 {% block title %}Candidate Roster — {{ exam.title }}{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">{% icon 'calendar' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">Exam Blueprints</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_detail' exam.pk %}">{{ exam.title }}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Candidate Roster</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'users' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'users' 'icon-lg' %}
+    </div>
     <div>
       <h2>Candidate Roster: {{ exam.title }}</h2>
       <p class="page-subtitle">{{ exam.code }} • {{ paginator.count|default:0 }} registered candidates with double-blind evaluation indices</p>
     </div>
   </div>
-  <div class="flex items-center gap-3">
+  <div class="page-actions">
     <a href="{% url 'exams:roster_import' exam.pk %}" class="btn btn-primary">
       {% icon 'upload' 'icon' %}
-      <span>Import Candidates (CSV/Excel)</span>
+      <span>Import Candidates</span>
     </a>
     <a href="{% url 'exams:exam_detail' exam.pk %}" class="btn btn-ghost">
       {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
@@ -27,7 +50,7 @@
 {% include "includes/page_guide.html" with guide_icon="users" guide_title="Double-Blind Candidate Roster" guide_text="Each student is allocated a sequential candidate_index (e.g. Candidate #001) used to anonymize submissions during double-blind human grading." %}
 
 <div class="glass-card" style="padding: 24px;">
-  <!-- Single-Line Filter Toolbar -->
+  <!-- Single-Line Filter Toolbar Standard -->
   <form method="get" class="table-filter-toolbar">
     <div class="filter-row-single">
       <div class="filter-search-field">
@@ -55,10 +78,8 @@
       </div>
     </div>
 
-    <div style="flex-shrink: 0;">
-      <span style="font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap;">
-        Total <strong>{{ paginator.count|default:0 }}</strong> candidate{{ paginator.count|pluralize }}
-      </span>
+    <div class="filter-count-badge">
+      <span>Total: <strong>{{ paginator.count|default:0 }}</strong> candidate{{ paginator.count|pluralize }}</span>
     </div>
   </form>
 
@@ -69,13 +90,13 @@
       {% if active_search_query %}
         <span class="filter-chip">
           Search: "{{ active_search_query }}"
-          <a href="{% query_transform q='' %}" title="Remove search filter">×</a>
+          <a href="?{% query_transform q='' %}" title="Remove search filter">×</a>
         </span>
       {% endif %}
       {% if active_status_filter %}
         <span class="filter-chip">
           Status: {{ active_status_filter }}
-          <a href="{% query_transform status='' %}" title="Remove status filter">×</a>
+          <a href="?{% query_transform status='' %}" title="Remove status filter">×</a>
         </span>
       {% endif %}
     </div>
@@ -109,10 +130,10 @@
             <td style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-text-secondary);">
               {{ entry.registration_number|default:entry.participant.profile.registration_number|default:"-" }}
             </td>
-            <td style="font-size: 0.85rem; color: var(--color-text-muted);">
+            <td style="font-size: 0.84rem; color: var(--color-text-muted);">
               {{ entry.participant.email }}
             </td>
-            <td style="font-size: 0.85rem; color: var(--color-text-secondary);">
+            <td style="font-size: 0.84rem; color: var(--color-text-secondary);">
               {{ entry.participant.profile.department|default:"General" }}
               {% if entry.participant.profile.batch_year %}
                 <span style="color: var(--color-text-muted);">({{ entry.participant.profile.batch_year }})</span>
@@ -120,11 +141,20 @@
             </td>
             <td>
               {% if entry.status == 'ENROLLED' %}
-                <span class="badge badge-success">Enrolled</span>
+                <span class="badge badge-success">
+                  <span class="status-dot"></span>
+                  <span>Enrolled</span>
+                </span>
               {% elif entry.status == 'ABSENT' %}
-                <span class="badge badge-warning">Absent</span>
+                <span class="badge badge-warning">
+                  <span class="status-dot"></span>
+                  <span>Absent</span>
+                </span>
               {% else %}
-                <span class="badge badge-danger">Revoked</span>
+                <span class="badge badge-danger">
+                  <span class="status-dot"></span>
+                  <span>Revoked</span>
+                </span>
               {% endif %}
             </td>
             <td style="color: var(--color-text-muted); font-size: 0.82rem;">

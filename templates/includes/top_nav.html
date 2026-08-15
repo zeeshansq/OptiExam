@@ -1,35 +1,48 @@
 {% load static optiexam_tags %}
 <header class="top-nav" style="border-top: 3px solid {{ tenant_primary_color|default:'#4F46E5' }};">
   <div class="container top-nav-inner">
-    <!-- Brand / Tenant Identity -->
+    <!-- Left: Brand / Tenant Identity -->
     <a href="{% url 'accounts:role_redirect' %}" class="nav-brand">
       {% if tenant_logo %}
-        <img src="{{ tenant_logo }}" alt="{{ tenant_name }}">
+        <img src="{{ tenant_logo }}" alt="{{ tenant_name }}" class="nav-brand-logo">
       {% else %}
-        <img src="{% static 'img/optiexam-logo.svg' %}" alt="OptiExam">
+        <img src="{% static 'img/optiexam-logo.svg' %}" alt="OptiExam" class="nav-brand-logo">
       {% endif %}
       <span class="nav-brand-text">
         {{ tenant_name|default:"OptiExam Platform" }}
       </span>
     </a>
 
-    <!-- Quick Module Navigation Links -->
-    <nav class="flex items-center gap-2" style="margin-left: 20px;">
+    <!-- Center: Role-Based Module Navigation Links -->
+    <nav class="nav-modules-menu" aria-label="Module Navigation">
       {% if is_super_admin %}
-        <a href="{% url 'tenants:super_admin_dashboard' %}" class="btn btn-ghost btn-sm">SaaS Hub</a>
-        <a href="{% url 'tenants:audit_logs' %}" class="btn btn-ghost btn-sm">Audit Logs</a>
-      {% endif %}
-      {% if is_designer %}
-        <a href="{% url 'exams:exam_list' %}" class="btn btn-ghost btn-sm">
+        <a href="{% url 'tenants:super_admin_dashboard' %}" class="nav-link {% if 'admin/saas' in request.path and 'audit' not in request.path %}active{% endif %}">
+          {% icon 'server' 'icon' %}
+          <span>SaaS Hub</span>
+        </a>
+        <a href="{% url 'tenants:audit_logs' %}" class="nav-link {% if 'audit-logs' in request.path %}active{% endif %}">
+          {% icon 'shield' 'icon' %}
+          <span>Audit Logs</span>
+        </a>
+        <a href="{% url 'exams:exam_list' %}" class="nav-link {% if '/exams/' in request.path %}active{% endif %}">
+          {% icon 'calendar' 'icon' %}
+          <span>Exams</span>
+        </a>
+        <a href="{% url 'questions:bank_list' %}" class="nav-link {% if '/questions/' in request.path %}active{% endif %}">
+          {% icon 'database' 'icon' %}
+          <span>Question Banks</span>
+        </a>
+      {% elif is_designer %}
+        <a href="{% url 'exams:exam_list' %}" class="nav-link {% if '/exams/' in request.path or '/dashboard/' in request.path %}active{% endif %}">
           {% icon 'calendar' 'icon' %}
           <span>Exam Blueprints</span>
         </a>
-        <a href="{% url 'questions:bank_list' %}" class="btn btn-ghost btn-sm">
+        <a href="{% url 'questions:bank_list' %}" class="nav-link {% if '/questions/' in request.path %}active{% endif %}">
           {% icon 'database' 'icon' %}
           <span>Question Banks</span>
         </a>
       {% elif is_item_writer %}
-        <a href="{% url 'questions:bank_list' %}" class="btn btn-ghost btn-sm">
+        <a href="{% url 'questions:bank_list' %}" class="nav-link {% if '/questions/' in request.path %}active{% endif %}">
           {% icon 'database' 'icon' %}
           <span>Question Banks</span>
         </a>
@@ -45,7 +58,7 @@
       </div>
     {% endif %}
 
-    <!-- Navigation Action Chrome -->
+    <!-- Right: Navigation Action Chrome -->
     <div class="nav-actions">
       <!-- Fullscreen Toggle Icon -->
       <button id="btn-fullscreen-toggle" class="nav-icon-btn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
@@ -62,8 +75,8 @@
       </button>
 
       <!-- In-App Notification Bell -->
-      <div style="position: relative;">
-        <button id="notification-bell" class="nav-icon-btn" title="Notifications" aria-label="View Notifications">
+      <div class="notification-wrapper">
+        <button id="notification-bell" class="nav-icon-btn" title="Notifications" aria-label="View Notifications" aria-expanded="false">
           {% icon 'bell' 'icon' %}
           {% if unread_notifications_count > 0 %}
             <span class="nav-badge-count">{{ unread_notifications_count }}</span>
@@ -75,8 +88,8 @@
       <!-- User Profile Badge & Logout -->
       <div class="user-profile-badge">
         <img src="{{ user_avatar|default:'/static/img/default-avatar.svg' }}" alt="{{ request.user.username }}" class="user-avatar-img">
-        <div style="display: flex; flex-direction: column;">
-          <span style="font-size: 0.85rem; font-weight: 700; color: var(--color-text-primary); line-height: 1.1;">
+        <div class="user-meta-group">
+          <span class="user-name-text">
             {{ request.user.get_full_name|default:request.user.username }}
           </span>
           <span class="user-role-tag">{{ user_role_name|default:"User" }}</span>

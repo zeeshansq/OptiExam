@@ -294,10 +294,17 @@ All tabular data views (Tenants, Users, Question Banks, Blueprints, Attempts, Gr
    * Tooltip help text must remain concise (action name only, without appending row names or extraneous details).
    * Destructive actions require a confirmation view before execution.
 
+### 3.8 Universal Breadcrumb Navigation & Monospace Tabular Numerals Standard
+1. **Hierarchical Breadcrumbs Navigation:**
+   * Every page renders hierarchical breadcrumbs via `<nav class="breadcrumbs-bar">` and `{% include "includes/breadcrumbs.html" %}` to maintain immediate location and navigational context (`Home / Question Banks / Repository / Questions / Question #1`).
+2. **Monospace Tabular Numerals:**
+   * Scores, question marks, penalties, student counts, quotas, and candidate indices are styled with `.metric-numeral` (`font-family: var(--font-mono); font-variant-numeric: tabular-nums;`) ensuring precise vertical visual alignment across tabular rows.
+3. **Step-Numbered Badges:**
+   * Form sections feature numbered gradient step badges (`<span class="form-step-badge">1</span>`, `2`, `3`...) with full-width floating/sticky `.form-actions-bar`.
+4. **Status Dots:**
+   * Badges include status indicator dots with glow (`<span class="status-dot"></span>`).
 
 ---
-
-
 
 ## 4. Examination Cockpit & Anti-Cheating Suite
 

@@ -1,48 +1,78 @@
 {% extends "base_app.html" %}
 {% load static optiexam_tags %}
 
-{% block title %}{{ tenant_obj.name }} — Institution Inspection{% endblock %}
+{% block title %}{{ tenant_obj.name }} — Institution Cockpit{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'tenants:super_admin_dashboard' %}">{% icon 'shield' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'tenants:super_admin_dashboard' %}">Institutions</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>{{ tenant_obj.name }}</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'school' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'school' 'icon-lg' %}
+    </div>
     <div>
       <h2>{{ tenant_obj.name }}</h2>
-      <p class="page-subtitle">
-        URL Slug: <code>/{{ tenant_obj.slug }}/</code> &nbsp;|&nbsp; 
-        Tier: <span class="badge badge-primary">{{ tenant_obj.get_tier_display }}</span> &nbsp;|&nbsp;
-        Status: {% if tenant_obj.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Suspended</span>{% endif %}
-      </p>
+      <div class="flex items-center gap-2" style="margin-top: 4px;">
+        <code style="font-size: 0.82rem;">/{{ tenant_obj.slug }}/</code>
+        <span class="badge badge-primary">{{ tenant_obj.get_tier_display }}</span>
+        {% if tenant_obj.is_active %}
+          <span class="badge badge-success">
+            <span class="status-dot"></span>
+            <span>Active</span>
+          </span>
+        {% else %}
+          <span class="badge badge-danger">
+            <span class="status-dot"></span>
+            <span>Suspended</span>
+          </span>
+        {% endif %}
+      </div>
     </div>
   </div>
-  <div class="flex items-center gap-3">
+  <div class="page-actions">
     <a href="{% url 'tenants:tenant_update' tenant_obj.pk %}" class="btn btn-primary">
       {% icon 'edit' 'icon' %}
-      <span>Edit Institution</span>
+      <span>Edit Settings</span>
     </a>
     <a href="{% url 'tenants:tenant_delete' tenant_obj.pk %}" class="btn btn-ghost" style="color: var(--color-danger); border-color: rgba(239, 68, 68, 0.3);">
       {% icon 'trash-2' 'icon' %}
       <span>Deactivate / Delete</span>
     </a>
     <a href="{% url 'tenants:super_admin_dashboard' %}" class="btn btn-ghost">
-      <span>Back to Directory</span>
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back</span>
     </a>
   </div>
 </div>
 
-<div class="grid grid-cols-3 gap-6" style="margin-bottom: 28px;">
+<div class="grid grid-cols-3 gap-6" style="margin-bottom: 24px;">
   <!-- Summary Card -->
   <div class="glass-card" style="padding: 24px;">
     <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
       {% icon 'shield' 'icon' %}
       <span>Institutional Profile</span>
     </h3>
-    <div style="font-size: 0.9rem; line-height: 1.8;">
-      <p><strong>Primary Color:</strong> <span style="display: inline-block; width: 14px; height: 14px; background: {{ tenant_obj.primary_color }}; vertical-align: middle; border-radius: 3px; box-shadow: 0 0 6px {{ tenant_obj.primary_color }};"></span> {{ tenant_obj.primary_color }}</p>
+    <div style="font-size: 0.88rem; line-height: 1.8;">
+      <p><strong>Primary Color:</strong> <span style="display: inline-block; width: 12px; height: 12px; background: {{ tenant_obj.primary_color }}; vertical-align: middle; border-radius: 3px; box-shadow: 0 0 6px {{ tenant_obj.primary_color }};"></span> {{ tenant_obj.primary_color }}</p>
       <p><strong>Domain:</strong> {{ tenant_obj.domain|default:"Default Platform Subpath" }}</p>
-      <p><strong>Max Capacity:</strong> {{ tenant_obj.max_concurrent_candidates }} Concurrent Candidates</p>
-      <p><strong>Registered Users:</strong> {{ tenant_users_count|default:0 }} accounts</p>
+      <p><strong>Max Capacity:</strong> <span class="metric-numeral">{{ tenant_obj.max_concurrent_candidates }}</span> Candidates</p>
+      <p><strong>Registered Accounts:</strong> <span class="metric-numeral">{{ tenant_users_count|default:0 }}</span> users</p>
       <p><strong>Contact Email:</strong> {{ tenant_obj.contact_email|default:"N/A" }}</p>
       <p><strong>Provisioned Date:</strong> {{ tenant_obj.created_at|date:"M d, Y H:i" }}</p>
     </div>
@@ -68,10 +98,13 @@
           {% for flag in feature_flags %}
             <tr>
               <td style="font-weight: 600;">{{ flag.get_feature_key_display }}</td>
-              <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--color-text-muted);">{{ flag.feature_key }}</td>
+              <td><code style="font-size: 0.78rem;">{{ flag.feature_key }}</code></td>
               <td>
                 {% if flag.is_enabled %}
-                  <span class="badge badge-success" id="badge-{{ flag.feature_key }}">Enabled</span>
+                  <span class="badge badge-success" id="badge-{{ flag.feature_key }}">
+                    <span class="status-dot"></span>
+                    <span>Enabled</span>
+                  </span>
                 {% else %}
                   <span class="badge badge-secondary" id="badge-{{ flag.feature_key }}">Disabled</span>
                 {% endif %}
@@ -91,8 +124,6 @@
                 </form>
               </td>
             </tr>
-
-
           {% empty %}
             <tr>
               <td colspan="4" style="text-align: center; color: var(--color-text-muted);">No feature flags defined for this tenant.</td>
@@ -108,7 +139,7 @@
 <div class="glass-card" style="padding: 24px;">
   <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
     {% icon 'activity' 'icon' %}
-    <span>Recent Institutional Audit Logs</span>
+    <span>Recent Institutional Audit Trail</span>
   </h3>
   <div class="table-responsive">
     <table class="data-table">
@@ -128,7 +159,7 @@
             <td style="font-weight: 600;">{{ log.user.username|default:"System" }}</td>
             <td><span class="badge badge-primary">{{ log.get_category_display }}</span></td>
             <td>{{ log.action }}</td>
-            <td style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--color-text-secondary);">{{ log.ip_address|default:"-" }}</td>
+            <td><code style="font-size: 0.78rem;">{{ log.ip_address|default:"-" }}</code></td>
           </tr>
         {% empty %}
           <tr>

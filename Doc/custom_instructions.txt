@@ -94,11 +94,14 @@ MANDATORY RULES (DO NOT VIOLATE):
     - Render a 10-row confirmation preview grid and row-by-row error table on validation failure.
     - Record all import jobs in DataImportJob (apps.core.models) with metrics and error logs.
 
-16. WHOLE-PROJECT UI/UX, SINGLE-LINE FILTERS & PAGINATION INVARIANTS:
+16. WHOLE-PROJECT UI/UX, SINGLE-LINE FILTERS, BREADCRUMBS & PAGINATION INVARIANTS:
     - 100% Full-Screen Width Fluid Layout (.container, .container-fluid). Never use fixed narrow max-widths.
-    - Single-Line Filter Toolbar (.filter-row-single) with search input, dropdowns, [Filter] button, and [Clear] icon button (rotate-ccw).
+    - Universal Hierarchical Breadcrumbs ({% include 'includes/breadcrumbs.html' %}) on all module views.
+    - Single-Line Filter Toolbar (.filter-row-single) with search input, dropdowns, [Filter] button, [Clear] icon button (rotate-ccw), and total count badge in a single 40px uniform line.
     - Interactive Data Tables with clickable two-way column sorting ({% sort_header %}) and full-featured windowed pagination ({% include 'includes/pagination.html' %}).
-    - Balanced 2-Column Full-Width Forms (<div class="grid grid-cols-2 gap-6">) with .form-section-card groupings, sensible prefilled defaults, auto-slugification, color preset swatches, and full-width bottom action bars.
-    - Icon-Only Colorful Action Buttons (.action-btn-inspect, .action-btn-edit, .action-btn-delete, .action-btn-success) with premium hover tooltips (data-tooltip="...").
+    - Balanced 2-Column Full-Width Forms (<div class="grid grid-cols-2 gap-6">) with .form-section-card groupings, numbered step badges (<span class="form-step-badge">1</span>), sensible prefilled defaults, auto-slugification, and full-width bottom action bars (.form-actions-bar).
+    - Icon-Only Colorful Action Buttons (.action-btn-inspect, .action-btn-edit, .action-btn-delete, .action-btn-success) with concise hover tooltips (data-tooltip="Direct Action" without row names).
+    - Monospace Tabular Numerals (.metric-numeral) for all scores, counts, durations, and indices; status badges with glowing status dots (.status-dot).
+
 
 

@@ -1,31 +1,51 @@
 {% extends "base_app.html" %}
 {% load static optiexam_tags %}
 
-{% block title %}{{ bank.name }} — Question Directory{% endblock %}
+{% block title %}{{ bank.name }} — Questions Directory{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'questions:bank_list' %}">{% icon 'database' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'questions:bank_list' %}">Question Banks</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>{{ bank.name }}</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'database' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'database' 'icon-lg' %}
+    </div>
     <div>
       <h2>{{ bank.name }}</h2>
       <p class="page-subtitle">{{ bank.subject }} {% if bank.code %}• <code>{{ bank.code }}</code>{% endif %} • {{ paginator.count|default:0 }} total questions</p>
     </div>
   </div>
-  <div class="flex items-center gap-3">
+  <div class="page-actions">
     <a href="{% url 'questions:question_create_mcq' bank.pk %}" class="btn btn-primary">
       {% icon 'plus' 'icon' %}
-      <span>Add MCQ Question</span>
+      <span>Add MCQ</span>
     </a>
     <a href="{% url 'questions:question_create_subjective' bank.pk %}" class="btn btn-accent">
       {% icon 'file-text' 'icon' %}
-      <span>Add Essay / Subjective</span>
+      <span>Add Subjective</span>
     </a>
     <a href="{% url 'questions:bank_import' bank.pk %}" class="btn btn-ghost">
       {% icon 'upload' 'icon' %}
       <span>Bulk Import</span>
     </a>
     <a href="{% url 'questions:bank_list' %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
       <span>All Banks</span>
     </a>
   </div>
@@ -34,7 +54,7 @@
 {% include "includes/page_guide.html" with guide_icon="file-text" guide_title="Question Authoring Directory" guide_text="Filter questions by Bloom's Taxonomy, difficulty, and format. Click Inspect to preview model solutions or Edit to modify rubrics and answer keys." %}
 
 <div class="glass-card" style="padding: 24px;">
-  <!-- Single-Line Filter Toolbar -->
+  <!-- Single-Line Filter Toolbar Standard -->
   <form method="get" class="table-filter-toolbar">
     <div class="filter-row-single">
       <div class="filter-search-field">
@@ -68,10 +88,8 @@
       </div>
     </div>
 
-    <div style="flex-shrink: 0;">
-      <span style="font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap;">
-        Found <strong>{{ paginator.count|default:0 }}</strong> item{{ paginator.count|pluralize }}
-      </span>
+    <div class="filter-count-badge">
+      <span>Total: <strong>{{ paginator.count|default:0 }}</strong> item{{ paginator.count|pluralize }}</span>
     </div>
   </form>
 
@@ -82,25 +100,25 @@
       {% if active_search_query %}
         <span class="filter-chip">
           Search: "{{ active_search_query }}"
-          <a href="{% query_transform q='' %}" title="Remove search filter">×</a>
+          <a href="?{% query_transform q='' %}" title="Remove search filter">×</a>
         </span>
       {% endif %}
       {% if active_type_filter %}
         <span class="filter-chip">
           Type: {{ active_type_filter }}
-          <a href="{% query_transform question_type='' %}" title="Remove type filter">×</a>
+          <a href="?{% query_transform question_type='' %}" title="Remove type filter">×</a>
         </span>
       {% endif %}
       {% if active_difficulty_filter %}
         <span class="filter-chip">
           Difficulty: {{ active_difficulty_filter }}
-          <a href="{% query_transform difficulty='' %}" title="Remove difficulty filter">×</a>
+          <a href="?{% query_transform difficulty='' %}" title="Remove difficulty filter">×</a>
         </span>
       {% endif %}
       {% if active_blooms_filter %}
         <span class="filter-chip">
           Bloom's: {{ active_blooms_filter }}
-          <a href="{% query_transform blooms_level='' %}" title="Remove Bloom's filter">×</a>
+          <a href="?{% query_transform blooms_level='' %}" title="Remove Bloom's filter">×</a>
         </span>
       {% endif %}
     </div>
@@ -137,12 +155,10 @@
               <span class="badge badge-secondary">{{ q.get_question_type_display }}</span>
             </td>
             <td>
-              <span style="font-weight: 700; font-family: var(--font-mono); color: var(--color-primary);">
-                {{ q.points }} pts
-              </span>
+              <span class="metric-numeral">{{ q.points }} pts</span>
               {% if q.negative_points > 0 %}
                 <span style="display: block; font-size: 0.72rem; color: var(--color-danger); font-family: var(--font-mono);">
-                  -{{ q.negative_points }} penalty
+                  -{{ q.negative_points }} pen
                 </span>
               {% endif %}
             </td>

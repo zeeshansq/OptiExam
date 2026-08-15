@@ -4,13 +4,34 @@
 {% block title %}Designer Studio — {{ tenant_name }}{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'accounts:role_redirect' %}">{% icon 'home' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Designer Studio</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'layers' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'layers' 'icon-lg' %}
+    </div>
     <div>
       <h2>Examination Designer Studio</h2>
       <p class="page-subtitle">Institution: <strong>{{ tenant_name }}</strong> (Tenant Admin: {{ request.user.username }})</p>
     </div>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'exams:exam_create' %}" class="btn btn-primary">
+      {% icon 'plus' 'icon' %}
+      <span>Create Blueprint</span>
+    </a>
   </div>
 </div>
 
@@ -22,7 +43,7 @@
       {% icon 'calendar' 'icon' %}
       <span>Exam Blueprints</span>
     </h3>
-    <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 16px;">
+    <p style="font-size: 0.86rem; color: var(--color-text-secondary); margin-bottom: 16px;">
       Construct multi-section exams, passing thresholds, anti-cheating policies, and lifeline configs.
     </p>
     <div class="flex items-center gap-2">
@@ -42,7 +63,7 @@
       {% icon 'database' 'icon' %}
       <span>Question Repositories</span>
     </h3>
-    <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 16px;">
+    <p style="font-size: 0.86rem; color: var(--color-text-secondary); margin-bottom: 16px;">
       Browse institutional question banks, review item quality, and link questions to exam sections.
     </p>
     <div class="flex items-center gap-2">
@@ -58,10 +79,13 @@
       {% icon 'activity' 'icon' %}
       <span>Live Exam Ops</span>
     </h3>
-    <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 16px;">
+    <p style="font-size: 0.86rem; color: var(--color-text-secondary); margin-bottom: 16px;">
       Real-time candidate matrix, bonus time injection, and live proctoring control room.
     </p>
-    <span class="badge badge-warning">Phase 3 Module</span>
+    <span class="badge badge-warning">
+      <span class="status-dot"></span>
+      <span>Phase 3 Module</span>
+    </span>
   </div>
 </div>
 {% endblock %}

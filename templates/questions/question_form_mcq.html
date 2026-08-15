@@ -4,15 +4,38 @@
 {% block title %}{% if is_create %}New Multiple Choice Question{% else %}Edit Question #{{ question.pk }}{% endif %} — {{ bank.name }}{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'questions:bank_list' %}">{% icon 'database' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'questions:bank_list' %}">Question Banks</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'questions:bank_detail' bank.pk %}">{{ bank.name }}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>{% if is_create %}Author MCQ{% else %}Edit Question #{{ question.pk }}{% endif %}</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'file-text' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'file-text' 'icon-lg' %}
+    </div>
     <div>
       <h2>{% if is_create %}Author Multiple Choice Question{% else %}Edit Multiple Choice Question #{{ question.pk }}{% endif %}</h2>
       <p class="page-subtitle">{{ bank.name }} ({{ bank.subject }})</p>
     </div>
   </div>
-  <div>
+  <div class="page-actions">
     <a href="{% url 'questions:bank_detail' bank.pk %}" class="btn btn-ghost">
       {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
       <span>Back to {{ bank.name }}</span>
@@ -32,37 +55,43 @@
       <!-- Section 1: Question Core & Prompt -->
       <div class="form-section-card" style="margin-bottom: 0;">
         <div class="form-section-header">
-          {% icon 'file-text' 'icon-lg' %}
+          <span class="form-step-badge">1</span>
           <div>
-            <h3>1. Question Format & Statement</h3>
+            <h3>Question Format & Statement</h3>
             <p>Define question text and format specification.</p>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div class="form-group">
-            <label class="form-label">Question Format <span style="color: var(--color-danger);">*</span></label>
+            <label class="form-label">
+              <span>Question Format</span>
+              <span class="required-indicator">*</span>
+            </label>
             {{ form.question_type }}
-            {% if form.question_type.errors %}<div class="form-error">{{ form.question_type.errors.0 }}</div>{% endif %}
+            {% if form.question_type.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.question_type.errors.0 }}</div>{% endif %}
           </div>
           <div class="form-group">
             <label class="form-label">Target Repository</label>
             {{ form.bank }}
-            {% if form.bank.errors %}<div class="form-error">{{ form.bank.errors.0 }}</div>{% endif %}
+            {% if form.bank.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.bank.errors.0 }}</div>{% endif %}
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Question Prompt / Problem Statement <span style="color: var(--color-danger);">*</span></label>
+          <label class="form-label">
+            <span>Question Prompt / Problem Statement</span>
+            <span class="required-indicator">*</span>
+          </label>
           {{ form.prompt }}
-          {% if form.prompt.errors %}<div class="form-error">{{ form.prompt.errors.0 }}</div>{% endif %}
+          {% if form.prompt.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.prompt.errors.0 }}</div>{% endif %}
           <div class="form-help">Supports plain text, mathematical notation, and code snippets.</div>
         </div>
 
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label">Attached Diagram / Visual Asset (Optional)</label>
           {{ form.image_asset }}
-          {% if form.image_asset.errors %}<div class="form-error">{{ form.image_asset.errors.0 }}</div>{% endif %}
+          {% if form.image_asset.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.image_asset.errors.0 }}</div>{% endif %}
           <div class="form-help">Uploaded high-res diagram will appear inside candidate examination cockpit.</div>
         </div>
       </div>
@@ -70,9 +99,9 @@
       <!-- Section 2: Choice Options Formset -->
       <div class="form-section-card" style="margin-bottom: 0;">
         <div class="form-section-header">
-          {% icon 'check-circle' 'icon-lg' %}
+          <span class="form-step-badge">2</span>
           <div>
-            <h3>2. Choice Options & Answer Keys</h3>
+            <h3>Choice Options & Answer Keys</h3>
             <p>Mark correct answer(s). Single choice must have exactly 1 correct key.</p>
           </div>
         </div>
@@ -80,7 +109,7 @@
         {{ formset.management_form }}
         {% if formset.non_form_errors %}
           <div class="form-error" style="margin-bottom: 12px; font-weight: 600;">
-            {{ formset.non_form_errors.0 }}
+            {% icon 'alert-circle' 'icon-sm' %} {{ formset.non_form_errors.0 }}
           </div>
         {% endif %}
 
@@ -93,16 +122,16 @@
                   <div class="flex items-center gap-3">
                     <label class="flex items-center gap-2" style="cursor: pointer;" title="Mark as correct answer">
                       {{ opt_form.is_correct }}
-                      <span style="font-size: 0.8rem; font-weight: 700; color: var(--color-accent);">Correct Key</span>
+                      <span style="font-size: 0.80rem; font-weight: 700; color: var(--color-accent);">Correct Key</span>
                     </label>
                     <div style="flex: 1;">
                       {{ opt_form.option_text }}
                     </div>
                   </div>
-                  {% if opt_form.option_text.errors %}<div class="form-error">{{ opt_form.option_text.errors.0 }}</div>{% endif %}
+                  {% if opt_form.option_text.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ opt_form.option_text.errors.0 }}</div>{% endif %}
                 </div>
                 {% if opt_form.instance.pk %}
-                  <div style="font-size: 0.8rem; color: var(--color-danger);">
+                  <div style="font-size: 0.80rem; color: var(--color-danger);">
                     <label>{{ opt_form.DELETE }} Delete</label>
                   </div>
                 {% endif %}
@@ -123,23 +152,26 @@
       <!-- Section 3: Scoring & Penalties -->
       <div class="form-section-card" style="margin-bottom: 0;">
         <div class="form-section-header">
-          {% icon 'activity' 'icon-lg' %}
+          <span class="form-step-badge">3</span>
           <div>
-            <h3>3. Scoring Scheme & Penalties</h3>
+            <h3>Scoring Scheme & Penalties</h3>
             <p>Define points awarded for correct answer and penalty deductions.</p>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div class="form-group">
-            <label class="form-label">Base Points (Marks) <span style="color: var(--color-danger);">*</span></label>
+            <label class="form-label">
+              <span>Base Points (Marks)</span>
+              <span class="required-indicator">*</span>
+            </label>
             {{ form.points }}
-            {% if form.points.errors %}<div class="form-error">{{ form.points.errors.0 }}</div>{% endif %}
+            {% if form.points.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.points.errors.0 }}</div>{% endif %}
           </div>
           <div class="form-group">
             <label class="form-label">Negative Penalty (Wrong Answer)</label>
             {{ form.negative_points }}
-            {% if form.negative_points.errors %}<div class="form-error">{{ form.negative_points.errors.0 }}</div>{% endif %}
+            {% if form.negative_points.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.negative_points.errors.0 }}</div>{% endif %}
             <div class="form-help">Deducted when candidate selects incorrect option.</div>
           </div>
         </div>
@@ -148,9 +180,9 @@
       <!-- Section 4: Pedagogical Classification -->
       <div class="form-section-card" style="margin-bottom: 0;">
         <div class="form-section-header">
-          {% icon 'layers' 'icon-lg' %}
+          <span class="form-step-badge">4</span>
           <div>
-            <h3>4. Bloom's Taxonomy & Classification</h3>
+            <h3>Bloom's Taxonomy & Classification</h3>
             <p>Tag question for item analysis and cohort blueprinting.</p>
           </div>
         </div>
@@ -159,26 +191,26 @@
           <div class="form-group">
             <label class="form-label">Difficulty Rating</label>
             {{ form.difficulty }}
-            {% if form.difficulty.errors %}<div class="form-error">{{ form.difficulty.errors.0 }}</div>{% endif %}
+            {% if form.difficulty.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.difficulty.errors.0 }}</div>{% endif %}
           </div>
           <div class="form-group">
-            <label class="form-label">Bloom's Taxonomy Cognitive Level</label>
+            <label class="form-label">Bloom's Taxonomy Level</label>
             {{ form.blooms_level }}
-            {% if form.blooms_level.errors %}<div class="form-error">{{ form.blooms_level.errors.0 }}</div>{% endif %}
+            {% if form.blooms_level.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.blooms_level.errors.0 }}</div>{% endif %}
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-label">Topic / Syllabus Keywords</label>
           {{ form.topic_tags }}
-          {% if form.topic_tags.errors %}<div class="form-error">{{ form.topic_tags.errors.0 }}</div>{% endif %}
+          {% if form.topic_tags.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.topic_tags.errors.0 }}</div>{% endif %}
           <div class="form-help">Comma-separated tags (e.g. <code>recursion, linked-list, memory</code>).</div>
         </div>
 
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label">Hint Token Content (Optional)</label>
           {{ form.hint_text }}
-          {% if form.hint_text.errors %}<div class="form-error">{{ form.hint_text.errors.0 }}</div>{% endif %}
+          {% if form.hint_text.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.hint_text.errors.0 }}</div>{% endif %}
           <div class="form-help">Revealed only if candidate consumes a Hint Token lifeline during exam.</div>
         </div>
       </div>
@@ -186,9 +218,9 @@
       <!-- Section 5: Model Explanation -->
       <div class="form-section-card" style="margin-bottom: 0;">
         <div class="form-section-header">
-          {% icon 'shield' 'icon-lg' %}
+          <span class="form-step-badge">5</span>
           <div>
-            <h3>5. Model Solution & Post-Exam Explanation</h3>
+            <h3>Model Solution & Post-Exam Explanation</h3>
             <p>Confidential explanation for examiners and post-release review.</p>
           </div>
         </div>
@@ -196,7 +228,7 @@
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label">Model Solution Rationale</label>
           {{ form.model_answer }}
-          {% if form.model_answer.errors %}<div class="form-error">{{ form.model_answer.errors.0 }}</div>{% endif %}
+          {% if form.model_answer.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.model_answer.errors.0 }}</div>{% endif %}
           <div class="form-help">Displayed to candidate only after results are published.</div>
         </div>
       </div>
@@ -206,8 +238,8 @@
   </div>
 
   <!-- Full-Width Bottom Actions Bar -->
-  <div class="glass-card flex items-center justify-between" style="padding: 20px 24px; margin-top: 24px;">
-    <div style="font-size: 0.85rem; color: var(--color-text-muted);">
+  <div class="form-actions-bar">
+    <div class="flex items-center gap-2" style="font-size: 0.84rem; color: var(--color-text-muted);">
       {% icon 'shield' 'icon' %}
       <span>Questions are immediately available for Exam Blueprint section assignment.</span>
     </div>

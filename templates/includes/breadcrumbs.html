@@ -1,0 +1,23 @@
+{% load static optiexam_tags %}
+{% if breadcrumbs %}
+<nav class="breadcrumbs-bar" aria-label="Breadcrumb Navigation">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'accounts:role_redirect' %}" title="Dashboard Home">
+        {% icon 'home' 'icon-sm' %}
+      </a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    {% for item in breadcrumbs %}
+      <li class="breadcrumb-item {% if forloop.last %}active{% endif %}">
+        {% if item.url and not forloop.last %}
+          <a href="{{ item.url }}">{{ item.label }}</a>
+          <span class="breadcrumb-separator">/</span>
+        {% else %}
+          <span>{{ item.label }}</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+</nav>
+{% endif %}

@@ -4,15 +4,34 @@
 {% block title %}{% if form.instance.pk %}Edit {{ form.instance.name }}{% else %}Provision Institution{% endif %} — OptiExam{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'tenants:super_admin_dashboard' %}">{% icon 'shield' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'tenants:super_admin_dashboard' %}">Institutions</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>{% if form.instance.pk %}Edit {{ form.instance.name }}{% else %}Provision Institution{% endif %}</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'school' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'school' 'icon-lg' %}
+    </div>
     <div>
       <h2>{% if form.instance.pk %}Edit {{ form.instance.name }}{% else %}Provision Educational Institution{% endif %}</h2>
-      <p class="page-subtitle">Configure institutional profile, concurrent candidate quotas, branding, and status</p>
+      <p class="page-subtitle">Configure institutional identity, concurrent candidate quotas, branding, and activation</p>
     </div>
   </div>
-  <div>
+  <div class="page-actions">
     <a href="{% url 'tenants:super_admin_dashboard' %}" class="btn btn-ghost">
       {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
       <span>Back to Directory</span>
@@ -30,33 +49,39 @@
     <div class="flex flex-col gap-6">
       
       <!-- Section 1: Institutional Identity -->
-      <div class="form-section-card" style="height: 100%; margin-bottom: 0;">
+      <div class="form-section-card" style="margin-bottom: 0;">
         <div class="form-section-header">
-          {% icon 'school' 'icon-lg' %}
+          <span class="form-step-badge">1</span>
           <div>
-            <h3>1. Institutional Identity & Workspace URL</h3>
+            <h3>Institutional Identity & Workspace URL</h3>
             <p>Official organization title, unique subpath identifier, and custom domain.</p>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="id-tenant-name" class="form-label">Official Institution Name <span style="color: var(--color-danger);">*</span></label>
+          <label for="id-tenant-name" class="form-label">
+            <span>Official Institution Name</span>
+            <span class="required-indicator">*</span>
+          </label>
           {{ form.name }}
-          {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+          {% if form.name.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.name.errors.0 }}</div>{% endif %}
           <div class="form-help">e.g. National Engineering College, King Edward Medical University</div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div class="form-group">
-            <label for="id-tenant-slug" class="form-label">URL Slug Identifier <span style="color: var(--color-danger);">*</span></label>
+            <label for="id-tenant-slug" class="form-label">
+              <span>URL Slug Identifier</span>
+              <span class="required-indicator">*</span>
+            </label>
             {{ form.slug }}
-            {% if form.slug.errors %}<div class="form-error">{{ form.slug.errors.0 }}</div>{% endif %}
+            {% if form.slug.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.slug.errors.0 }}</div>{% endif %}
             <div class="form-help">Unique subpath (e.g. <code>/nec/dashboard/</code>)</div>
           </div>
           <div class="form-group">
             <label class="form-label">Custom Domain (Optional)</label>
             {{ form.domain }}
-            {% if form.domain.errors %}<div class="form-error">{{ form.domain.errors.0 }}</div>{% endif %}
+            {% if form.domain.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.domain.errors.0 }}</div>{% endif %}
             <div class="form-help">e.g. <code>exams.institution.edu</code></div>
           </div>
         </div>
@@ -64,7 +89,7 @@
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label">Administrative Contact Email</label>
           {{ form.contact_email }}
-          {% if form.contact_email.errors %}<div class="form-error">{{ form.contact_email.errors.0 }}</div>{% endif %}
+          {% if form.contact_email.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.contact_email.errors.0 }}</div>{% endif %}
           <div class="form-help">Notifications regarding quotas and security alerts will be sent here.</div>
         </div>
       </div>
@@ -72,23 +97,29 @@
       <!-- Section 2: Quotas & Capacity Limits -->
       <div class="form-section-card" style="margin-bottom: 0;">
         <div class="form-section-header">
-          {% icon 'database' 'icon-lg' %}
+          <span class="form-step-badge">2</span>
           <div>
-            <h3>2. Subscription Tier & Concurrent Capacity</h3>
+            <h3>Subscription Tier & Concurrent Capacity</h3>
             <p>Set license tiers and maximum concurrent live test takers.</p>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div class="form-group">
-            <label for="id-tenant-tier" class="form-label">Subscription Tier <span style="color: var(--color-danger);">*</span></label>
+            <label for="id-tenant-tier" class="form-label">
+              <span>Subscription Tier</span>
+              <span class="required-indicator">*</span>
+            </label>
             {{ form.tier }}
-            {% if form.tier.errors %}<div class="form-error">{{ form.tier.errors.0 }}</div>{% endif %}
+            {% if form.tier.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.tier.errors.0 }}</div>{% endif %}
           </div>
           <div class="form-group">
-            <label for="id-max-candidates" class="form-label">Max Concurrent Candidates <span style="color: var(--color-danger);">*</span></label>
+            <label for="id-max-candidates" class="form-label">
+              <span>Max Concurrent Candidates</span>
+              <span class="required-indicator">*</span>
+            </label>
             {{ form.max_concurrent_candidates }}
-            {% if form.max_concurrent_candidates.errors %}<div class="form-error">{{ form.max_concurrent_candidates.errors.0 }}</div>{% endif %}
+            {% if form.max_concurrent_candidates.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.max_concurrent_candidates.errors.0 }}</div>{% endif %}
             <div class="form-help">Maximum simultaneous live exam cockpits allowed.</div>
           </div>
         </div>
@@ -100,11 +131,11 @@
     <div class="flex flex-col gap-6">
 
       <!-- Section 3: Branding & Theming -->
-      <div class="form-section-card" style="height: 100%; margin-bottom: 0;">
+      <div class="form-section-card" style="margin-bottom: 0;">
         <div class="form-section-header">
-          {% icon 'layers' 'icon-lg' %}
+          <span class="form-step-badge">3</span>
           <div>
-            <h3>3. Institutional Branding & Theming</h3>
+            <h3>Institutional Branding & Theming</h3>
             <p>Customize the primary color accent and institutional logo.</p>
           </div>
         </div>
@@ -116,7 +147,7 @@
               {{ form.primary_color }}
             </div>
             <div class="color-picker-group">
-              <span style="font-size: 0.82rem; color: var(--color-text-muted);">Quick Presets:</span>
+              <span style="font-size: 0.80rem; color: var(--color-text-muted);">Presets:</span>
               <button type="button" class="color-swatch-btn" style="background: #4F46E5;" title="Indigo (Default)" onclick="setPrimaryColor('#4F46E5')"></button>
               <button type="button" class="color-swatch-btn" style="background: #06B6D4;" title="Cyan" onclick="setPrimaryColor('#06B6D4')"></button>
               <button type="button" class="color-swatch-btn" style="background: #10B981;" title="Emerald" onclick="setPrimaryColor('#10B981')"></button>
@@ -125,7 +156,7 @@
               <button type="button" class="color-swatch-btn" style="background: #EF4444;" title="Crimson" onclick="setPrimaryColor('#EF4444')"></button>
             </div>
           </div>
-          {% if form.primary_color.errors %}<div class="form-error">{{ form.primary_color.errors.0 }}</div>{% endif %}
+          {% if form.primary_color.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.primary_color.errors.0 }}</div>{% endif %}
         </div>
 
         <div class="form-group" style="margin-bottom: 0;">
@@ -137,7 +168,7 @@
             </div>
           {% endif %}
           {{ form.logo }}
-          {% if form.logo.errors %}<div class="form-error">{{ form.logo.errors.0 }}</div>{% endif %}
+          {% if form.logo.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.logo.errors.0 }}</div>{% endif %}
           <div class="form-help">Recommended: PNG or SVG with transparent background (512x512 max).</div>
         </div>
       </div>
@@ -145,9 +176,9 @@
       <!-- Section 4: Workspace Status -->
       <div class="form-section-card" style="margin-bottom: 0;">
         <div class="form-section-header">
-          {% icon 'shield' 'icon-lg' %}
+          <span class="form-step-badge">4</span>
           <div>
-            <h3>4. Workspace Status & Security</h3>
+            <h3>Workspace Status & Access Guard</h3>
             <p>Control workspace availability for exam conduction.</p>
           </div>
         </div>
@@ -156,8 +187,8 @@
           <label class="flex items-center gap-3" style="cursor: pointer;">
             {{ form.is_active }}
             <div>
-              <strong style="color: var(--color-text-primary); font-size: 0.95rem;">Active Institution Workspace</strong>
-              <p style="font-size: 0.82rem; color: var(--color-text-muted); margin-bottom: 0;">When unchecked, faculty and candidates cannot sign in to this workspace.</p>
+              <strong style="color: var(--color-text-primary); font-size: 0.92rem;">Active Institution Workspace</strong>
+              <p style="font-size: 0.80rem; color: var(--color-text-muted); margin-bottom: 0;">When unchecked, faculty and candidates cannot sign in to this workspace.</p>
             </div>
           </label>
         </div>
@@ -168,8 +199,8 @@
   </div>
 
   <!-- Full-Width Bottom Actions Bar -->
-  <div class="glass-card flex items-center justify-between" style="padding: 20px 24px; margin-top: 24px;">
-    <div style="font-size: 0.85rem; color: var(--color-text-muted);">
+  <div class="form-actions-bar">
+    <div class="flex items-center gap-2" style="font-size: 0.84rem; color: var(--color-text-muted);">
       {% icon 'shield' 'icon' %}
       <span>All institutional changes take effect immediately across all tenant-scoped portals.</span>
     </div>

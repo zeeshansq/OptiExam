@@ -4,15 +4,38 @@
 {% block title %}Inspect Question #{{ question.pk }} — {{ question.bank.name }}{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'questions:bank_list' %}">{% icon 'database' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'questions:bank_list' %}">Question Banks</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'questions:bank_detail' question.bank.pk %}">{{ question.bank.name }}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Question #{{ question.pk }}</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'file-text' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'file-text' 'icon-lg' %}
+    </div>
     <div>
       <h2>Question Inspection Cockpit</h2>
       <p class="page-subtitle">{{ question.bank.name }} • {{ question.get_question_type_display }} • {{ question.points }} Points</p>
     </div>
   </div>
-  <div class="flex items-center gap-3">
+  <div class="page-actions">
     {% if question.is_mcq %}
       <a href="{% url 'questions:question_update_mcq' question.pk %}" class="btn btn-primary">
         {% icon 'edit' 'icon' %}
@@ -39,7 +62,7 @@
     <div class="glass-card" style="padding: 24px;">
       <div class="flex items-center justify-between" style="margin-bottom: 16px;">
         <span class="badge badge-primary">{{ question.get_question_type_display }}</span>
-        <span style="font-weight: 700; font-family: var(--font-mono); color: var(--color-primary); font-size: 1.1rem;">
+        <span class="metric-numeral" style="font-size: 1.15rem;">
           {{ question.points }} pts
         </span>
       </div>
@@ -63,7 +86,10 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   {% if opt.is_correct %}
-                    <span class="badge badge-success">✓ Correct Key</span>
+                    <span class="badge badge-success">
+                      <span class="status-dot"></span>
+                      <span>Correct Key</span>
+                    </span>
                   {% else %}
                     <span class="badge badge-secondary">Choice</span>
                   {% endif %}
@@ -71,7 +97,7 @@
                 </div>
               </div>
               {% if opt.explanation %}
-                <p style="margin-top: 6px; margin-bottom: 0; font-size: 0.8rem; color: var(--color-text-muted);">
+                <p style="margin-top: 6px; margin-bottom: 0; font-size: 0.80rem; color: var(--color-text-muted);">
                   💡 {{ opt.explanation }}
                 </p>
               {% endif %}
@@ -95,7 +121,7 @@
               {% for rub in question.rubrics.all %}
                 <tr>
                   <td style="font-weight: 600;">{{ rub.criteria_title }}</td>
-                  <td style="color: var(--color-text-secondary); font-size: 0.85rem;">{{ rub.description|default:"-" }}</td>
+                  <td style="color: var(--color-text-secondary); font-size: 0.84rem;">{{ rub.description|default:"-" }}</td>
                   <td style="text-align: right; font-weight: 700; color: var(--color-primary);">{{ rub.max_points }} pts</td>
                 </tr>
               {% empty %}

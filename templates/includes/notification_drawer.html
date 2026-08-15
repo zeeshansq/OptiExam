@@ -1,19 +1,32 @@
 {% load static optiexam_tags %}
-<div id="notification-menu" class="notification-menu">
+<div id="notification-menu" class="notification-menu" aria-label="Notifications Dropdown">
   <div class="notification-header">
-    <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0;">In-App Notifications</h4>
-    <span class="badge badge-primary">{{ unread_notifications_count|default:0 }} New</span>
+    <h4>
+      {% icon 'bell' 'icon-sm' %}
+      <span>In-App Notifications</span>
+    </h4>
+    {% if unread_notifications_count > 0 %}
+      <span class="badge badge-primary">{{ unread_notifications_count }} New</span>
+    {% else %}
+      <span class="badge badge-secondary">0 New</span>
+    {% endif %}
   </div>
-  <div class="notification-body" style="max-height: 280px; overflow-y: auto;">
+  <div class="notification-body">
     {% for alert in recent_notifications %}
       <div class="notification-item">
-        <strong style="font-size: 0.85rem; color: var(--color-text-primary); display: block; margin-bottom: 2px;">{{ alert.title }}</strong>
-        <p style="font-size: 0.8rem; color: var(--color-text-secondary); margin-bottom: 0;">{{ alert.message }}</p>
+        <strong class="notification-item-title">{{ alert.title }}</strong>
+        <p class="notification-item-msg">{{ alert.message }}</p>
+        {% if alert.created_at %}
+          <span class="notification-item-time">{{ alert.created_at|timesince }} ago</span>
+        {% endif %}
       </div>
     {% empty %}
-      <div style="padding: 24px; text-align: center; color: var(--color-text-muted); font-size: 0.85rem;">
-        {% icon 'check' 'icon-lg' %}
-        <p style="margin-top: 8px; margin-bottom: 0;">You're all caught up! No unread alerts.</p>
+      <div class="notification-empty">
+        <div class="notification-empty-icon">
+          {% icon 'check' 'icon' %}
+        </div>
+        <strong style="display: block; font-size: 0.88rem; color: var(--color-text-primary); margin-bottom: 4px;">All Caught Up!</strong>
+        <p style="font-size: 0.80rem; color: var(--color-text-muted); margin-bottom: 0;">You have no unread notifications.</p>
       </div>
     {% endfor %}
   </div>

@@ -7,46 +7,60 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 18px;
+  padding: 9px 16px;
   font-family: var(--font-ui);
-  font-size: 0.92rem;
+  font-size: 0.90rem;
   font-weight: 600;
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   cursor: pointer;
   text-decoration: none;
   transition: all var(--transition-fast);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.98);
 }
 
 .btn-primary {
   background: var(--color-primary);
   color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
 }
 
 .btn-primary:hover {
   background: var(--color-primary-hover);
   color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.40);
+  transform: translateY(-1px);
 }
 
 .btn-accent, .btn-success {
   background: var(--color-accent);
   color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
 }
 
 .btn-accent:hover, .btn-success:hover {
   background: var(--color-accent-hover);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.40);
+  transform: translateY(-1px);
 }
 
 .btn-danger {
   background: var(--color-danger);
   color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
 }
 
 .btn-danger:hover {
   background: var(--color-danger-hover);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.40);
+  transform: translateY(-1px);
 }
 
 .btn-secondary, .btn-ghost {
@@ -58,16 +72,20 @@
 .btn-secondary:hover, .btn-ghost:hover {
   background: var(--color-surface-elevated);
   border-color: var(--color-primary);
+  color: var(--color-text-primary);
+  transform: translateY(-1px);
 }
 
 .btn-sm {
   padding: 6px 12px;
-  font-size: 0.82rem;
+  font-size: 0.80rem;
+  border-radius: var(--radius-sm);
 }
 
 .btn-lg {
-  padding: 14px 24px;
-  font-size: 1.05rem;
+  padding: 12px 22px;
+  font-size: 1.0rem;
+  border-radius: var(--radius-md);
 }
 
 .btn-block {
@@ -78,10 +96,17 @@
    Colorful Icon-Only Action Buttons for Data Tables & Hubs
    ============================================================================== */
 
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
 .action-btn {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
   border-radius: var(--radius-md);
   display: inline-flex;
   align-items: center;
@@ -93,95 +118,86 @@
   transition: transform var(--transition-fast), background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
+.action-btn:active {
+  transform: scale(0.94);
+}
+
 .action-btn:hover {
   transform: translateY(-2px);
 }
 
 /* Cyan: Inspect / View */
-.action-btn-inspect, .action-btn-view {
+.action-btn-inspect {
   background: rgba(6, 182, 212, 0.12);
   color: #06B6D4;
-  border-color: rgba(6, 182, 212, 0.3);
+  border-color: rgba(6, 182, 212, 0.25);
 }
 
-.action-btn-inspect:hover, .action-btn-view:hover {
+.action-btn-inspect:hover {
   background: #06B6D4;
   color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.40);
   border-color: #06B6D4;
 }
 
-/* Indigo / Primary: Edit / Settings */
-.action-btn-edit, .action-btn-settings {
+/* Indigo: Edit / Settings */
+.action-btn-edit {
   background: rgba(79, 70, 229, 0.12);
-  color: #818CF8;
-  border-color: rgba(79, 70, 229, 0.3);
+  color: #6366F1;
+  border-color: rgba(79, 70, 229, 0.25);
 }
 
-.action-btn-edit:hover, .action-btn-settings:hover {
+.action-btn-edit:hover {
   background: #4F46E5;
   color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.40);
   border-color: #4F46E5;
 }
 
-/* Emerald: Success / Toggle Enable */
-.action-btn-success, .action-btn-enable {
+/* Emerald: Success / Enable / Add */
+.action-btn-success {
   background: rgba(16, 185, 129, 0.12);
   color: #10B981;
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.25);
 }
 
-.action-btn-success:hover, .action-btn-enable:hover {
+.action-btn-success:hover {
   background: #10B981;
   color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.40);
   border-color: #10B981;
 }
 
-/* Amber: Warning / Alert */
+/* Amber: Warning / Pause */
 .action-btn-warning {
   background: rgba(245, 158, 11, 0.12);
   color: #F59E0B;
-  border-color: rgba(245, 158, 11, 0.3);
+  border-color: rgba(245, 158, 11, 0.25);
 }
 
 .action-btn-warning:hover {
   background: #F59E0B;
   color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.40);
   border-color: #F59E0B;
 }
 
-/* Crimson: Delete / Deactivate / Remove */
-.action-btn-delete, .action-btn-danger {
+/* Crimson: Delete / Destructive */
+.action-btn-delete {
   background: rgba(239, 68, 68, 0.12);
   color: #EF4444;
-  border-color: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.25);
 }
 
-.action-btn-delete:hover, .action-btn-danger:hover {
+.action-btn-delete:hover {
   background: #EF4444;
   color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.40);
   border-color: #EF4444;
 }
 
-/* Ghost: Secondary Action */
-.action-btn-ghost {
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  border-color: var(--color-glass-border);
-}
-
-.action-btn-ghost:hover {
-  background: var(--color-surface-elevated);
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
-}
-
 /* ==============================================================================
-   Premium CSS Tooltip Engine ([data-tooltip])
+   Glassmorphic CSS Tooltip Engine [data-tooltip]
    ============================================================================== */
 
 [data-tooltip] {
@@ -194,11 +210,12 @@
   bottom: calc(100% + 2px);
   left: 50%;
   transform: translateX(-50%) translateY(4px);
-  border: 5px solid transparent;
-  border-top-color: #0F172A;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #0F172A transparent transparent transparent;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
   pointer-events: none;
   z-index: 1001;
 }
@@ -206,25 +223,25 @@
 [data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + 12px);
   left: 50%;
   transform: translateX(-50%) translateY(4px);
   background: #0F172A;
   color: #F8FAFC;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  border-radius: var(--radius-sm);
-  padding: 5px 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
   font-family: var(--font-ui);
-  font-size: 0.76rem;
-  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
   pointer-events: none;
   z-index: 1000;
-  letter-spacing: 0.02em;
 }
 
 [data-tooltip]:hover::before,
@@ -232,17 +249,4 @@
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
-}
-
-/* Tooltip position modifier: bottom */
-[data-tooltip-pos="bottom"]::before {
-  bottom: auto;
-  top: calc(100% + 2px);
-  border-top-color: transparent;
-  border-bottom-color: #0F172A;
-}
-
-[data-tooltip-pos="bottom"]::after {
-  bottom: auto;
-  top: calc(100% + 8px);
 }

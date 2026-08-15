@@ -264,32 +264,43 @@ Run via: `python manage.py auto_submit_expired`
    * All `.container` and `.container-fluid` classes MUST span `width: 100%; max-width: 100%;` with responsive `28px` gutter padding.
    * All tables, dashboards, Question Banks, Exam Cockpits, Live Ops matrices, and Split-Screen grading studios MUST fluidly utilize the full horizontal viewport real estate.
 
-2. **Single-Line Filter Toolbar & Icon Clear Invariant:**
-   * Every filter toolbar on any tabular data page MUST fit entirely in a **single horizontal line** using `.filter-row-single`.
-   * Search input (`.filter-search-field`), dropdown filters (`.filter-dropdown-field`), the primary **Filter** submit button, and the **Clear/Reset** icon button (`rotate-ccw`) MUST sit side-by-side on the same row with consistent `38px` component heights.
-   * When active filters exist, display **Active Filter Chips** above the table with 1-click `×` removal.
+2. **Universal Hierarchical Breadcrumbs Navigation Invariant:**
+   * Every page must render hierarchical breadcrumb navigation via `{% include "includes/breadcrumbs.html" %}` (or `<nav class="breadcrumbs-bar">`) providing immediate contextual awareness (`Home / Exam Blueprints / Assessment Title / Section Builder`).
 
-3. **Full-Featured Windowed Pagination & Clickable Column Sorting Invariant:**
+3. **Single-Line Filter Toolbar & Icon Clear Invariant:**
+   * Every filter toolbar on any tabular data page MUST fit entirely in a **single horizontal line** using `.filter-row-single`.
+   * Search input (`.filter-search-field`), dropdown filters (`.filter-dropdown-field`), the primary **Filter** submit button, and the **Clear/Reset** icon button (`rotate-ccw`) MUST sit side-by-side on the same row with consistent uniform `40px` component heights.
+   * When active filters exist, display **Active Filter Chips** above the table with 1-click `×` removal.
+   * Display total record counts via `<div class="filter-count-badge">Total: <strong>X</strong> records</div>`.
+
+4. **Full-Featured Windowed Pagination & Clickable Column Sorting Invariant:**
    * Never render an unpaginated query for lists (Tenants, Users, Questions, Blueprints, Attempts, Grading Batches, Audit Logs).
    * Always paginate via Django (`paginate_by = 10|25|50|100`) and include `{% include "includes/pagination.html" %}`.
    * Column headers must support two-way ascending/descending sorting via `{% sort_header 'field' 'Label' %}` (`?sort=field&order=asc|desc`), preserving all active search query parameters across pagination.
 
-4. **Balanced Full-Width Two-Column Form Invariant:**
+5. **Balanced Full-Width Two-Column Form Invariant with Step Badges:**
    * Forms MUST NEVER be restricted by artificial width constraints (e.g. `max-width: 900px`) that cause forms to appear on only the half-left side of wide monitors.
    * Multi-section forms MUST be structured across a **balanced 2-column full-screen width grid (`<div class="grid grid-cols-2 gap-6">`)** filling 100% of the horizontal screen real estate:
+     - **Section Cards:** Categorized `.form-section-card` with numbered gradient badges (`<span class="form-step-badge">1</span>`, `2`, `3`, etc.).
      - **Left Column:** Core entity identity, primary parameters, and capacity/configuration cards.
      - **Right Column:** Branding, metadata, security, status, and auxiliary settings cards.
-     - **Bottom Actions Bar:** Full-width glassmorphic container (`.glass-card`) spanning both columns with cancellation and primary submit action buttons.
-5. **Icon-Only Colorful Action Buttons with Concise Hover Tooltips Invariant:**
+     - **Bottom Actions Bar:** Full-width floating/sticky glassmorphic container (`.form-actions-bar`) spanning both columns with cancellation and primary submit action buttons.
+
+6. **Icon-Only Colorful Action Buttons with Concise Hover Tooltips Invariant:**
    * Data table row actions MUST use well-aligned, colorful icon-only action buttons (`.action-btn`) instead of raw text labels:
      - **Inspect / View:** `.action-btn.action-btn-inspect` (Cyan tint) with `{% icon 'eye' %}` and `data-tooltip="Inspect"`
      - **Edit / Settings:** `.action-btn.action-btn-edit` (Indigo tint) with `{% icon 'edit' %}` and `data-tooltip="Edit"`
      - **Delete / Deactivate / Remove:** `.action-btn.action-btn-delete` (Crimson tint) with `{% icon 'trash-2' %}` and `data-tooltip="Delete"`
      - **Enable / Success:** `.action-btn.action-btn-success` (Emerald tint) with `{% icon 'check' %}` and `data-tooltip="Enable"`
      - **Disable / Suspend:** `.action-btn.action-btn-delete` (Crimson tint) with `{% icon 'x' %}` and `data-tooltip="Disable"`
-     - **Warning / Alert:** `.action-btn.action-btn-warning` (Amber tint) with `{% icon 'alert-triangle' %}` and `data-tooltip="Warning"`
+     - **Duplicate:** `.action-btn.action-btn-success` (Emerald tint) with `{% icon 'plus' %}` and `data-tooltip="Duplicate"`
    * Tooltip text MUST remain **concise and direct** (action name only, e.g. `"Inspect"`, `"Edit"`, `"Delete"`) without appending dynamic row titles or extraneous details.
    * Every action button MUST feature a premium hover tooltip via `data-tooltip="..."` with smooth micro-animation (`translateY(-2px)`), high-contrast glassmorphic surface, and arrow notch.
+
+7. **Monospace Tabular Numerals & Status Dots Invariant:**
+   * Numerical metrics (Points, Penalties, Duration, Total Enrolled, Quotas, Scores) MUST be rendered with tabular numerals using `.metric-numeral` or `font-family: var(--font-mono); font-variant-numeric: tabular-nums;`.
+   * Status badges (Active, Suspended, Enrolled, Absent) MUST include glowing status indicator dots (`<span class="status-dot"></span>`).
+
 
 
 

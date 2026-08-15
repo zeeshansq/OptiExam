@@ -4,13 +4,34 @@
 {% block title %}Authoring Studio — {{ tenant_name }}{% endblock %}
 
 {% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'accounts:role_redirect' %}">{% icon 'home' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Item Writer Studio</span>
+    </li>
+  </ol>
+</nav>
+
 <div class="page-header">
   <div class="page-title">
-    {% icon 'file-text' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'file-text' 'icon-lg' %}
+    </div>
     <div>
       <h2>Item Writer Authoring Studio</h2>
       <p class="page-subtitle">Institution: <strong>{{ tenant_name }}</strong> (Item Writer: {{ request.user.username }})</p>
     </div>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'questions:bank_create' %}" class="btn btn-primary">
+      {% icon 'plus' 'icon' %}
+      <span>Create Question Bank</span>
+    </a>
   </div>
 </div>
 
@@ -19,7 +40,7 @@
 <div class="grid grid-cols-2 gap-6">
   <div class="glass-card" style="padding: 24px;">
     <h3 style="margin-bottom: 8px;">Question Bank Repositories</h3>
-    <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 16px;">
+    <p style="font-size: 0.86rem; color: var(--color-text-secondary); margin-bottom: 16px;">
       Organize subject repositories, taxonomies, Bloom's levels, and author questions in 5 formats.
     </p>
     <div class="flex items-center gap-2">
@@ -35,7 +56,7 @@
   </div>
   <div class="glass-card" style="padding: 24px;">
     <h3 style="margin-bottom: 8px;">Quick Question Bank Creation</h3>
-    <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 16px;">
+    <p style="font-size: 0.86rem; color: var(--color-text-secondary); margin-bottom: 16px;">
       Launch a new academic repository and start populating single MCQs, diagram items, and essay rubrics.
     </p>
     <div class="flex items-center gap-2">

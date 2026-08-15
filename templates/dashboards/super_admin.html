@@ -4,70 +4,89 @@
 {% block title %}SaaS Global Management Hub — OptiExam{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'tenants:super_admin_dashboard' %}">{% icon 'shield' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>SaaS Control Center</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'shield' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'shield' 'icon-lg' %}
+    </div>
     <div>
       <h2>SaaS Global Management Hub</h2>
-      <p class="page-subtitle">Platform-level multi-tenant provisioning, quotas, and health matrix</p>
+      <p class="page-subtitle">Platform-level multi-tenant provisioning, quotas, and real-time health matrix</p>
     </div>
   </div>
-  <div class="flex items-center gap-3">
+  <div class="page-actions">
     <a href="{% url 'tenants:audit_logs' %}" class="btn btn-ghost">
       {% icon 'activity' 'icon' %}
       <span>Audit Logs Explorer</span>
     </a>
     <a href="{% url 'tenants:tenant_create' %}" class="btn btn-primary">
       {% icon 'plus' 'icon' %}
-      <span>Provision New Institution</span>
+      <span>Provision Institution</span>
     </a>
   </div>
 </div>
 
 {% include "includes/page_guide.html" with guide_icon="shield" guide_title="SaaS Global Control Center" guide_text="Manage educational institutions, subscription tiers, storage limits, feature flags, and view real-time platform metrics." %}
 
-<!-- SaaS Health Metrics Grid -->
-<div class="grid grid-cols-4 gap-4" style="margin-bottom: 28px;">
+<!-- SaaS Health Metrics KPI Grid -->
+<div class="grid grid-cols-4 gap-4" style="margin-bottom: 24px;">
   <div class="stat-card">
-    <div class="stat-label">
-      {% icon 'school' 'icon' %}
-      <span>Total Institutions</span>
+    <div class="stat-icon" style="background: rgba(79, 70, 229, 0.15); color: var(--color-primary);">
+      {% icon 'school' 'icon-lg' %}
     </div>
-    <div class="stat-value">{{ total_tenants|default:0 }}</div>
-    <div class="stat-desc">{{ active_tenants|default:0 }} currently active</div>
+    <div>
+      <div class="stat-value">{{ total_tenants|default:0 }}</div>
+      <div class="stat-label">Total Institutions ({{ active_tenants|default:0 }} active)</div>
+    </div>
   </div>
 
   <div class="stat-card">
-    <div class="stat-label">
-      {% icon 'layers' 'icon' %}
-      <span>Starter Tiers</span>
+    <div class="stat-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--color-cyan);">
+      {% icon 'layers' 'icon-lg' %}
     </div>
-    <div class="stat-value" style="color: #06B6D4;">{{ starter_count|default:0 }}</div>
-    <div class="stat-desc">Single school / lab tier</div>
+    <div>
+      <div class="stat-value" style="color: var(--color-cyan);">{{ starter_count|default:0 }}</div>
+      <div class="stat-label">Starter Tiers (Single Lab)</div>
+    </div>
   </div>
 
   <div class="stat-card">
-    <div class="stat-label">
-      {% icon 'database' 'icon' %}
-      <span>Professional Tiers</span>
+    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--color-accent);">
+      {% icon 'database' 'icon-lg' %}
     </div>
-    <div class="stat-value" style="color: #10B981;">{{ professional_count|default:0 }}</div>
-    <div class="stat-desc">College / Multi-dept</div>
+    <div>
+      <div class="stat-value" style="color: var(--color-accent);">{{ professional_count|default:0 }}</div>
+      <div class="stat-label">Professional Tiers (College)</div>
+    </div>
   </div>
 
   <div class="stat-card">
-    <div class="stat-label">
-      {% icon 'activity' 'icon' %}
-      <span>Enterprise Tiers</span>
+    <div class="stat-icon" style="background: rgba(129, 140, 248, 0.15); color: #818CF8;">
+      {% icon 'activity' 'icon-lg' %}
     </div>
-    <div class="stat-value" style="color: #818CF8;">{{ enterprise_count|default:0 }}</div>
-    <div class="stat-desc">University / Multi-campus</div>
+    <div>
+      <div class="stat-value" style="color: #818CF8;">{{ enterprise_count|default:0 }}</div>
+      <div class="stat-label">Enterprise (University)</div>
+    </div>
   </div>
 </div>
 
-<!-- Interactive Institution Directory -->
+<!-- Interactive Institution Directory Matrix -->
 <div class="glass-card" style="padding: 24px;">
-  <!-- Filter & Search Toolbar (Single-Line Layout) -->
+  <!-- Filter & Search Toolbar (Single-Line Layout Standard) -->
   <form method="get" class="table-filter-toolbar">
     <div class="filter-row-single">
       <div class="filter-search-field">
@@ -98,15 +117,12 @@
       </div>
     </div>
 
-    <div style="flex-shrink: 0;">
-      <span style="font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap;">
-        Found <strong>{{ paginator.count|default:0 }}</strong> institution{{ paginator.count|pluralize }}
-      </span>
+    <div class="filter-count-badge">
+      <span>Total: <strong>{{ paginator.count|default:0 }}</strong> institution{{ paginator.count|pluralize }}</span>
     </div>
   </form>
 
-
-  <!-- Active Filter Chips -->
+  <!-- Active Filter Chips Bar -->
   {% if active_search_query or active_tier_filter or active_status_filter %}
     <div class="active-filters-bar">
       <span style="font-size: 0.8rem; color: var(--color-text-muted);">Active Filters:</span>
@@ -148,32 +164,43 @@
       <tbody>
         {% for tenant_item in tenants %}
           <tr>
-            <td style="font-weight: 600;">
-              <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: {{ tenant_item.primary_color }}; margin-right: 8px; vertical-align: middle; box-shadow: 0 0 8px {{ tenant_item.primary_color }};"></span>
-              <a href="{% url 'tenants:tenant_detail' tenant_item.pk %}" style="color: var(--color-text-primary); font-weight: 600;">
-                {{ tenant_item.name }}
-              </a>
-              {% if tenant_item.domain %}
-                <span style="display: block; font-size: 0.78rem; color: var(--color-text-muted); font-weight: normal;">{{ tenant_item.domain }}</span>
-              {% endif %}
+            <td>
+              <div class="flex items-center gap-2">
+                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: {{ tenant_item.primary_color }}; box-shadow: 0 0 8px {{ tenant_item.primary_color }}; flex-shrink: 0;"></span>
+                <div>
+                  <a href="{% url 'tenants:tenant_detail' tenant_item.pk %}" style="color: var(--color-text-primary); font-weight: 700; text-decoration: none;">
+                    {{ tenant_item.name }}
+                  </a>
+                  {% if tenant_item.domain %}
+                    <span style="display: block; font-size: 0.76rem; color: var(--color-text-muted);">{{ tenant_item.domain }}</span>
+                  {% endif %}
+                </div>
+              </div>
             </td>
-            <td style="font-family: var(--font-mono); color: var(--color-text-secondary);">
-              /{{ tenant_item.slug }}/
+            <td>
+              <code style="font-size: 0.82rem;">/{{ tenant_item.slug }}/</code>
             </td>
             <td>
               <span class="badge badge-primary">{{ tenant_item.get_tier_display }}</span>
             </td>
-            <td style="color: var(--color-text-secondary);">
-              {{ tenant_item.max_concurrent_candidates }} Candidates
+            <td>
+              <span class="metric-numeral">{{ tenant_item.max_concurrent_candidates }}</span>
+              <span style="font-size: 0.80rem; color: var(--color-text-muted);"> seats</span>
             </td>
             <td>
               {% if tenant_item.is_active %}
-                <span class="badge badge-success">Active</span>
+                <span class="badge badge-success">
+                  <span class="status-dot"></span>
+                  <span>Active</span>
+                </span>
               {% else %}
-                <span class="badge badge-danger">Suspended</span>
+                <span class="badge badge-danger">
+                  <span class="status-dot"></span>
+                  <span>Suspended</span>
+                </span>
               {% endif %}
             </td>
-            <td style="color: var(--color-text-muted); font-size: 0.85rem;">
+            <td style="color: var(--color-text-muted); font-size: 0.82rem;">
               {{ tenant_item.created_at|date:"M d, Y" }}
             </td>
             <td style="text-align: right;">
@@ -190,9 +217,6 @@
               </div>
             </td>
           </tr>
-
-
-
         {% empty %}
           <tr>
             <td colspan="7" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">
@@ -210,7 +234,7 @@
     </table>
   </div>
 
-  <!-- Full-Featured Pagination Partial -->
+  <!-- Full-Featured Windowed Pagination Partial -->
   {% include "includes/pagination.html" %}
 </div>
 {% endblock %}

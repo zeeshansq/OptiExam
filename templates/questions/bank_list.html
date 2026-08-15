@@ -4,15 +4,34 @@
 {% block title %}Question Banks — OptiExam{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'accounts:role_redirect' %}">{% icon 'home' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Question Banks</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'database' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'database' 'icon-lg' %}
+    </div>
     <div>
       <h2>Question Bank Repositories</h2>
       <p class="page-subtitle">Curated academic item repositories categorized by subject and discipline</p>
     </div>
   </div>
-  <div class="flex items-center gap-3">
+  <div class="page-actions">
+    <a href="{% url 'core:download_template' 'questions' %}?format=csv" class="btn btn-ghost" title="Download Sample CSV Template">
+      {% icon 'download' 'icon' %}
+      <span>Sample CSV</span>
+    </a>
     <a href="{% url 'questions:bank_create' %}" class="btn btn-primary">
       {% icon 'plus' 'icon' %}
       <span>Create Question Bank</span>
@@ -23,7 +42,7 @@
 {% include "includes/page_guide.html" with guide_icon="database" guide_title="Question Bank Workspace" guide_text="Author, organize, and version questions across 5 academic formats. Assigned questions are dynamically linked to Exam Blueprints." %}
 
 <div class="glass-card" style="padding: 24px;">
-  <!-- Single-Line Filter Toolbar -->
+  <!-- Single-Line Filter Toolbar Standard -->
   <form method="get" class="table-filter-toolbar">
     <div class="filter-row-single">
       <div class="filter-search-field">
@@ -51,10 +70,8 @@
       </div>
     </div>
 
-    <div style="flex-shrink: 0;">
-      <span style="font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap;">
-        Found <strong>{{ paginator.count|default:0 }}</strong> repository{{ paginator.count|pluralize:"ies,y" }}
-      </span>
+    <div class="filter-count-badge">
+      <span>Total: <strong>{{ paginator.count|default:0 }}</strong> repositor{{ paginator.count|pluralize:"ies,y" }}</span>
     </div>
   </form>
 
@@ -65,13 +82,13 @@
       {% if active_search_query %}
         <span class="filter-chip">
           Search: "{{ active_search_query }}"
-          <a href="{% query_transform q='' %}" title="Remove search filter">×</a>
+          <a href="?{% query_transform q='' %}" title="Remove search filter">×</a>
         </span>
       {% endif %}
       {% if active_subject_filter %}
         <span class="filter-chip">
           Subject: "{{ active_subject_filter }}"
-          <a href="{% query_transform subject='' %}" title="Remove subject filter">×</a>
+          <a href="?{% query_transform subject='' %}" title="Remove subject filter">×</a>
         </span>
       {% endif %}
     </div>
@@ -85,7 +102,7 @@
           <th>{% sort_header 'name' 'Bank Name & Code' %}</th>
           <th>{% sort_header 'subject' 'Subject Discipline' %}</th>
           <th>Total Questions</th>
-          <th>Author / Created By</th>
+          <th>Author / Faculty</th>
           <th>{% sort_header 'created_at' 'Created Date' %}</th>
           <th style="text-align: right;">Actions</th>
         </tr>
@@ -107,11 +124,10 @@
               <span class="badge badge-primary">{{ bank.subject }}</span>
             </td>
             <td>
-              <span style="font-weight: 600; font-family: var(--font-mono); color: var(--color-text-primary);">
-                {{ bank.total_questions|default:bank.question_count }}
-              </span> questions
+              <span class="metric-numeral">{{ bank.total_questions|default:bank.question_count }}</span>
+              <span style="font-size: 0.80rem; color: var(--color-text-muted);"> items</span>
             </td>
-            <td style="color: var(--color-text-secondary); font-size: 0.85rem;">
+            <td style="color: var(--color-text-secondary); font-size: 0.84rem;">
               {{ bank.created_by.get_full_name|default:bank.created_by.username|default:"Faculty" }}
             </td>
             <td style="color: var(--color-text-muted); font-size: 0.82rem;">
@@ -139,7 +155,7 @@
             <td colspan="6" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">
               {% icon 'database' 'icon-xl' %}
               <h4 style="margin-top: 12px; margin-bottom: 4px; color: var(--color-text-secondary);">No Question Banks Found</h4>
-              <p style="font-size: 0.85rem; margin-bottom: 16px;">Create your first academic question repository to begin authoring items.</p>
+              <p style="font-size: 0.85rem; margin-bottom: 16px;">Create your first academic question repository or import from spreadsheet.</p>
               <a href="{% url 'questions:bank_create' %}" class="btn btn-primary btn-sm">
                 {% icon 'plus' 'icon' %}
                 <span>Create Question Bank</span>

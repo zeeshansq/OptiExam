@@ -4,15 +4,34 @@
 {% block title %}{{ exam.title }} — Blueprint Details{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">{% icon 'calendar' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">Exam Blueprints</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>{{ exam.title }}</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'calendar' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'calendar' 'icon-lg' %}
+    </div>
     <div>
       <h2>{{ exam.title }}</h2>
       <p class="page-subtitle">{{ exam.subject }} • Code: <code>{{ exam.code }}</code> • {{ exam.duration_minutes }} Mins • {{ exam.total_marks }} Marks</p>
     </div>
   </div>
-  <div class="flex items-center gap-3">
+  <div class="page-actions">
     <a href="{% url 'exams:roster_hub' exam.pk %}" class="btn btn-accent">
       {% icon 'users' 'icon' %}
       <span>Candidate Roster ({{ exam.total_enrolled_candidates }})</span>
@@ -31,41 +50,41 @@
 <!-- Overview Stats Cards Row -->
 <div class="grid grid-cols-4 gap-4" style="margin-bottom: 24px;">
   <div class="stat-card">
-    <div class="stat-icon" style="background: rgba(79, 70, 229, 0.1); color: var(--color-primary);">
-      {% icon 'calendar' 'icon-lg' %}
+    <div class="stat-icon" style="background: rgba(79, 70, 229, 0.15); color: var(--color-primary);">
+      {% icon 'clock' 'icon-lg' %}
     </div>
     <div>
-      <div class="stat-value">{{ exam.duration_minutes }}m</div>
+      <div class="stat-value"><span class="metric-numeral">{{ exam.duration_minutes }}</span>m</div>
       <div class="stat-label">Duration Limit</div>
     </div>
   </div>
 
   <div class="stat-card">
-    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-accent);">
+    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--color-accent);">
       {% icon 'activity' 'icon-lg' %}
     </div>
     <div>
-      <div class="stat-value">{{ exam.total_marks }}</div>
-      <div class="stat-label">Total Marks (Pass: {{ exam.passing_percentage }}%)</div>
+      <div class="stat-value"><span class="metric-numeral">{{ exam.total_marks }}</span> pts</div>
+      <div class="stat-label">Pass: {{ exam.passing_percentage }}%</div>
     </div>
   </div>
 
   <div class="stat-card">
-    <div class="stat-icon" style="background: rgba(6, 182, 212, 0.1); color: var(--color-cyan, #06B6D4);">
+    <div class="stat-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--color-cyan);">
       {% icon 'layers' 'icon-lg' %}
     </div>
     <div>
       <div class="stat-value">{{ exam.sections.count }}</div>
-      <div class="stat-label">Sections ({{ exam.total_assigned_questions }} Questions)</div>
+      <div class="stat-label">{{ exam.total_assigned_questions }} Questions Assigned</div>
     </div>
   </div>
 
   <div class="stat-card">
-    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--color-warning);">
+    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">
       {% icon 'users' 'icon-lg' %}
     </div>
     <div>
-      <div class="stat-value">{{ exam.total_enrolled_candidates }}</div>
+      <div class="stat-value"><span class="metric-numeral">{{ exam.total_enrolled_candidates }}</span></div>
       <div class="stat-label">Enrolled Candidates</div>
     </div>
   </div>
@@ -75,12 +94,12 @@
 <div class="flex flex-col gap-6" style="margin-bottom: 24px;">
   {% for section in exam.sections.all %}
     <div class="glass-card" style="padding: 24px;">
-      <div class="flex items-center justify-between" style="border-bottom: 1px solid var(--color-glass-border); padding-bottom: 16px; margin-bottom: 16px;">
+      <div class="flex items-center justify-between" style="border-bottom: 1px solid var(--color-glass-border); padding-bottom: 16px; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
         <div class="flex items-center gap-3">
           <span class="badge badge-primary">Section {{ forloop.counter }}</span>
           <h3 style="margin-bottom: 0;">{{ section.title }}</h3>
-          <span style="font-size: 0.85rem; color: var(--color-text-muted);">
-            (Weightage: {{ section.weightage }}% • {{ section.assignments.count }} Questions)
+          <span style="font-size: 0.84rem; color: var(--color-text-muted);">
+            (Weightage: <span class="metric-numeral">{{ section.weightage }}%</span> • {{ section.assignments.count }} Questions)
           </span>
         </div>
         <div>
@@ -119,8 +138,8 @@
                 <td><span class="badge badge-secondary">{{ assign.question.get_question_type_display }}</span></td>
                 <td><span class="badge badge-primary">{{ assign.question.get_difficulty_display }}</span></td>
                 <td><span class="badge badge-secondary">{{ assign.question.get_blooms_level_display }}</span></td>
-                <td style="font-family: var(--font-mono); font-weight: 700; color: var(--color-primary);">
-                  {{ assign.effective_marks }} pts
+                <td>
+                  <span class="metric-numeral">{{ assign.effective_marks }} pts</span>
                 </td>
                 <td style="text-align: right;">
                   <form action="{% url 'exams:remove_assignment' assign.pk %}" method="post" style="display: inline;">
@@ -198,7 +217,7 @@
             <span class="badge {% if lf.is_enabled %}badge-success{% else %}badge-secondary{% endif %}">
               {{ lf.is_enabled|yesno:"Active,Inactive" }}
             </span>
-            <span style="font-size: 0.8rem; color: var(--color-text-muted); font-family: var(--font-mono);">
+            <span style="font-size: 0.80rem; color: var(--color-text-muted); font-family: var(--font-mono);">
               (Max {{ lf.max_allowed }})
             </span>
           </div>

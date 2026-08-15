@@ -4,15 +4,34 @@
 {% block title %}Exam Blueprints — OptiExam{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'accounts:role_redirect' %}">{% icon 'home' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Exam Blueprints</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'calendar' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'calendar' 'icon-lg' %}
+    </div>
     <div>
       <h2>Exam Blueprints & Assessments</h2>
       <p class="page-subtitle">Multi-section examination blueprints, scheduling windows, and anti-cheating configurations</p>
     </div>
   </div>
-  <div class="flex items-center gap-3">
+  <div class="page-actions">
+    <a href="{% url 'core:download_template' 'roster' %}?format=csv" class="btn btn-ghost" title="Download Sample Roster CSV">
+      {% icon 'download' 'icon' %}
+      <span>Sample Roster</span>
+    </a>
     <a href="{% url 'exams:exam_create' %}" class="btn btn-primary">
       {% icon 'plus' 'icon' %}
       <span>Create Exam Blueprint</span>
@@ -23,7 +42,7 @@
 {% include "includes/page_guide.html" with guide_icon="calendar" guide_title="Exam Blueprint Hub" guide_text="Design structured exams with section weightages, anti-cheat lockdown policies, and lifeline rules. Ingest candidate rosters via CSV for sequential double-blind grading index allocation." %}
 
 <div class="glass-card" style="padding: 24px;">
-  <!-- Single-Line Filter Toolbar -->
+  <!-- Single-Line Filter Toolbar Standard -->
   <form method="get" class="table-filter-toolbar">
     <div class="filter-row-single">
       <div class="filter-search-field">
@@ -54,10 +73,8 @@
       </div>
     </div>
 
-    <div style="flex-shrink: 0;">
-      <span style="font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap;">
-        Found <strong>{{ paginator.count|default:0 }}</strong> blueprint{{ paginator.count|pluralize }}
-      </span>
+    <div class="filter-count-badge">
+      <span>Total: <strong>{{ paginator.count|default:0 }}</strong> blueprint{{ paginator.count|pluralize }}</span>
     </div>
   </form>
 
@@ -68,19 +85,19 @@
       {% if active_search_query %}
         <span class="filter-chip">
           Search: "{{ active_search_query }}"
-          <a href="{% query_transform q='' %}" title="Remove search filter">×</a>
+          <a href="?{% query_transform q='' %}" title="Remove search filter">×</a>
         </span>
       {% endif %}
       {% if active_subject_filter %}
         <span class="filter-chip">
           Subject: "{{ active_subject_filter }}"
-          <a href="{% query_transform subject='' %}" title="Remove subject filter">×</a>
+          <a href="?{% query_transform subject='' %}" title="Remove subject filter">×</a>
         </span>
       {% endif %}
       {% if active_status_filter %}
         <span class="filter-chip">
           Status: {{ active_status_filter }}
-          <a href="{% query_transform status='' %}" title="Remove status filter">×</a>
+          <a href="?{% query_transform status='' %}" title="Remove status filter">×</a>
         </span>
       {% endif %}
     </div>
@@ -120,14 +137,11 @@
               <div><strong>End:</strong> {{ exam.end_time|date:"M d, Y H:i" }}</div>
             </td>
             <td>
-              <span style="font-weight: 600; font-family: var(--font-mono); color: var(--color-text-primary);">
-                {{ exam.duration_minutes }} min
-              </span>
+              <span class="metric-numeral">{{ exam.duration_minutes }}</span>
+              <span style="font-size: 0.80rem; color: var(--color-text-muted);"> min</span>
             </td>
             <td>
-              <span style="font-weight: 700; font-family: var(--font-mono); color: var(--color-primary);">
-                {{ exam.total_marks }} pts
-              </span>
+              <span class="metric-numeral">{{ exam.total_marks }} pts</span>
               <span style="display: block; font-size: 0.75rem; color: var(--color-text-muted);">
                 Pass: {{ exam.passing_percentage }}%
               </span>
@@ -139,9 +153,15 @@
             </td>
             <td>
               {% if exam.results_published %}
-                <span class="badge badge-accent">Results Published</span>
+                <span class="badge badge-accent">
+                  <span class="status-dot"></span>
+                  <span>Results Published</span>
+                </span>
               {% elif exam.is_active %}
-                <span class="badge badge-success">Active</span>
+                <span class="badge badge-success">
+                  <span class="status-dot"></span>
+                  <span>Active</span>
+                </span>
               {% else %}
                 <span class="badge badge-warning">Draft</span>
               {% endif %}

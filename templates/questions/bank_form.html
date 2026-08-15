@@ -4,15 +4,34 @@
 {% block title %}{% if form.instance.pk %}Edit {{ form.instance.name }}{% else %}New Question Bank{% endif %} — OptiExam{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'questions:bank_list' %}">{% icon 'database' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'questions:bank_list' %}">Question Banks</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>{% if form.instance.pk %}Edit {{ form.instance.name }}{% else %}New Bank{% endif %}</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'database' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'database' 'icon-lg' %}
+    </div>
     <div>
       <h2>{% if form.instance.pk %}Edit {{ form.instance.name }}{% else %}Create Question Bank Repository{% endif %}</h2>
-      <p class="page-subtitle">Configure academic subject discipline and bank metadata</p>
+      <p class="page-subtitle">Configure academic subject discipline and repository metadata</p>
     </div>
   </div>
-  <div>
+  <div class="page-actions">
     <a href="{% url 'questions:bank_list' %}" class="btn btn-ghost">
       {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
       <span>Back to Repositories</span>
@@ -30,24 +49,27 @@
     <div class="flex flex-col gap-6">
       <div class="form-section-card" style="height: 100%; margin-bottom: 0;">
         <div class="form-section-header">
-          {% icon 'database' 'icon-lg' %}
+          <span class="form-step-badge">1</span>
           <div>
-            <h3>1. Bank Title & Course Code</h3>
+            <h3>Bank Title & Course Code</h3>
             <p>Specify the official repository title and course identifier.</p>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Question Bank Name <span style="color: var(--color-danger);">*</span></label>
+          <label class="form-label">
+            <span>Question Bank Name</span>
+            <span class="required-indicator">*</span>
+          </label>
           {{ form.name }}
-          {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+          {% if form.name.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.name.errors.0 }}</div>{% endif %}
           <div class="form-help">e.g. Computer Science Fundamentals, Clinical Pharmacology II</div>
         </div>
 
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label">Course / Bank Code</label>
           {{ form.code }}
-          {% if form.code.errors %}<div class="form-error">{{ form.code.errors.0 }}</div>{% endif %}
+          {% if form.code.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.code.errors.0 }}</div>{% endif %}
           <div class="form-help">Unique catalog abbreviation (e.g. <code>CS101-BANK</code>, <code>MED-PHARM</code>).</div>
         </div>
       </div>
@@ -57,24 +79,27 @@
     <div class="flex flex-col gap-6">
       <div class="form-section-card" style="height: 100%; margin-bottom: 0;">
         <div class="form-section-header">
-          {% icon 'file-text' 'icon-lg' %}
+          <span class="form-step-badge">2</span>
           <div>
-            <h3>2. Academic Subject & Topics Scope</h3>
+            <h3>Academic Subject & Topics Scope</h3>
             <p>Categorize by discipline and outline covered curriculum units.</p>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Subject Discipline <span style="color: var(--color-danger);">*</span></label>
+          <label class="form-label">
+            <span>Subject Discipline</span>
+            <span class="required-indicator">*</span>
+          </label>
           {{ form.subject }}
-          {% if form.subject.errors %}<div class="form-error">{{ form.subject.errors.0 }}</div>{% endif %}
+          {% if form.subject.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.subject.errors.0 }}</div>{% endif %}
           <div class="form-help">e.g. Computer Science, Medicine, Mathematics, Law</div>
         </div>
 
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label">Curriculum Description & Notes</label>
           {{ form.description }}
-          {% if form.description.errors %}<div class="form-error">{{ form.description.errors.0 }}</div>{% endif %}
+          {% if form.description.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.description.errors.0 }}</div>{% endif %}
           <div class="form-help">Guidance on topics included for faculty item writers.</div>
         </div>
       </div>
@@ -83,8 +108,8 @@
   </div>
 
   <!-- Full-Width Bottom Actions Bar -->
-  <div class="glass-card flex items-center justify-between" style="padding: 20px 24px; margin-top: 24px;">
-    <div style="font-size: 0.85rem; color: var(--color-text-muted);">
+  <div class="form-actions-bar">
+    <div class="flex items-center gap-2" style="font-size: 0.84rem; color: var(--color-text-muted);">
       {% icon 'shield' 'icon' %}
       <span>All questions added to this bank are securely isolated to {{ tenant_name }}.</span>
     </div>

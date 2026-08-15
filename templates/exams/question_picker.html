@@ -4,15 +4,38 @@
 {% block title %}Assign Questions to {{ section.title }} — {{ exam.title }}{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">{% icon 'calendar' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">Exam Blueprints</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_detail' exam.pk %}">{{ exam.title }}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Question Picker ({{ section.title }})</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'layers' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'layers' 'icon-lg' %}
+    </div>
     <div>
       <h2>Assign Questions to {{ section.title }}</h2>
-      <p class="page-subtitle">{{ exam.title }} ({{ exam.code }}) • Current Assigned: {{ section.assignments.count }} questions</p>
+      <p class="page-subtitle">{{ exam.title }} ({{ exam.code }}) • Currently Assigned: {{ section.assignments.count }} questions</p>
     </div>
   </div>
-  <div>
+  <div class="page-actions">
     <a href="{% url 'exams:exam_detail' exam.pk %}" class="btn btn-ghost">
       {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
       <span>Back to Blueprint</span>
@@ -22,12 +45,12 @@
 
 <div class="glass-card" style="padding: 24px;">
   <!-- Question Bank Filter -->
-  <div class="flex items-center justify-between" style="border-bottom: 1px solid var(--color-glass-border); padding-bottom: 16px; margin-bottom: 20px;">
-    <div class="flex items-center gap-3">
-      <span style="font-size: 0.88rem; font-weight: 600; color: var(--color-text-secondary);">Filter by Question Bank:</span>
-      <div class="flex items-center gap-2">
+  <div class="flex items-center justify-between" style="border-bottom: 1px solid var(--color-glass-border); padding-bottom: 16px; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+    <div class="flex items-center gap-3" style="flex-wrap: wrap;">
+      <span style="font-size: 0.86rem; font-weight: 600; color: var(--color-text-secondary);">Repository Source:</span>
+      <div class="flex items-center gap-2" style="flex-wrap: wrap;">
         <a href="{% url 'exams:question_picker' section.pk %}" class="btn btn-sm {% if not selected_bank_id %}btn-primary{% else %}btn-ghost{% endif %}">
-          All Banks
+          All Repositories
         </a>
         {% for b in banks %}
           <a href="{% url 'exams:question_picker' section.pk %}?bank={{ b.pk }}" class="btn btn-sm {% if selected_bank_id == b.pk|stringformat:'s' %}btn-primary{% else %}btn-ghost{% endif %}">
@@ -69,12 +92,15 @@
             <td><span class="badge badge-secondary">{{ q.get_question_type_display }}</span></td>
             <td><span class="badge badge-primary">{{ q.get_difficulty_display }}</span></td>
             <td><span class="badge badge-secondary">{{ q.get_blooms_level_display }}</span></td>
-            <td style="font-family: var(--font-mono); font-weight: 700; color: var(--color-primary);">
-              {{ q.points }} pts
+            <td>
+              <span class="metric-numeral">{{ q.points }} pts</span>
             </td>
             <td style="text-align: right;">
               {% if q.pk in assigned_question_ids %}
-                <span class="badge badge-success" style="padding: 6px 12px;">✓ Assigned</span>
+                <span class="badge badge-success" style="padding: 5px 10px;">
+                  <span class="status-dot"></span>
+                  <span>Assigned</span>
+                </span>
               {% else %}
                 <form method="post" style="display: inline;">
                   {% csrf_token %}

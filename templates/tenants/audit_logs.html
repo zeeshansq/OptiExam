@@ -4,25 +4,45 @@
 {% block title %}Audit Logs Explorer — OptiExam{% endblock %}
 
 {% block content %}
-<div class="page-header flex items-center justify-between">
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'tenants:super_admin_dashboard' %}">{% icon 'shield' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'tenants:super_admin_dashboard' %}">SaaS Hub</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Audit Trail Explorer</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
   <div class="page-title">
-    {% icon 'activity' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'activity' 'icon-lg' %}
+    </div>
     <div>
       <h2>Platform Audit Log Explorer</h2>
       <p class="page-subtitle">Immutable security, authentication, and operational event trails</p>
     </div>
   </div>
-  <div>
+  <div class="page-actions">
     <a href="{% url 'tenants:super_admin_dashboard' %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
       <span>Back to SaaS Hub</span>
     </a>
   </div>
 </div>
 
-{% include "includes/page_guide.html" with guide_icon="activity" guide_title="Audit Trail Inspector" guide_text="Search authentication events, administrative actions, live proctoring violations, and grading operations." %}
+{% include "includes/page_guide.html" with guide_icon="activity" guide_title="Audit Trail Inspector" guide_text="Search authentication events, administrative actions, live proctoring violations, and grading operations across all tenants." %}
 
 <div class="glass-card" style="padding: 24px;">
-  <!-- Filter Toolbar (Single-Line Layout) -->
+  <!-- Filter Toolbar (Single-Line Layout Standard) -->
   <form method="get" class="table-filter-toolbar">
     <div class="filter-row-single">
       <div class="filter-search-field">
@@ -50,15 +70,12 @@
       </div>
     </div>
 
-    <div style="flex-shrink: 0;">
-      <span style="font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap;">
-        Found <strong>{{ paginator.count|default:0 }}</strong> event record{{ paginator.count|pluralize }}
-      </span>
+    <div class="filter-count-badge">
+      <span>Total: <strong>{{ paginator.count|default:0 }}</strong> event{{ paginator.count|pluralize }}</span>
     </div>
   </form>
 
-
-  <!-- Table -->
+  <!-- Data Table -->
   <div class="table-responsive">
     <table class="data-table">
       <thead>
@@ -94,17 +111,19 @@
             <td style="color: var(--color-text-primary);">
               {{ log.action }}
             </td>
-            <td style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--color-text-secondary);">
-              {{ log.ip_address|default:"-" }}
+            <td>
+              <code style="font-size: 0.78rem;">{{ log.ip_address|default:"-" }}</code>
             </td>
-            <td style="font-size: 0.78rem; color: var(--color-text-muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <td style="font-size: 0.78rem; color: var(--color-text-muted); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
               {{ log.user_agent|default:"-" }}
             </td>
           </tr>
         {% empty %}
           <tr>
             <td colspan="7" style="padding: 48px; text-align: center; color: var(--color-text-muted);">
-              No audit records match your query.
+              {% icon 'activity' 'icon-xl' %}
+              <h4 style="margin-top: 12px; margin-bottom: 4px; color: var(--color-text-secondary);">No Audit Events Found</h4>
+              <p style="font-size: 0.85rem;">No security or operational records match your query parameters.</p>
             </td>
           </tr>
         {% endfor %}
