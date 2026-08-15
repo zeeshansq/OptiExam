@@ -121,12 +121,17 @@ class ExamQuestionAssignment(models.Model):
         blank=True,
         help_text="Overrides base question points specifically for this exam."
     )
+    is_reserve = models.BooleanField(
+        default=False,
+        help_text="Designated as a reserve pool item for Question Swap / Skip lifelines."
+    )
 
     class Meta:
         ordering = ['order', 'id']
         unique_together = ('section', 'question')
         verbose_name = 'Exam Question Assignment'
         verbose_name_plural = 'Exam Question Assignments'
+
 
     def __str__(self):
         return f"{self.section.title} -> Q#{self.question.id} (Order {self.order})"
@@ -141,10 +146,10 @@ class ExamLifelineConfig(models.Model):
     Lifeline assistance rules configured for a specific exam.
     """
     class LifelineType(models.TextChoices):
-        SKIP_QUESTION = 'SKIP_QUESTION', 'Skip Question'
         FIFTY_FIFTY = 'FIFTY_FIFTY', '50:50 Eliminator'
         HINT_TOKEN = 'HINT_TOKEN', 'Hint Token'
         BOOKMARK_FLAG = 'BOOKMARK_FLAG', 'Bookmark / Flag'
+
 
     exam = models.ForeignKey(
         Exam,

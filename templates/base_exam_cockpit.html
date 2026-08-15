@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/forms.css' %}">
   <link rel="stylesheet" href="{% static 'css/cockpit.css' %}">
+  <link rel="stylesheet" href="{% static 'css/quill.snow.min.css' %}">
   <link rel="icon" type="image/svg+xml" href="{% static 'img/optiexam-logo.svg' %}">
 
   {% block extra_css %}{% endblock %}
@@ -20,9 +21,11 @@
   {% block content %}{% endblock %}
 
   <!-- Core JavaScript Modules (Zero CDN) -->
+  <script src="{% static 'js/quill.min.js' %}"></script>
   <script src="{% static 'js/anti-cheat-shield.js' %}"></script>
   <script src="{% static 'js/heartbeat-sync.js' %}"></script>
   <script src="{% static 'js/exam-cockpit.js' %}"></script>
+
   {% block extra_js %}{% endblock %}
 </body>
 </html>

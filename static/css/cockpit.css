@@ -52,6 +52,8 @@ body.cockpit-mode {
   font-family: var(--font-ui, system-ui, -apple-system, sans-serif);
 }
 
+
+
 /* ==============================================================================
    COCKPIT TOP BAR
    ============================================================================== */
@@ -349,7 +351,7 @@ body.cockpit-mode {
 
 /* Left Navigator Palette Drawer */
 .cockpit-drawer {
-  width: 290px;
+  width: 360px;
   background: var(--cockpit-surface);
   border-right: 1px solid var(--cockpit-border);
   display: flex;
@@ -358,6 +360,7 @@ body.cockpit-mode {
   height: 100%;
   overflow: hidden;
 }
+
 
 /* Stats HUD */
 .drawer-stats-hud {
@@ -462,10 +465,189 @@ body.cockpit-mode {
   border-radius: 4px;
 }
 
+/* Palette Filter Chips Bar */
+.palette-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px 6px 12px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--cockpit-border);
+}
+
+.filter-chip {
+  background: var(--cockpit-surface-elevated);
+  border: 1px solid var(--cockpit-border);
+  color: var(--cockpit-text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.filter-chip:hover {
+  border-color: var(--cockpit-accent);
+  color: var(--cockpit-text-main);
+}
+
+.filter-chip.active {
+  background: rgba(99, 102, 241, 0.18);
+  border-color: var(--cockpit-accent);
+  color: #38BDF8;
+  font-weight: 700;
+}
+
+/* ==============================================================================
+   SCIENTIFIC & BASIC CALCULATOR POPUP CARD
+   ============================================================================== */
+.calculator-popup-card {
+  background: var(--cockpit-surface-modal);
+  border: 1px solid var(--cockpit-border);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.calculator-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--cockpit-surface-elevated);
+  border-bottom: 1px solid var(--cockpit-border);
+}
+
+.calc-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--cockpit-text-main);
+}
+
+.calc-mode-badge {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid var(--cockpit-accent);
+  color: #38BDF8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.calc-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--cockpit-text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.calc-close-btn:hover {
+  color: var(--cockpit-danger);
+}
+
+.calc-screen-container {
+  background: var(--cockpit-input-bg);
+  padding: 14px 18px;
+  text-align: right;
+  border-bottom: 1px solid var(--cockpit-border);
+}
+
+
+.calc-history-line {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  color: var(--cockpit-text-muted);
+  min-height: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calc-main-line {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--cockpit-text-main);
+  margin-top: 4px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.calc-keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  padding: 14px;
+  background: var(--cockpit-surface-modal);
+}
+
+.calc-keypad-grid.standard-mode {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.calc-keypad-grid.standard-mode .calc-sci {
+  display: none !important;
+}
+
+.calc-btn {
+  background: var(--cockpit-surface-elevated);
+  border: 1px solid var(--cockpit-border);
+  color: var(--cockpit-text-main);
+  font-family: inherit;
+  font-size: 0.90rem;
+  font-weight: 600;
+  padding: 10px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  user-select: none;
+}
+
+.calc-btn:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--cockpit-accent);
+}
+
+.calc-btn:active {
+  transform: scale(0.95);
+}
+
+.calc-btn.calc-sci {
+  color: #38BDF8;
+  font-size: 0.78rem;
+}
+
+.calc-btn.calc-op {
+  color: #F59E0B;
+  font-weight: 700;
+}
+
+.calc-btn.calc-btn-equals {
+  background: var(--cockpit-accent) !important;
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+  border-color: transparent !important;
+}
+
+.calc-btn.calc-btn-equals:hover {
+  filter: brightness(1.1);
+}
+
 /* Palette Grid - PURE VERTICAL SCROLL ONLY */
 .palette-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 8px;
   padding: 14px 16px;
   overflow-y: auto;
@@ -474,7 +656,9 @@ body.cockpit-mode {
   align-content: start;
 }
 
+
 .palette-tile {
+
   aspect-ratio: 1;
   border-radius: 6px;
   border: 1px solid var(--cockpit-border);
@@ -838,34 +1022,101 @@ body.cockpit-mode {
   color: #38BDF8;
 }
 
-.toolbar-divider {
-  width: 1px;
-  height: 18px;
-  background: var(--cockpit-border);
-  margin: 0 4px;
+.toolbar-btn.active {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: var(--cockpit-accent);
+  color: #38BDF8;
 }
 
-.text-response-input {
-  width: 100%;
-  background: var(--cockpit-input-bg);
+/* ==============================================================================
+   QUILL RICH TEXT WYSIWYG EDITOR INTEGRATION
+   ============================================================================== */
+.quill-editor-wrapper {
+  border-radius: 8px;
+  overflow: hidden;
   border: 1px solid var(--cockpit-border);
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-  padding: 14px 16px;
-  color: var(--cockpit-text-main);
-  font-size: 0.98rem;
-  line-height: 1.65;
-  font-family: inherit;
-  resize: vertical;
-  min-height: 180px;
+  background: var(--cockpit-input-bg);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.text-response-input:focus {
-  outline: none;
-  border-color: #6366F1;
+.quill-editor-wrapper:focus-within {
+  border-color: var(--cockpit-accent);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.ql-toolbar.ql-snow {
+  background: var(--cockpit-surface-elevated) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--cockpit-border) !important;
+  padding: 8px 12px !important;
+  font-family: inherit !important;
+}
+
+.ql-snow .ql-stroke {
+  stroke: var(--cockpit-text-muted) !important;
+}
+
+.ql-snow .ql-fill {
+  fill: var(--cockpit-text-muted) !important;
+}
+
+.ql-snow .ql-picker {
+  color: var(--cockpit-text-muted) !important;
+}
+
+.ql-snow .ql-picker-options {
+  background-color: var(--cockpit-surface-elevated) !important;
+  border: 1px solid var(--cockpit-border) !important;
+  box-shadow: var(--cockpit-shadow) !important;
+  border-radius: 6px !important;
+}
+
+.ql-snow .ql-picker-item {
+  color: var(--cockpit-text-main) !important;
+}
+
+.ql-snow .ql-picker-item:hover {
+  color: var(--cockpit-accent) !important;
+}
+
+.ql-toolbar.ql-snow button:hover,
+.ql-toolbar.ql-snow button:focus,
+.ql-toolbar.ql-snow button.ql-active {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border-radius: 4px !important;
+}
+
+.ql-toolbar.ql-snow button:hover .ql-stroke,
+.ql-toolbar.ql-snow button.ql-active .ql-stroke {
+  stroke: var(--cockpit-accent) !important;
+}
+
+.ql-toolbar.ql-snow button:hover .ql-fill,
+.ql-toolbar.ql-snow button.ql-active .ql-fill {
+  fill: var(--cockpit-accent) !important;
+}
+
+.ql-container.ql-snow {
+  border: none !important;
+  font-family: inherit !important;
+  font-size: 1.05rem !important;
+  color: var(--cockpit-text-main) !important;
+  min-height: 220px !important;
+  max-height: 520px !important;
+  background: var(--cockpit-input-bg) !important;
+}
+
+.ql-editor {
+  min-height: 220px !important;
+  padding: 16px 18px !important;
+  line-height: 1.7 !important;
+  color: var(--cockpit-text-main) !important;
+}
+
+.ql-editor.ql-blank::before {
+  color: var(--cockpit-text-muted) !important;
+  font-style: italic !important;
+  left: 18px !important;
 }
 
 .word-counter-box {
@@ -873,6 +1124,7 @@ body.cockpit-mode {
   margin-top: 6px;
   margin-bottom: 24px;
 }
+
 
 .word-count-badge {
   display: inline-flex;
@@ -1098,33 +1350,65 @@ body.cockpit-mode {
 [data-theme="dark"] .unanswered-box { color: #F87171; }
 
 
-/* Simulation Floating Banner */
-.simulation-watermark-banner {
+/* Security Toast Pill */
+.security-toast-pill {
   position: fixed;
-  top: 10px;
+  bottom: 80px;
   left: 50%;
-  transform: translateX(-50%);
-  z-index: 200;
-  background: rgba(245, 158, 11, 0.95);
-  color: #000;
-  font-weight: 800;
-  font-size: 0.74rem;
-  padding: 4px 16px;
-  border-radius: 9999px;
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
-  letter-spacing: 0.5px;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(239, 68, 68, 0.95);
+  color: #FFFFFF;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
+.security-toast-pill.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Simulation Floating Banner (Positioned directly above footer bar) */
+.simulation-watermark-banner {
+  position: fixed;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 95;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.95) 0%, rgba(217, 119, 6, 0.95) 100%);
+  color: #0F172A;
+  font-weight: 800;
+  font-size: 0.76rem;
+  padding: 6px 20px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
 .sim-action-link {
-  color: #000;
+  color: #0F172A;
   text-decoration: underline;
-  font-weight: 700;
+  font-weight: 800;
+  transition: color 0.15s ease;
 }
 
 .sim-action-link:hover {
-  color: #1E1B4B;
+  color: #000000;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
+
 

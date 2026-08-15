@@ -7,9 +7,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!window.COCKPIT_CONFIG) return;
 
   const config = window.COCKPIT_CONFIG;
-  let currentQuestionIndex = 0;
+  let currentQuestionIndex = parseInt(config.activeQuestionIndex, 10) || 0;
+
+  // Try recovering last viewed question index from localStorage if valid
+  try {
+    const savedIdx = localStorage.getItem(`optiexam_current_q_${config.attemptId}`);
+    if (savedIdx !== null) {
+      const parsed = parseInt(savedIdx, 10);
+      if (!isNaN(parsed) && parsed >= 0 && parsed < (config.questions || []).length) {
+        currentQuestionIndex = parsed;
+      }
+    }
+  } catch (e) {
+    console.warn('Could not read saved question index:', e);
+  }
+
   const questions = config.questions || [];
   let currentFontSize = 1.15;
+
 
   // 1. Cache all DOM Elements upfront
   const btnPrev = document.getElementById('btn-prev-question');
@@ -28,12 +43,54 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCancelSubmit = document.getElementById('btn-cancel-submit-modal');
   const btnFiftyFifty = document.getElementById('btn-lifeline-fifty');
   const btnHint = document.getElementById('btn-lifeline-hint');
-  const btnSkip = document.getElementById('btn-lifeline-skip');
   const hintModal = document.getElementById('lifeline-hint-modal');
   const hintContent = document.getElementById('lifeline-hint-content');
   const btnCloseHint = document.getElementById('btn-close-hint-modal');
   const btnDismissHint = document.getElementById('btn-dismiss-hint');
   const btnReturnFullscreen = document.getElementById('btn-return-fullscreen');
+
+  // Custom Modal Dialog Engine (Replaces browser alert/confirm)
+  const dialogOverlay = document.getElementById('cockpit-custom-dialog-overlay');
+  const dialogTitle = document.getElementById('cockpit-dialog-title');
+  const dialogMsg = document.getElementById('cockpit-dialog-message');
+  const btnDialogConfirm = document.getElementById('btn-dialog-confirm');
+  const btnDialogCancel = document.getElementById('btn-dialog-cancel');
+
+  function showCockpitDialog(title, message, isConfirm = false) {
+    return new Promise((resolve) => {
+      if (!dialogOverlay) {
+        if (isConfirm) resolve(window.confirm(message));
+        else { window.alert(message); resolve(true); }
+        return;
+      }
+
+      dialogTitle.textContent = title;
+      dialogMsg.textContent = message;
+
+      btnDialogCancel.style.display = isConfirm ? 'inline-flex' : 'none';
+      dialogOverlay.classList.add('show');
+
+      function onConfirm() {
+        cleanup();
+        resolve(true);
+      }
+
+      function onCancel() {
+        cleanup();
+        resolve(false);
+      }
+
+      function cleanup() {
+        dialogOverlay.classList.remove('show');
+        btnDialogConfirm.removeEventListener('click', onConfirm);
+        btnDialogCancel.removeEventListener('click', onCancel);
+      }
+
+      btnDialogConfirm.addEventListener('click', onConfirm);
+      btnDialogCancel.addEventListener('click', onCancel);
+    });
+  }
+
 
 
   // 2. Initialize Heartbeat Sync Engine
@@ -65,11 +122,78 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // 3. Initialize Anti-Cheat Shield (Passive if disabled)
+  const violationHistory = [];
+  const violationAuditModal = document.getElementById('violation-audit-modal');
+  const btnCloseViolation = document.getElementById('btn-close-violation-modal');
+  const btnDismissViolation = document.getElementById('btn-dismiss-violation-modal');
+  const violationCounterPill = document.getElementById('violation-counter-pill');
+
+  if (violationCounterPill && violationAuditModal) {
+    violationCounterPill.style.cursor = 'pointer';
+    violationCounterPill.addEventListener('click', () => {
+      renderViolationAuditList();
+      violationAuditModal.classList.add('show');
+    });
+  }
+
+  if (btnCloseViolation && violationAuditModal) {
+    btnCloseViolation.addEventListener('click', () => violationAuditModal.classList.remove('show'));
+  }
+  if (btnDismissViolation && violationAuditModal) {
+    btnDismissViolation.addEventListener('click', () => violationAuditModal.classList.remove('show'));
+  }
+
+  function renderViolationAuditList() {
+    const listElem = document.getElementById('violation-audit-list');
+    if (!listElem) return;
+
+    if (violationHistory.length === 0) {
+      listElem.innerHTML = `
+        <div class="glass-card" style="padding: 12px 16px; font-size: 0.84rem; color: var(--cockpit-text-muted); text-align: center;">
+          No security violations recorded in this session.
+        </div>
+      `;
+      return;
+    }
+
+    listElem.innerHTML = violationHistory.map(v => `
+      <div class="glass-card flex items-center justify-between" style="padding: 10px 14px; border-left: 3px solid var(--cockpit-danger); border-radius: 6px; background: rgba(239, 68, 68, 0.06);">
+        <div>
+          <div style="font-weight: 700; font-size: 0.85rem; color: var(--cockpit-text-main);">${v.title}</div>
+          <div style="font-size: 0.78rem; color: var(--cockpit-text-muted); margin-top: 2px;">${v.message}</div>
+        </div>
+        <div style="font-size: 0.74rem; font-family: var(--font-mono); color: #38BDF8; white-space: nowrap;">
+          ${v.time}
+        </div>
+      </div>
+    `).join('');
+  }
+
   const antiCheat = new AntiCheatShield({
     enforceFullscreen: config.enforceFullscreen,
     lockCopyPaste: config.lockCopyPaste,
-    maxViolations: config.maxViolations || 3,
-    onViolation: (type, message, count) => {
+    isSimulation: config.isSimulation,
+    maxViolations: config.maxTabSwitchLimit || config.maxViolations || 3,
+    onViolation: async (type, message, count) => {
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+      
+      const typeTitles = {
+        'TAB_BLUR': 'Window Lost Focus / Tab Switch',
+        'FULLSCREEN_EXIT': 'Fullscreen Lockdown Exited',
+        'FULLSCREEN_GRACE_EXPIRED': 'Fullscreen Return Grace Timeout',
+        'CLIPBOARD_BLOCKED': 'Clipboard Action Blocked',
+        'CONTEXT_MENU_BLOCKED': 'Context Menu Blocked',
+        'DEVTOOLS_BLOCKED': 'DevTools / Key Lock Blocked'
+      };
+
+      violationHistory.unshift({
+        type,
+        title: typeTitles[type] || type,
+        message: message || 'Proctoring rule violation recorded.',
+        time: timeStr
+      });
+
       const countBadge = document.getElementById('violation-counter-pill');
       const countText = document.getElementById('violation-count-text');
       if (countBadge && count > 0) {
@@ -77,18 +201,90 @@ document.addEventListener('DOMContentLoaded', () => {
         if (countText) countText.textContent = `${count} Violation${count > 1 ? 's' : ''}`;
       }
 
-      fetch(config.violationUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': config.csrfToken
-        },
-        body: JSON.stringify({ event_type: type, details: { message } })
-      }).catch(e => console.warn(e));
+      try {
+        const resp = await fetch(config.violationUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': config.csrfToken
+          },
+          body: JSON.stringify({ event_type: type, details: { message } })
+        });
+        const data = await resp.json();
+
+        if (data.is_auto_submitted) {
+          // Trigger Security Limit Reached Modal (NOT Time Expired)
+          const violationModal = document.getElementById('violation-escalation-modal');
+          if (violationModal) {
+            const msgElem = document.getElementById('violation-escalation-msg');
+            if (msgElem) {
+              msgElem.textContent = `You have reached the maximum allowed limit (${data.max_violations || count} violations). Your assessment has been automatically finalized.`;
+            }
+            violationModal.classList.add('show');
+          }
+          setTimeout(() => {
+            window.location.href = config.submitUrl;
+          }, 2500);
+        } else if (data.max_violations && (data.max_violations - count) <= 2 && (data.max_violations - count) > 0) {
+          // Warning popup when 2 switches/violations left before auto-submit
+          const remainingSwitches = data.max_violations - count;
+          await showCockpitDialog(
+            'Security Warning: Tab Switch Detected',
+            `You have switched away from the exam window. You only have ${remainingSwitches} switch${remainingSwitches > 1 ? 'es' : ''} remaining before your assessment is automatically submitted.`
+          );
+        }
+      } catch (e) {
+        console.warn('Violation logging failed:', e);
+      }
     }
   });
 
-  // 4. Theme Toggle Button
+
+
+  // 4. Restore any unsynced local answers on page reload for crash recovery
+  try {
+    const cachedPending = localStorage.getItem(`optiexam_attempt_${config.attemptId}`);
+    if (cachedPending) {
+      const pendingList = JSON.parse(cachedPending);
+      if (Array.isArray(pendingList)) {
+        pendingList.forEach(item => {
+          const targetQ = questions.find(q => q.question_id === item.question_id);
+          if (targetQ && targetQ.answer) {
+            if (item.text_response !== undefined) {
+              targetQ.answer.text_response = item.text_response;
+              targetQ.answer.is_answered = !!item.text_response.trim();
+            }
+            if (item.selected_option_ids !== undefined) {
+              targetQ.answer.selected_option_ids = item.selected_option_ids;
+              targetQ.answer.is_answered = item.selected_option_ids.length > 0;
+            }
+            if (item.is_bookmarked !== undefined) {
+              targetQ.answer.is_bookmarked = item.is_bookmarked;
+            }
+          }
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('Could not restore local storage answers:', e);
+  }
+
+  // Flush answers immediately on beforeunload / pagehide using Navigator sendBeacon or sync
+  window.addEventListener('beforeunload', () => {
+    const activeQ = questions[currentQuestionIndex];
+    if (activeQ && heartbeat.pendingDelta.length > 0) {
+      const payload = JSON.stringify({
+        active_question_id: activeQ.question_id,
+        answers_delta: heartbeat.pendingDelta
+      });
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon(config.heartbeatUrl, blob);
+      }
+    }
+  });
+
+  // 5. Theme Toggle Button
   if (btnTheme) {
     btnTheme.addEventListener('click', () => {
       const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -103,60 +299,140 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 5. Initial Stats & Initial Question Render
+  // 6. Initialize Quill Rich Text Editor
+  let quillInstance = null;
+  let isUpdatingQuillProgrammatically = false;
+  const quillContainer = document.getElementById('quill-editor-container');
+  if (quillContainer && window.Quill) {
+    quillInstance = new Quill('#quill-editor-container', {
+      theme: 'snow',
+      placeholder: 'Type your comprehensive response here... Use toolbar tools for formatting, equations, lists, and code.',
+      modules: {
+        toolbar: [
+          [{ 'header': [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'color': [] }, { 'background': [] }],
+          [{ 'script': 'sub'}, { 'script': 'super' }],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          ['blockquote', 'code-block'],
+          ['clean']
+        ]
+      }
+    });
+
+    quillInstance.on('text-change', (delta, oldDelta, source) => {
+      if (isUpdatingQuillProgrammatically) return;
+
+      const q = questions[currentQuestionIndex];
+      if (!q) return;
+
+      const html = quillInstance.root.innerHTML;
+      const text = quillInstance.getText().trim();
+      const count = text ? text.split(/\s+/).filter(Boolean).length : 0;
+
+      const wordCountSpan = document.getElementById('word-count-num');
+      if (wordCountSpan) wordCountSpan.textContent = count;
+
+      q.answer.text_response = text ? html : '';
+      q.answer.is_answered = count > 0;
+
+      updatePaletteTileStatus(currentQuestionIndex, q.answer);
+      updateGlobalStatsHUD();
+
+      heartbeat.queueAnswer(q.question_id, { text_response: q.answer.text_response });
+    });
+  }
+
+  // 7. Initial Stats & Initial Question Render
   updateGlobalStatsHUD();
   renderQuestion(currentQuestionIndex);
 
-  // 6. Navigation Buttons
+
+  // 6. Navigation Buttons (Respect allow_back_navigation policy)
   if (btnPrev) {
-    btnPrev.addEventListener('click', () => {
-      if (currentQuestionIndex > 0) {
-        currentQuestionIndex -= 1;
-        renderQuestion(currentQuestionIndex);
-      }
-    });
+    if (!config.allowBackNavigation) {
+      btnPrev.style.display = 'none';
+    } else {
+      btnPrev.addEventListener('click', () => {
+        if (currentQuestionIndex > 0) {
+          currentQuestionIndex -= 1;
+          renderQuestion(currentQuestionIndex);
+        }
+      });
+    }
   }
 
   if (btnNext) {
-    btnNext.addEventListener('click', () => {
+    btnNext.addEventListener('click', async () => {
+      const q = questions[currentQuestionIndex];
+      // If linear navigation policy is enforced, candidate MUST answer the question before advancing
+      if (!config.allowBackNavigation && (!q.answer || !q.answer.is_answered)) {
+        await showCockpitDialog(
+          'Answer Required',
+          'Linear exam progression is enforced. You must answer or attempt this question before saving and moving to the next question.'
+        );
+        return;
+      }
+
       if (currentQuestionIndex < questions.length - 1) {
         currentQuestionIndex += 1;
         renderQuestion(currentQuestionIndex);
+      } else {
+        // At the last question, trigger final submission review
+        if (btnTriggerSubmit) btnTriggerSubmit.click();
       }
     });
   }
 
-  // 7. Bind Palette Tiles
+  // 7. Bind Palette Tiles (Enforcing linear progression if back navigation is disabled)
   document.querySelectorAll('.palette-tile').forEach((tile) => {
-    tile.addEventListener('click', () => {
+    tile.addEventListener('click', async () => {
       const idx = parseInt(tile.getAttribute('data-index'), 10);
       if (!isNaN(idx) && idx >= 0 && idx < questions.length) {
+        if (!config.allowBackNavigation) {
+          if (idx !== currentQuestionIndex) {
+            await showCockpitDialog(
+              'Sequential Navigation Enforced',
+              'Direct palette jumping is disabled for this examination. Please use "Save Answer & Next" to progress through questions sequentially.'
+            );
+            return;
+          }
+        }
         currentQuestionIndex = idx;
         renderQuestion(currentQuestionIndex);
       }
     });
   });
 
-  // 8. Bookmark / Flag Toggle Button
+
+
+  // 8. Bookmark / Flag Toggle Button (Disabled if linear progression is enforced)
   if (btnBookmark) {
-    btnBookmark.addEventListener('click', () => {
-      const q = questions[currentQuestionIndex];
-      if (!q) return;
+    if (!config.allowBackNavigation) {
+      btnBookmark.style.display = 'none';
+    } else {
+      btnBookmark.addEventListener('click', () => {
+        const q = questions[currentQuestionIndex];
+        if (!q) return;
 
-      q.answer.is_bookmarked = !q.answer.is_bookmarked;
-      updateBookmarkButtonState(q.answer.is_bookmarked);
-      updatePaletteTileStatus(currentQuestionIndex, q.answer);
-      updateGlobalStatsHUD();
+        q.answer.is_bookmarked = !q.answer.is_bookmarked;
+        updateBookmarkButtonState(q.answer.is_bookmarked);
+        updatePaletteTileStatus(currentQuestionIndex, q.answer);
+        updateGlobalStatsHUD();
 
-      heartbeat.queueAnswer(q.question_id, { is_bookmarked: q.answer.is_bookmarked });
-    });
+        heartbeat.queueAnswer(q.question_id, { is_bookmarked: q.answer.is_bookmarked });
+      });
+    }
   }
 
   // 9. Clear Answer Button
   if (btnClear) {
-    btnClear.addEventListener('click', () => {
+    btnClear.addEventListener('click', async () => {
       const q = questions[currentQuestionIndex];
       if (!q) return;
+
+      const confirmed = await showCockpitDialog('Clear Response', 'Are you sure you want to clear your current answer for this question?', true);
+      if (!confirmed) return;
 
       if (['MCQ_SINGLE', 'MCQ_MULTIPLE', 'IMAGE_MCQ'].includes(q.question_type)) {
         q.answer.selected_option_ids = [];
@@ -166,8 +442,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } else {
         q.answer.text_response = '';
-        const textarea = document.getElementById('question-text-response');
-        if (textarea) textarea.value = '';
+        if (quillInstance) {
+          quillInstance.setText('');
+        }
         const wordCountSpan = document.getElementById('word-count-num');
         if (wordCountSpan) wordCountSpan.textContent = '0';
       }
@@ -183,76 +460,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 10. Rich Text Formatting Toolbar Handlers
-  const richToolbar = document.getElementById('richTextToolbar');
-  if (richToolbar) {
-    richToolbar.querySelectorAll('.toolbar-btn[data-format]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const format = btn.getAttribute('data-format');
-        const textarea = document.getElementById('question-text-response');
-        if (!textarea) return;
-
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const selected = textarea.value.substring(start, end);
-        let replacement = '';
-
-        switch (format) {
-          case 'bold':
-            replacement = `**${selected || 'bold text'}**`;
-            break;
-          case 'italic':
-            replacement = `*${selected || 'italic text'}*`;
-            break;
-          case 'underline':
-            replacement = `<u>${selected || 'underlined text'}</u>`;
-            break;
-          case 'strike':
-            replacement = `~~${selected || 'strikethrough text'}~~`;
-            break;
-          case 'heading':
-            replacement = `\n### ${selected || 'Section Heading'}\n`;
-            break;
-          case 'bullet':
-            replacement = `\n- ${selected || 'List item'}`;
-            break;
-          case 'number':
-            replacement = `\n1. ${selected || 'Numbered item'}`;
-            break;
-          case 'code':
-            replacement = `\`\`\`\n${selected || '// code block'}\n\`\`\``;
-            break;
-          case 'quote':
-            replacement = `\n> ${selected || 'Quotation text'}\n`;
-            break;
-          case 'table':
-            replacement = `\n| Column 1 | Column 2 | Column 3 |\n| :--- | :--- | :--- |\n| Value A | Value B | Value C |\n`;
-            break;
-          case 'math':
-            replacement = `$${selected || 'E = mc^2'}$`;
-            break;
-          default:
-            replacement = selected;
-        }
 
 
-        textarea.setRangeText(replacement, start, end, 'end');
-        textarea.focus();
-        textarea.dispatchEvent(new Event('input'));
-      });
-    });
-
-    const btnClearEditor = document.getElementById('btn-clear-editor-text');
-    if (btnClearEditor) {
-      btnClearEditor.addEventListener('click', () => {
-        const textarea = document.getElementById('question-text-response');
-        if (textarea && confirm('Clear all content from this answer box?')) {
-          textarea.value = '';
-          textarea.dispatchEvent(new Event('input'));
-        }
-      });
-    }
-  }
 
   // 11. Font Size Scaler
   const readingArea = document.getElementById('current-question-prompt');
@@ -319,25 +528,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 14. Keyboard Shortcuts (Alt+Right: Next, Alt+Left: Prev, Alt+F: Flag)
-
   document.addEventListener('keydown', (e) => {
     if (e.altKey && e.key === 'ArrowRight') {
       e.preventDefault();
-      if (currentQuestionIndex < questions.length - 1) {
-        currentQuestionIndex += 1;
-        renderQuestion(currentQuestionIndex);
-      }
+      if (btnNext) btnNext.click();
     } else if (e.altKey && e.key === 'ArrowLeft') {
       e.preventDefault();
-      if (currentQuestionIndex > 0) {
-        currentQuestionIndex -= 1;
-        renderQuestion(currentQuestionIndex);
+      if (config.allowBackNavigation && btnPrev) {
+        btnPrev.click();
       }
     } else if (e.altKey && (e.key === 'f' || e.key === 'F')) {
       e.preventDefault();
-      if (btnBookmark) btnBookmark.click();
+      if (config.allowBackNavigation && btnBookmark) {
+        btnBookmark.click();
+      }
     }
   });
+
 
   function renderQuestion(index) {
     const q = questions[index];
@@ -404,14 +611,38 @@ document.addEventListener('DOMContentLoaded', () => {
       tile.classList.toggle('active', tIdx === index);
     });
 
-    // Update Prev/Next buttons
+    // Update Prev/Next buttons & Linear Progression Labels
     if (btnPrev) {
       btnPrev.disabled = index === 0;
+      if (!config.allowBackNavigation) btnPrev.style.display = 'none';
     }
     if (btnNext) {
-      btnNext.disabled = index === questions.length - 1;
+      const isLast = index === questions.length - 1;
+      const nextBtnSpan = btnNext.querySelector('span');
+      if (nextBtnSpan) {
+        if (isLast) {
+          nextBtnSpan.textContent = 'Save & Review Submission';
+        } else if (!config.allowBackNavigation) {
+          nextBtnSpan.textContent = 'Save Answer & Next';
+        } else {
+          nextBtnSpan.textContent = 'Next Question';
+        }
+      }
+      btnNext.disabled = false; // Always allow clicking to trigger validation or progression
     }
+
+
+    // Persist current question index position across page reloads
+    try {
+      localStorage.setItem(`optiexam_current_q_${config.attemptId}`, String(index));
+    } catch (e) {
+      console.warn('LocalStorage save failed:', e);
+    }
+
+    // Inform heartbeat about active question navigation
+    heartbeat.queueAnswer(q.question_id, {});
   }
+
 
   function updateBookmarkButtonState(isBookmarked) {
     if (!btnBookmark) return;
@@ -465,12 +696,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderTextResponse(q) {
-    const textarea = document.getElementById('question-text-response');
     const wordCountSpan = document.getElementById('word-count-num');
     const limitSpan = document.getElementById('word-limit-max');
-    if (!textarea) return;
-
-    textarea.value = q.answer.text_response || '';
 
     if (q.word_limit && limitSpan) {
       limitSpan.textContent = `/ ${q.word_limit} words max`;
@@ -478,21 +705,26 @@ document.addEventListener('DOMContentLoaded', () => {
       limitSpan.textContent = '';
     }
 
-    const updateCount = () => {
-      const text = textarea.value.trim();
-      const count = text ? text.split(/\s+/).length : 0;
+    if (quillInstance) {
+      isUpdatingQuillProgrammatically = true;
+      const content = (q.answer && q.answer.text_response) ? q.answer.text_response : '';
+
+      if (content && (content.includes('<p>') || content.includes('<h') || content.includes('<ul') || content.includes('<ol'))) {
+        quillInstance.root.innerHTML = content;
+      } else if (content) {
+        quillInstance.setText(content);
+      } else {
+        quillInstance.setText('');
+      }
+
+      const text = quillInstance.getText().trim();
+      const count = text ? text.split(/\s+/).filter(Boolean).length : 0;
       if (wordCountSpan) wordCountSpan.textContent = count;
+      isUpdatingQuillProgrammatically = false;
+    }
 
-      q.answer.text_response = textarea.value;
-      q.answer.is_answered = count > 0;
-      updatePaletteTileStatus(currentQuestionIndex, q.answer);
-      updateGlobalStatsHUD();
-      heartbeat.queueAnswer(q.question_id, { text_response: textarea.value });
-    };
-
-    textarea.oninput = updateCount;
-    updateCount();
   }
+
 
   function updatePaletteTileStatus(idx, answer) {
     const tile = document.getElementById(`palette-tile-${idx}`);
@@ -535,6 +767,66 @@ document.addEventListener('DOMContentLoaded', () => {
     if (remElem) remElem.textContent = remainingCount;
     if (pctElem) pctElem.textContent = `${percent}%`;
     if (fillElem) fillElem.style.width = `${percent}%`;
+
+    // Update filter counts
+    const fAll = document.getElementById('filter-cnt-all');
+    const fAns = document.getElementById('filter-cnt-ans');
+    const fUnans = document.getElementById('filter-cnt-unans');
+    const fFlag = document.getElementById('filter-cnt-flag');
+    if (fAll) fAll.textContent = questions.length;
+    if (fAns) fAns.textContent = answeredCount;
+    if (fUnans) fUnans.textContent = remainingCount;
+    if (fFlag) fFlag.textContent = bookmarkedCount;
+  }
+
+  // Palette Filter Logic (All, Answered, Unanswered, Flagged)
+  let activePaletteFilter = 'all';
+  document.querySelectorAll('.palette-filter-bar .filter-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.palette-filter-bar .filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activePaletteFilter = chip.getAttribute('data-filter') || 'all';
+      applyPaletteFilter();
+    });
+  });
+
+  function applyPaletteFilter() {
+    questions.forEach((q, idx) => {
+      const tile = document.getElementById(`palette-tile-${idx}`);
+      if (!tile) return;
+
+      let visible = true;
+      if (activePaletteFilter === 'answered') {
+        visible = !!(q.answer && q.answer.is_answered);
+      } else if (activePaletteFilter === 'unanswered') {
+        visible = !(q.answer && q.answer.is_answered);
+      } else if (activePaletteFilter === 'flagged') {
+        visible = !!(q.answer && q.answer.is_bookmarked);
+      }
+      tile.style.display = visible ? 'flex' : 'none';
+    });
+  }
+
+  // Low-Time Web Audio Chime Synthesizer (Zero asset dependency)
+  let playedWarningBeep = false;
+  let playedDangerBeep = false;
+
+  function playSoftAlertTone(freq = 440, duration = 0.25) {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {
+      console.warn('Audio tone could not play:', e);
+    }
   }
 
   function updateTimerDisplay(seconds) {
@@ -555,10 +847,23 @@ document.addEventListener('DOMContentLoaded', () => {
     timerElem.textContent = formatted;
 
     if (timerBox) {
-      timerBox.classList.toggle('warning', seconds <= 300 && seconds > 60);
-      timerBox.classList.toggle('danger', seconds <= 60);
+      const isWarning = seconds <= 300 && seconds > 60;
+      const isDanger = seconds <= 60;
+
+      timerBox.classList.toggle('warning', isWarning);
+      timerBox.classList.toggle('danger', isDanger);
+
+      if (isWarning && !playedWarningBeep) {
+        playSoftAlertTone(523.25, 0.4); // C5 tone
+        playedWarningBeep = true;
+      }
+      if (isDanger && !playedDangerBeep) {
+        playSoftAlertTone(659.25, 0.6); // E5 tone
+        playedDangerBeep = true;
+      }
     }
   }
+
 
   function handleExamExpired() {
     const expiryModal = document.getElementById('time-expiry-modal');
@@ -592,7 +897,7 @@ document.addEventListener('DOMContentLoaded', () => {
           btnFiftyFifty.disabled = data.remaining_quota <= 0;
           btnFiftyFifty.querySelector('span').textContent = `50:50 (${data.remaining_quota})`;
         } else {
-          alert(data.error || 'Lifeline failed.');
+          await showCockpitDialog('Lifeline Notice', data.error || 'Lifeline could not be applied to this question.');
         }
       } catch (err) {
         console.warn(err);
@@ -619,7 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
           btnHint.disabled = data.remaining_quota <= 0;
           btnHint.querySelector('span').textContent = `Hint (${data.remaining_quota})`;
         } else {
-          alert(data.error || 'No guidance hint configured for this question.');
+          await showCockpitDialog('Hint Unavailable', data.error || 'No guidance hint has been configured for this question.');
         }
       } catch (err) {
         console.warn(err);
@@ -635,45 +940,156 @@ document.addEventListener('DOMContentLoaded', () => {
     btnDismissHint.addEventListener('click', () => hintModal.classList.remove('show'));
   }
 
-  // Skip Question Lifeline
-  if (btnSkip) {
-    btnSkip.addEventListener('click', async () => {
-      const q = questions[currentQuestionIndex];
-      if (!q) return;
-
-      if (!confirm('Use Skip Question lifeline on this question? You can return to it later.')) return;
-
-      try {
-        const resp = await fetch(config.lifelineUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': config.csrfToken },
-          body: JSON.stringify({ lifeline_type: 'SKIP_QUESTION', question_id: q.question_id })
-        });
-        const data = await resp.json();
-        if (data.success) {
-          q.answer.is_skipped = true;
-          updatePaletteTileStatus(currentQuestionIndex, q.answer);
-          btnSkip.disabled = data.remaining_quota <= 0;
-          btnSkip.querySelector('span').textContent = `Skip (${data.remaining_quota})`;
-          // Advance to next question if available
-          if (currentQuestionIndex < questions.length - 1) {
-            currentQuestionIndex += 1;
-            renderQuestion(currentQuestionIndex);
-          }
-        } else {
-          alert(data.error || 'Skip lifeline failed.');
-        }
-      } catch (err) {
-        console.warn(err);
-      }
-    });
-  }
-
   // 15. Fullscreen Return Action
   if (btnReturnFullscreen) {
     btnReturnFullscreen.addEventListener('click', () => {
       document.documentElement.requestFullscreen().catch(e => console.warn(e));
     });
   }
+
+  // 16. Scientific & Standard Calculator Controller
+  const btnOpenCalc = document.getElementById('btn-open-calc');
+  const calcModal = document.getElementById('calculator-modal-overlay');
+  const btnCloseCalc = document.getElementById('btn-close-calc-modal');
+  const btnToggleCalcMode = document.getElementById('btn-toggle-calc-mode');
+  const calcKeypad = document.getElementById('calcKeypad');
+  const calcMainDisplay = document.getElementById('calc-main-display');
+  const calcHistDisplay = document.getElementById('calc-history-display');
+
+  if (btnOpenCalc && calcModal) {
+    btnOpenCalc.addEventListener('click', () => calcModal.classList.add('show'));
+  }
+  if (btnCloseCalc && calcModal) {
+    btnCloseCalc.addEventListener('click', () => calcModal.classList.remove('show'));
+  }
+
+  let calcCurrentExpr = '';
+  let calcLastAnswer = 0;
+  let isScientificMode = true;
+
+  if (btnToggleCalcMode && calcKeypad) {
+    btnToggleCalcMode.addEventListener('click', () => {
+      isScientificMode = !isScientificMode;
+      btnToggleCalcMode.textContent = isScientificMode ? 'Scientific' : 'Standard';
+      calcKeypad.classList.toggle('standard-mode', !isScientificMode);
+    });
+  }
+
+  function updateCalcScreen(val = null) {
+    if (calcMainDisplay) {
+      calcMainDisplay.textContent = val !== null ? val : (calcCurrentExpr || '0');
+    }
+  }
+
+  if (calcKeypad) {
+    calcKeypad.addEventListener('click', (e) => {
+      const btn = e.target.closest('.calc-btn');
+      if (!btn) return;
+
+      const num = btn.getAttribute('data-num');
+      const op = btn.getAttribute('data-op');
+      const action = btn.getAttribute('data-action');
+
+      if (num !== null) {
+        if (calcCurrentExpr === '0' && num !== '.') calcCurrentExpr = num;
+        else calcCurrentExpr += num;
+        updateCalcScreen();
+      } else if (action === 'clear') {
+        calcCurrentExpr = '';
+        if (calcHistDisplay) calcHistDisplay.innerHTML = '&nbsp;';
+        updateCalcScreen('0');
+      } else if (action === 'backspace') {
+        calcCurrentExpr = calcCurrentExpr.slice(0, -1);
+        updateCalcScreen(calcCurrentExpr || '0');
+      } else if (action === 'equals') {
+        if (!calcCurrentExpr) return;
+        try {
+          if (calcHistDisplay) calcHistDisplay.textContent = `${calcCurrentExpr} =`;
+          let evalExpr = calcCurrentExpr
+            .replace(/×/g, '*')
+            .replace(/÷/g, '/')
+            .replace(/−/g, '-')
+            .replace(/π/g, 'Math.PI')
+            .replace(/e/g, 'Math.E');
+
+          // Safe math evaluation
+          const result = Function(`'use strict'; return (${evalExpr})`)();
+          calcLastAnswer = Number(result);
+          calcCurrentExpr = String(Math.round(result * 100000000) / 100000000);
+          updateCalcScreen(calcCurrentExpr);
+        } catch (err) {
+          updateCalcScreen('Error');
+          calcCurrentExpr = '';
+        }
+      } else if (op) {
+        switch (op) {
+          case 'sin':
+          case 'cos':
+          case 'tan':
+          case 'log':
+          case 'sqrt':
+            try {
+              let currentVal = parseFloat(calcCurrentExpr) || calcLastAnswer || 0;
+              let res = 0;
+              if (op === 'sin') res = Math.sin((currentVal * Math.PI) / 180);
+              else if (op === 'cos') res = Math.cos((currentVal * Math.PI) / 180);
+              else if (op === 'tan') res = Math.tan((currentVal * Math.PI) / 180);
+              else if (op === 'log') res = Math.log10(currentVal);
+              else if (op === 'sqrt') res = Math.sqrt(currentVal);
+
+              if (calcHistDisplay) calcHistDisplay.textContent = `${op}(${currentVal}) =`;
+              calcLastAnswer = res;
+              calcCurrentExpr = String(Math.round(res * 100000000) / 100000000);
+              updateCalcScreen(calcCurrentExpr);
+            } catch (err) {
+              updateCalcScreen('Error');
+            }
+            break;
+          case 'ln':
+            try {
+              let currentVal = parseFloat(calcCurrentExpr) || 0;
+              let res = Math.log(currentVal);
+              calcCurrentExpr = String(Math.round(res * 100000000) / 100000000);
+              updateCalcScreen(calcCurrentExpr);
+            } catch (e) { updateCalcScreen('Error'); }
+            break;
+          case 'pow':
+            try {
+              let currentVal = parseFloat(calcCurrentExpr) || 0;
+              let res = Math.pow(currentVal, 2);
+              calcCurrentExpr = String(res);
+              updateCalcScreen(calcCurrentExpr);
+            } catch (e) { updateCalcScreen('Error'); }
+            break;
+          case 'inv':
+            try {
+              let currentVal = parseFloat(calcCurrentExpr) || 0;
+              let res = 1 / currentVal;
+              calcCurrentExpr = String(Math.round(res * 100000000) / 100000000);
+              updateCalcScreen(calcCurrentExpr);
+            } catch (e) { updateCalcScreen('Error'); }
+            break;
+          case 'neg':
+            if (calcCurrentExpr.startsWith('-')) calcCurrentExpr = calcCurrentExpr.slice(1);
+            else if (calcCurrentExpr) calcCurrentExpr = '-' + calcCurrentExpr;
+            updateCalcScreen();
+            break;
+          case 'pi':
+            calcCurrentExpr += Math.PI.toFixed(6);
+            updateCalcScreen();
+            break;
+          case 'ans':
+            calcCurrentExpr += String(calcLastAnswer);
+            updateCalcScreen();
+            break;
+          default:
+            calcCurrentExpr += ` ${op} `;
+            updateCalcScreen();
+        }
+      }
+    });
+  }
 });
+
+
 

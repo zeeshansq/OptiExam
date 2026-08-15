@@ -161,10 +161,18 @@
               {{ att.started_at|date:"H:i:s" }}
             </td>
             <td style="text-align: right;">
-              <button type="button" class="btn btn-ghost btn-sm btn-bonus-single" data-attempt-id="{{ att.id }}" title="Grant +5m to this student">
-                {% icon 'clock' 'icon' %}
-                <span>+5m</span>
-              </button>
+              <div class="flex items-center justify-end gap-2">
+                {% if att.status == 'AUTO_SUBMITTED' or att.status == 'LOCKED' %}
+                  <button type="button" class="btn btn-accent btn-sm btn-unlock-candidate" data-attempt-id="{{ att.id }}" data-candidate-name="{{ att.participant.get_full_name|default:att.participant.username }}" title="Allow candidate to resume exam">
+                    {% icon 'unlock' 'icon' %}
+                    <span>Unlock &amp; Resume</span>
+                  </button>
+                {% endif %}
+                <button type="button" class="btn btn-ghost btn-sm btn-bonus-single" data-attempt-id="{{ att.id }}" title="Grant +5m to this student">
+                  {% icon 'clock' 'icon' %}
+                  <span>+5m</span>
+                </button>
+              </div>
             </td>
           </tr>
         {% empty %}
@@ -185,6 +193,7 @@
 {% block extra_js %}
 <script>
   const bonusUrl = "{% url 'exams:live_ops_bonus_time' exam.pk %}";
+  const unlockUrl = "{% url 'exams:live_ops_unlock_attempt' exam.pk %}";
   const csrfToken = "{{ csrf_token }}";
 
   document.getElementById('btn-bonus-all')?.addEventListener('click', async () => {
@@ -224,5 +233,29 @@
       }
     });
   });
+
+  document.querySelectorAll('.btn-unlock-candidate').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const attId = btn.getAttribute('data-attempt-id');
+      const name = btn.getAttribute('data-candidate-name');
+      if (!confirm(`Are you sure you want to unlock and resume ${name}'s exam attempt?\n\nThis will reset violation counters and allow the candidate to return to the Live Cockpit.`)) return;
+
+      try {
+        const resp = await fetch(unlockUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+          body: JSON.stringify({ attempt_id: attId, reset_violations: true, bonus_minutes: 2 })
+        });
+        const data = await resp.json();
+        if (data.status === 'success') {
+          alert(data.message || 'Attempt unlocked successfully.');
+          window.location.reload();
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+    });
+  });
 </script>
 {% endblock %}
+

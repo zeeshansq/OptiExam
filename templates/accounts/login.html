@@ -260,6 +260,12 @@
          RIGHT REGION (38%): Expanded High-Width Interactive Login Card
          ==================================================================== -->
     <main class="auth-login-panel">
+      <!-- Live Assessment Engine Telemetry Pill Placed Above Login Card -->
+      <div class="live-status-pill-floating">
+        <span class="status-pulse-dot"></span>
+        <span class="status-pill-text">Live Assessment Engine • Sub-Second Telemetry</span>
+      </div>
+
       <div class="login-card-container">
 
         <!-- Mobile-Only Brand Header -->
@@ -273,20 +279,14 @@
 
         <!-- Login Card Header -->
         <div class="login-card-header">
-          <!-- Top Row Badges: Secure Access + Centered Live Assessment Telemetry -->
-          <div class="login-header-badge-row">
-            <div class="access-badge">
-              {% icon 'shield' 'icon-xs' %}
-              <span>SECURE ACCESS PORTAL</span>
-            </div>
-            <div class="live-status-pill">
-              <span class="status-pulse-dot"></span>
-              <span class="status-pill-text">Live Assessment Engine • Sub-Second Telemetry</span>
-            </div>
+          <div class="access-badge" style="margin-bottom: 10px;">
+            {% icon 'shield' 'icon-xs' %}
+            <span>SECURE ACCESS PORTAL</span>
           </div>
           <h2 class="login-title">Sign In</h2>
           <p class="login-subtitle">Enter your institutional credentials to access your assessment workspace.</p>
         </div>
+
 
         <!-- Form Error Alerts -->
         {% if form.errors %}
@@ -1055,6 +1055,7 @@
     flex: 0 0 38%;
     max-width: 38%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 24px 36px;
@@ -1062,7 +1063,42 @@
     overflow-y: auto;
   }
 
+  /* Floating Live Telemetry Pill placed outside and above login card */
+  .live-status-pill-floating {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #34D399;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    margin-top: 6px;
+    margin-bottom: 16px;
+    transition: all 0.2s ease;
+  }
+
+  .status-pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #10B981;
+    box-shadow: 0 0 8px #10B981;
+    animation: statusBlink 1.8s infinite ease-in-out;
+  }
+
+  @keyframes statusBlink {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
   .login-card-container {
+
     width: 100%;
     max-width: 480px;
     /* Expanded spacious width */
@@ -1097,11 +1133,15 @@
 
   .mobile-brand-subtitle {
     font-size: 0.74rem;
+    color: #94A3B8;
+  }
+
   /* Login Header */
   .login-card-header {
     margin-bottom: 18px;
     text-align: center;
   }
+
 
   .login-header-badge-row {
     display: flex;

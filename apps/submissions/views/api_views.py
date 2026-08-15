@@ -75,4 +75,10 @@ class ProctoringViolationAPIView(LoginRequiredMixin, View):
         details = body.get('details', {})
 
         log_proctoring_event(attempt, event_type, details)
-        return JsonResponse({'status': 'logged', 'violations': attempt.violation_count})
+        return JsonResponse({
+            'status': 'logged',
+            'violations': attempt.violation_count,
+            'is_auto_submitted': attempt.status == ExamAttempt.Status.AUTO_SUBMITTED,
+            'max_violations': attempt.exam.max_tab_switch_limit
+        })
+

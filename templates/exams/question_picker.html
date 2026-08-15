@@ -106,12 +106,14 @@
                   {% csrf_token %}
                   <input type="hidden" name="question_id" value="{{ q.pk }}">
                   <button type="submit" class="btn btn-primary btn-sm">
-                    {% icon 'plus' 'icon' %}
+                    {% icon 'plus' 'icon-xs' %}
                     <span>Assign</span>
                   </button>
                 </form>
               {% endif %}
             </td>
+
+
           </tr>
         {% empty %}
           <tr>

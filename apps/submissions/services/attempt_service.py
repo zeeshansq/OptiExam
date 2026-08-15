@@ -34,25 +34,26 @@ def initialize_attempt(
     Initializes a new candidate attempt with seeded question/option shuffling,
     or resumes an active attempt if one already exists.
     """
-    # For simulations, always purge any old simulation attempt (submitted, expired, in progress) to provide a fresh run
-    if is_simulation:
-        ExamAttempt.objects.filter(exam=exam, participant=participant, is_simulation=True).delete()
-    else:
-        # Check for existing IN_PROGRESS attempt
-        existing_attempt = ExamAttempt.objects.filter(
-            exam=exam,
-            participant=participant,
-            status=ExamAttempt.Status.IN_PROGRESS,
-            is_simulation=False
-        ).first()
+    # Check for existing IN_PROGRESS attempt (for both official attempts and dry-run simulations)
+    existing_attempt = ExamAttempt.objects.filter(
+        exam=exam,
+        participant=participant,
+        status=ExamAttempt.Status.IN_PROGRESS,
+        is_simulation=is_simulation
+    ).first()
 
-        if existing_attempt:
-            if existing_attempt.is_expired:
+    if existing_attempt:
+        if existing_attempt.is_expired:
+            if is_simulation:
+                # Expired simulations get wiped to start fresh
+                ExamAttempt.objects.filter(exam=exam, participant=participant, is_simulation=True).delete()
+            else:
                 existing_attempt.status = ExamAttempt.Status.AUTO_SUBMITTED
                 existing_attempt.submitted_at = timezone.now()
                 existing_attempt.save(update_fields=['status', 'submitted_at'])
-            else:
-                return existing_attempt
+        else:
+            return existing_attempt
+
 
 
     # Enforce Roster verification for non-simulations
@@ -88,7 +89,11 @@ def initialize_attempt(
     seen_question_ids = set()
 
     for section in sections:
-        assignments = list(ExamQuestionAssignment.objects.filter(section=section).select_related('question').order_by('order'))
+        assignments = list(
+            ExamQuestionAssignment.objects.filter(section=section, is_reserve=False)
+            .select_related('question')
+            .order_by('order')
+        )
         section_questions = []
         for a in assignments:
             if a.question and a.question.id not in seen_question_ids:
@@ -99,6 +104,7 @@ def initialize_attempt(
             rng.shuffle(section_questions)
 
         ordered_questions.extend(section_questions)
+
 
     # Pre-create blank AttemptAnswer records
     attempt_answers = []

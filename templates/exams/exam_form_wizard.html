@@ -42,8 +42,35 @@
 <form method="post" style="width: 100%;">
   {% csrf_token %}
 
+  <!-- Comprehensive Error Banner if Validation Fails -->
+  {% if form.errors or section_formset.errors or lifeline_formset.errors or form.non_field_errors or section_formset.non_form_errors or lifeline_formset.non_form_errors %}
+    <div class="glass-card flex flex-col gap-2" style="border-left: 4px solid var(--color-danger); padding: 14px 18px; margin-bottom: 20px; background: rgba(239, 68, 68, 0.08);">
+      <div class="flex items-center gap-2" style="color: var(--color-danger); font-weight: 700;">
+        {% icon 'alert-triangle' 'icon-sm' %}
+        <span>Please correct the errors below before saving:</span>
+      </div>
+      <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: var(--color-danger); line-height: 1.5;">
+        {% for error in form.non_field_errors %}
+          <li><strong>Blueprint:</strong> {{ error }}</li>
+        {% endfor %}
+        {% for field in form %}
+          {% for error in field.errors %}
+            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+        {% for error in section_formset.non_form_errors %}
+          <li><strong>Sections:</strong> {{ error }}</li>
+        {% endfor %}
+        {% for error in lifeline_formset.non_form_errors %}
+          <li><strong>Lifelines:</strong> {{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
   <!-- Two-Column Balanced Layout Spanning Full Screen Width -->
   <div class="grid grid-cols-2 gap-6">
+
     
     <!-- LEFT COLUMN: Identity, Schedule & Instructions -->
     <div class="flex flex-col gap-6">
@@ -227,12 +254,18 @@
 
       <!-- Section 5: Exam Sections Formset -->
       <div class="form-section-card" style="margin-bottom: 0;">
-        <div class="form-section-header">
-          <span class="form-step-badge">5</span>
-          <div>
-            <h3>Exam Sections & Weightages</h3>
-            <p>Partition exam into distinct academic sections.</p>
+        <div class="form-section-header flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="form-step-badge">5</span>
+            <div>
+              <h3>Exam Sections & Weightages</h3>
+              <p>Partition exam into distinct academic sections.</p>
+            </div>
           </div>
+          <button type="button" id="btn-add-section" class="btn btn-secondary btn-sm" style="font-size: 0.78rem;">
+            {% icon 'plus' 'icon-xs' %}
+            <span>+ Add Section</span>
+          </button>
         </div>
 
         {{ section_formset.management_form }}
@@ -242,9 +275,9 @@
           </div>
         {% endif %}
 
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-3" id="section-forms-container">
           {% for s_form in section_formset %}
-            <div class="glass-card" style="padding: 12px 16px; border-radius: var(--radius-sm);">
+            <div class="glass-card section-formset-row" style="padding: 14px 16px; border-radius: var(--radius-sm);">
               {{ s_form.id }}
               <div class="flex items-center gap-3">
                 <div style="flex: 1;">
@@ -260,13 +293,55 @@
                   {{ s_form.order }}
                 </div>
               </div>
-              {% if s_form.instance.pk %}
-                <div style="margin-top: 6px; text-align: right; font-size: 0.78rem; color: var(--color-danger);">
-                  <label>{{ s_form.DELETE }} Remove section</label>
+              <div class="flex items-center justify-between" style="margin-top: 8px;">
+                <div style="flex: 1; margin-right: 12px;">
+                  <label class="form-label" style="font-size: 0.75rem; color: var(--color-text-muted);">Section Guidance / Description (Optional)</label>
+                  {{ s_form.description }}
                 </div>
-              {% endif %}
+                {% if s_form.instance.pk %}
+                  <div style="text-align: right; font-size: 0.78rem; color: var(--color-danger); white-space: nowrap;">
+                    <label class="flex items-center gap-1">{{ s_form.DELETE }} Delete</label>
+                  </div>
+                {% else %}
+                  <button type="button" class="btn btn-ghost btn-xs btn-remove-dynamic-section" style="color: var(--color-danger); padding: 4px 8px; font-size: 0.76rem;" title="Remove this section">
+                    {% icon 'trash-2' 'icon-xs' %}
+                    <span>Remove</span>
+                  </button>
+                {% endif %}
+              </div>
             </div>
           {% endfor %}
+        </div>
+
+        <!-- Hidden Empty Section Form Template for Dynamic Cloning -->
+        <div id="empty-section-template" style="display: none;">
+          <div class="glass-card section-formset-row" style="padding: 14px 16px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-primary);">
+            {{ section_formset.empty_form.id }}
+            <div class="flex items-center gap-3">
+              <div style="flex: 1;">
+                <label class="form-label" style="font-size: 0.78rem;">Section Title</label>
+                {{ section_formset.empty_form.title }}
+              </div>
+              <div>
+                <label class="form-label" style="font-size: 0.78rem;">Weight %</label>
+                {{ section_formset.empty_form.weightage }}
+              </div>
+              <div>
+                <label class="form-label" style="font-size: 0.78rem;">Order</label>
+                {{ section_formset.empty_form.order }}
+              </div>
+            </div>
+            <div class="flex items-center justify-between" style="margin-top: 8px;">
+              <div style="flex: 1; margin-right: 12px;">
+                <label class="form-label" style="font-size: 0.75rem; color: var(--color-text-muted);">Section Guidance / Description (Optional)</label>
+                {{ section_formset.empty_form.description }}
+              </div>
+              <button type="button" class="btn btn-ghost btn-xs btn-remove-dynamic-section" style="color: var(--color-danger); padding: 4px 8px; font-size: 0.76rem;" title="Remove this section">
+                {% icon 'trash-2' 'icon-xs' %}
+                <span>Remove</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -277,12 +352,19 @@
             <span class="form-step-badge">6</span>
             <div>
               <h3>Lifeline Assistance Rules</h3>
-              <p>Configure permitted lifelines (50:50, Skip, Hint, Bookmark).</p>
+              <p>Configure permitted lifelines (50:50 Eliminator, Hint Token, Bookmark / Flag).</p>
             </div>
           </div>
 
+          {% if lifeline_formset.non_form_errors %}
+            <div class="form-error" style="margin-bottom: 12px; font-weight: 600; padding: 8px 12px; background: rgba(239, 68, 68, 0.1); border-radius: var(--radius-sm); border: 1px solid rgba(239, 68, 68, 0.3);">
+              {% icon 'alert-circle' 'icon-sm' %} {{ lifeline_formset.non_form_errors.0 }}
+            </div>
+          {% endif %}
+
           {{ lifeline_formset.management_form }}
           <div class="flex flex-col gap-2">
+
             {% for lf_form in lifeline_formset %}
               <div class="glass-card flex items-center justify-between" style="padding: 10px 14px; border-radius: var(--radius-sm);">
                 {{ lf_form.id }}
@@ -323,4 +405,59 @@
     </div>
   </div>
 </form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnAddSection = document.getElementById('btn-add-section');
+    const container = document.getElementById('section-forms-container');
+    const template = document.getElementById('empty-section-template');
+    const totalFormsInput = document.getElementById('id_sections-TOTAL_FORMS');
+
+    if (btnAddSection && container && template && totalFormsInput) {
+      btnAddSection.addEventListener('click', () => {
+        const formIndex = parseInt(totalFormsInput.value, 10);
+        const newHtml = template.innerHTML.replace(/__prefix__/g, formIndex);
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newHtml.trim();
+        const newCard = tempDiv.firstElementChild;
+
+        // Auto-set default title and order
+        const titleInput = newCard.querySelector('input[name$="-title"]');
+        const orderInput = newCard.querySelector('input[name$="-order"]');
+        const weightInput = newCard.querySelector('input[name$="-weightage"]');
+
+        const letter = String.fromCharCode(65 + formIndex); // A, B, C, D...
+        if (titleInput && !titleInput.value) titleInput.value = `Section ${letter}`;
+        if (orderInput) orderInput.value = formIndex + 1;
+        if (weightInput && !weightInput.value) weightInput.value = '100.0';
+
+        container.appendChild(newCard);
+        totalFormsInput.value = formIndex + 1;
+      });
+    }
+
+    // Event delegation for dynamic remove buttons
+    document.addEventListener('click', (e) => {
+      const removeBtn = e.target.closest('.btn-remove-dynamic-section');
+      if (!removeBtn) return;
+
+      const card = removeBtn.closest('.section-formset-row');
+      if (card && container) {
+        card.remove();
+        // Re-index remaining forms
+        const rows = container.querySelectorAll('.section-formset-row');
+        totalFormsInput.value = rows.length;
+        rows.forEach((row, idx) => {
+          row.querySelectorAll('input, select, textarea, label').forEach(elem => {
+            if (elem.name) elem.name = elem.name.replace(/sections-\d+-/, `sections-${idx}-`);
+            if (elem.id) elem.id = elem.id.replace(/id_sections-\d+-/, `id_sections-${idx}-`);
+            if (elem.htmlFor) elem.htmlFor = elem.htmlFor.replace(/id_sections-\d+-/, `id_sections-${idx}-`);
+          });
+        });
+      }
+    });
+  });
+</script>
 {% endblock %}
+

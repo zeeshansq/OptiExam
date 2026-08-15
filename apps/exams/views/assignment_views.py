@@ -30,7 +30,8 @@ class QuestionPickerPaletteView(DesignerRequiredMixin, View):
         if selected_bank_id:
             questions = questions.filter(bank_id=selected_bank_id)
         
-        assigned_question_ids = section.assignments.values_list('question_id', flat=True)
+        active_assignments = section.assignments.filter(is_reserve=False).values_list('question_id', flat=True)
+        reserve_assignments = section.assignments.filter(is_reserve=True).values_list('question_id', flat=True)
 
         return render(request, self.template_name, {
             'section': section,
@@ -38,13 +39,17 @@ class QuestionPickerPaletteView(DesignerRequiredMixin, View):
             'banks': banks,
             'selected_bank_id': selected_bank_id,
             'questions': questions.prefetch_related('options'),
-            'assigned_question_ids': set(assigned_question_ids)
+            'assigned_active_ids': set(active_assignments),
+            'assigned_reserve_ids': set(reserve_assignments),
+            'assigned_question_ids': set(active_assignments) | set(reserve_assignments)
         })
+
 
     def post(self, request, section_id, *args, **kwargs):
         section = self.get_section(section_id)
         question_id = request.POST.get('question_id')
         custom_marks = request.POST.get('custom_marks')
+        is_reserve = request.POST.get('is_reserve') == '1' or request.POST.get('is_reserve') == 'true'
 
         question = get_object_or_404(Question.objects.for_tenant(request.tenant), pk=question_id)
         custom_pts = None
@@ -55,9 +60,11 @@ class QuestionPickerPaletteView(DesignerRequiredMixin, View):
             except Exception:
                 pass
 
-        assign_question_to_section(section, question, custom_marks=custom_pts)
-        messages.success(request, f"Question Q#{question.pk} assigned to {section.title}.")
+        assign_question_to_section(section, question, custom_marks=custom_pts, is_reserve=is_reserve)
+        role_label = "Reserve Pool (Question Swap)" if is_reserve else "Active Exam"
+        messages.success(request, f"Question Q#{question.pk} assigned to {section.title} as {role_label}.")
         return redirect('exams:question_picker', section_id=section.pk)
+
 
 
 class QuestionRemoveAssignmentView(DesignerRequiredMixin, View):

@@ -125,11 +125,14 @@ ExamLifelineConfigFormSet = inlineformset_factory(
 )
 
 
+
 class QuestionAssignForm(forms.Form):
     section_id = forms.IntegerField(widget=forms.HiddenInput())
     question_id = forms.IntegerField(widget=forms.HiddenInput())
     order = forms.IntegerField(required=False, initial=1)
     custom_marks = forms.DecimalField(required=False, max_digits=6, decimal_places=2)
+    is_reserve = forms.BooleanField(required=False, initial=False)
+
 
 
 class RosterCSVImportForm(forms.Form):

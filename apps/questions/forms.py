@@ -69,6 +69,7 @@ class QuestionBaseForm(forms.ModelForm):
             'bank': forms.Select(attrs={'class': 'form-select'}),
             'question_type': forms.Select(attrs={'class': 'form-select'}),
             'prompt': forms.Textarea(attrs={'class': 'form-input', 'rows': 4, 'placeholder': 'Type your question prompt here...'}),
+            'image_asset': forms.FileInput(attrs={'class': 'form-input', 'id': 'id_image_asset', 'accept': 'image/*'}),
             'points': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.5', 'min': '0.5'}),
             'negative_points': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.25', 'min': '0.0'}),
             'difficulty': forms.Select(attrs={'class': 'form-select'}),
@@ -77,6 +78,7 @@ class QuestionBaseForm(forms.ModelForm):
             'model_answer': forms.Textarea(attrs={'class': 'form-input', 'rows': 3, 'placeholder': 'Confidential scoring guidance for graders...'}),
             'hint_text': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Optional hint revealed via Hint Token lifeline...'}),
         }
+
 
     def __init__(self, *args, tenant=None, **kwargs):
         super().__init__(*args, **kwargs)

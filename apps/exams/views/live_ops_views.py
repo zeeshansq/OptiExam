@@ -59,3 +59,57 @@ class LiveOpsBonusTimeAPIView(DesignerRequiredMixin, View):
                 att.save(update_fields=['bonus_minutes_awarded'])
                 count += 1
             return JsonResponse({'status': 'success', 'awarded_to': 'all', 'affected_count': count})
+
+
+class LiveOpsUnlockAttemptAPIView(DesignerRequiredMixin, View):
+    """
+    Allows examiners and designers to unlock/resume an attempt that was auto-submitted or locked
+    due to proctoring violation limit or accidental exit.
+    """
+    def post(self, request, exam_id, *args, **kwargs):
+        exam = get_object_or_404(Exam.objects.for_tenant(request.tenant), pk=exam_id)
+
+
+        try:
+            body = json.loads(request.body.decode('utf-8'))
+        except Exception:
+            body = {}
+
+        attempt_id = body.get('attempt_id')
+        reset_violations = bool(body.get('reset_violations', True))
+        bonus_mins = int(body.get('bonus_minutes', 0))
+
+        attempt = get_object_or_404(ExamAttempt, exam=exam, pk=attempt_id)
+        attempt.status = ExamAttempt.Status.IN_PROGRESS
+        attempt.submitted_at = None
+        
+        if reset_violations:
+            attempt.violation_count = 0
+
+        if bonus_mins > 0:
+            attempt.bonus_minutes_awarded += bonus_mins
+
+        attempt.save(update_fields=['status', 'submitted_at', 'violation_count', 'bonus_minutes_awarded'])
+
+        # Log designer override in ProctoringLog stream
+        from apps.submissions.models import ProctoringLog
+        ProctoringLog.objects.create(
+            attempt=attempt,
+            event_type=ProctoringLog.EventType.VIOLATION_RECORDED,
+            details={
+                'action': 'PROCTOR_UNLOCK_OVERRIDE',
+                'unlocked_by': request.user.username,
+                'reset_violations': reset_violations,
+                'bonus_minutes_awarded': bonus_mins,
+                'timestamp': timezone.now().isoformat()
+            }
+        )
+
+        return JsonResponse({
+            'status': 'success',
+            'message': f"Candidate {attempt.participant.username}'s attempt has been unlocked and resumed.",
+            'attempt_status': attempt.status,
+            'violation_count': attempt.violation_count,
+            'bonus_minutes': attempt.bonus_minutes_awarded
+        })
+

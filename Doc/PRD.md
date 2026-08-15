@@ -373,12 +373,13 @@ All tabular data views (Tenants, Users, Question Banks, Blueprints, Attempts, Gr
 
 | Lifeline Name | Code | Description | Configuration |
 |---|---|---|---|
-| **Skip Question Quota** | `SKIP_QUESTION` | Skip question without penalty. | Max skip count (e.g., 3). |
 | **50:50 Eliminator** | `FIFTY_FIFTY` | Removes 2 incorrect MCQ options. | Max uses per exam (e.g., 2). |
 | **Hint / Guidance Token** | `HINT_TOKEN` | Reveals Item Writer's curated hint. | Max uses per exam/section. |
 | **Bookmark & Revisit** | `BOOKMARK_FLAG` | Color-tags question on navigation palette. | Unlimited (enabled by default). |
 
 > All lifelines are configured per exam via `ExamLifelineConfig`. Candidate usage is tracked in `AttemptLifelineUsage`.
+
+
 
 ---
 

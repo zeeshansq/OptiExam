@@ -16,8 +16,26 @@
   </div>
 {% endif %}
 
+<!-- Mandatory Fullscreen Entry Overlay Modal (Triggered on Exam Launch) -->
+<div id="fullscreen-entry-overlay" class="proctoring-alert-overlay">
+  <div class="proctoring-alert-modal" style="border-color: #38BDF8; max-width: 500px;">
+    <div style="color: #38BDF8; margin-bottom: 14px;">
+      {% icon 'maximize' 'icon-2xl' %}
+    </div>
+    <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--cockpit-text-main); margin-bottom: 10px;">Fullscreen Lockdown Required</h2>
+    <p style="color: var(--cockpit-text-muted); font-size: 0.90rem; line-height: 1.6; margin-bottom: 22px;">
+      This assessment enforces a secure full-screen testing environment. Click below to enter full-screen mode and begin your examination.
+    </p>
+    <button type="button" id="btn-enter-initial-fullscreen" class="btn btn-primary btn-lg btn-block" style="font-size: 1rem; font-weight: 700;">
+      {% icon 'maximize' 'icon' %}
+      <span>Enter Full-Screen Exam Mode</span>
+    </button>
+  </div>
+</div>
+
 <!-- Fullscreen Exit Overlay Alert Modal -->
 <div id="fullscreen-alert-overlay" class="proctoring-alert-overlay">
+
   <div class="proctoring-alert-modal">
     <div class="alert-modal-icon">
       {% icon 'alert-triangle' 'icon-2xl' %}
@@ -51,6 +69,51 @@
     </div>
   </div>
 </div>
+
+<!-- Proctoring Security Escalation Auto-Submit Overlay Modal -->
+<div id="violation-escalation-modal" class="proctoring-alert-overlay">
+  <div class="proctoring-alert-modal" style="border-color: var(--cockpit-danger); max-width: 480px;">
+    <div style="color: var(--cockpit-danger); margin-bottom: 14px;">
+      {% icon 'shield-alert' 'icon-2xl' %}
+    </div>
+    <h2 style="color: var(--cockpit-danger); font-size: 1.35rem; font-weight: 800; margin-bottom: 10px;">Security Limit Reached</h2>
+    <p id="violation-escalation-msg" style="color: var(--cockpit-text-muted); font-size: 0.90rem; line-height: 1.6; margin-bottom: 18px;">
+      You have exceeded the maximum allowed tab switches. Your examination has been automatically finalized and logged.
+    </p>
+    <div style="font-size: 0.88rem; color: #38BDF8; font-weight: 600;">
+      Redirecting to submission receipt...
+    </div>
+  </div>
+</div>
+
+<!-- Security Violations Activity Inspector Modal -->
+<div id="violation-audit-modal" class="proctoring-alert-overlay">
+  <div class="proctoring-alert-modal" style="border-color: var(--cockpit-danger); max-width: 540px; text-align: left;">
+    <div class="flex items-center justify-between" style="margin-bottom: 16px; border-bottom: 1px solid var(--cockpit-border); padding-bottom: 12px;">
+      <div class="flex items-center gap-2" style="color: var(--cockpit-danger);">
+        {% icon 'shield-alert' 'icon' %}
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--cockpit-text-main); margin: 0;">Security Violation Audit Log</h3>
+      </div>
+      <button type="button" id="btn-close-violation-modal" class="btn btn-ghost btn-sm" style="padding: 4px 8px; font-size: 1rem; color: var(--cockpit-text-main);">✕</button>
+    </div>
+    <p style="font-size: 0.84rem; color: var(--cockpit-text-muted); margin-bottom: 14px;">
+      The following events have been recorded by the proctoring engine during this session:
+    </p>
+    <div id="violation-audit-list" style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px;">
+      <div class="glass-card" style="padding: 10px 14px; font-size: 0.84rem; color: var(--cockpit-text-muted); text-align: center;">
+        No violations recorded in this session.
+      </div>
+    </div>
+    <div class="flex items-center justify-between">
+      <span style="font-size: 0.78rem; color: var(--cockpit-text-muted);" id="violation-audit-summary">
+        Policy Limit: {{ exam.max_tab_switch_limit|default:"3" }} violations before auto-submission.
+      </span>
+      <button type="button" id="btn-dismiss-violation-modal" class="btn btn-primary btn-sm">Close</button>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- Confirmation Modal Before Final Submission -->
 <div id="submit-confirm-modal" class="proctoring-alert-overlay">
@@ -147,13 +210,96 @@
   </div>
 </div>
 
+<!-- Scientific & Standard Calculator Modal Overlay -->
+<div id="calculator-modal-overlay" class="proctoring-alert-overlay">
+  <div class="calculator-popup-card">
+    <div class="calculator-header">
+      <div class="flex items-center gap-2">
+        {% icon 'help-circle' 'icon-sm' %}
+        <span class="calc-title">Scientific Calculator</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" id="btn-toggle-calc-mode" class="calc-mode-badge" title="Toggle between Standard and Scientific">Scientific</button>
+        <button type="button" id="btn-close-calc-modal" class="calc-close-btn" title="Close Calculator">✕</button>
+      </div>
+    </div>
+    
+    <div class="calc-screen-container">
+      <div id="calc-history-display" class="calc-history-line">&nbsp;</div>
+      <div id="calc-main-display" class="calc-main-line">0</div>
+    </div>
 
+    <!-- Keypad Grid -->
+    <div class="calc-keypad-grid" id="calcKeypad">
+      <!-- Scientific Row 1 -->
+      <button type="button" class="calc-btn calc-sci" data-op="sin">sin</button>
+      <button type="button" class="calc-btn calc-sci" data-op="cos">cos</button>
+      <button type="button" class="calc-btn calc-sci" data-op="tan">tan</button>
+      <button type="button" class="calc-btn calc-sci" data-op="pi">π</button>
+      <button type="button" class="calc-btn calc-op" data-action="clear" style="color: var(--cockpit-danger); font-weight: 700;">AC</button>
+      <button type="button" class="calc-btn calc-op" data-action="backspace">⌫</button>
+
+      <!-- Scientific Row 2 & Basic Row 1 -->
+      <button type="button" class="calc-btn calc-sci" data-op="sqrt">√</button>
+      <button type="button" class="calc-btn calc-sci" data-op="pow">x²</button>
+      <button type="button" class="calc-btn calc-sci" data-op="log">log</button>
+      <button type="button" class="calc-btn calc-sci" data-op="ln">ln</button>
+      <button type="button" class="calc-btn calc-op" data-op="(">(</button>
+      <button type="button" class="calc-btn calc-op" data-op=")">)</button>
+
+      <!-- Number Pad & Operators Row 3 -->
+      <button type="button" class="calc-btn calc-sci" data-op="exp">e</button>
+      <button type="button" class="calc-btn calc-num" data-num="7">7</button>
+      <button type="button" class="calc-btn calc-num" data-num="8">8</button>
+      <button type="button" class="calc-btn calc-num" data-num="9">9</button>
+      <button type="button" class="calc-btn calc-op" data-op="/">÷</button>
+      <button type="button" class="calc-btn calc-sci" data-op="mod">%</button>
+
+      <!-- Number Pad Row 4 -->
+      <button type="button" class="calc-btn calc-sci" data-op="inv">1/x</button>
+      <button type="button" class="calc-btn calc-num" data-num="4">4</button>
+      <button type="button" class="calc-btn calc-num" data-num="5">5</button>
+      <button type="button" class="calc-btn calc-num" data-num="6">6</button>
+      <button type="button" class="calc-btn calc-op" data-op="*">×</button>
+      <button type="button" class="calc-btn calc-op" data-op="-">−</button>
+
+      <!-- Number Pad Row 5 -->
+      <button type="button" class="calc-btn calc-sci" data-op="neg">±</button>
+      <button type="button" class="calc-btn calc-num" data-num="1">1</button>
+      <button type="button" class="calc-btn calc-num" data-num="2">2</button>
+      <button type="button" class="calc-btn calc-num" data-num="3">3</button>
+      <button type="button" class="calc-btn calc-op" data-op="+">+</button>
+      <button type="button" class="calc-btn calc-btn-equals" data-action="equals">=</button>
+
+      <!-- Number Pad Row 6 (Zero & Dec) -->
+      <button type="button" class="calc-btn calc-num" data-num="0" style="grid-column: span 3;">0</button>
+      <button type="button" class="calc-btn calc-num" data-num=".">.</button>
+      <button type="button" class="calc-btn calc-sci" data-op="ans" style="grid-column: span 2;">Ans</button>
+    </div>
+  </div>
+</div>
+
+<!-- Universal Custom Alert & Confirmation Modal -->
+<div id="cockpit-custom-dialog-overlay" class="proctoring-alert-overlay">
+  <div class="proctoring-alert-modal" style="max-width: 460px; text-align: center;">
+    <div id="cockpit-dialog-icon" style="color: var(--cockpit-accent); margin-bottom: 14px;">
+      {% icon 'info' 'icon-2xl' %}
+    </div>
+    <h3 id="cockpit-dialog-title" style="font-size: 1.25rem; font-weight: 700; color: var(--cockpit-text-main); margin-bottom: 8px;">Notice</h3>
+    <p id="cockpit-dialog-message" style="font-size: 0.90rem; color: var(--cockpit-text-muted); line-height: 1.6; margin-bottom: 22px;">Message content here</p>
+    <div class="flex items-center justify-center gap-3" id="cockpit-dialog-actions">
+      <button type="button" id="btn-dialog-cancel" class="btn btn-secondary" style="min-width: 110px; display: none;">Cancel</button>
+      <button type="button" id="btn-dialog-confirm" class="btn btn-primary" style="min-width: 120px;">OK</button>
+    </div>
+  </div>
+</div>
 
 
 <!-- ====================================================================
      COCKPIT HEADER: Exam Title, Live Stats, Sync Status, Central Timer
      ==================================================================== -->
 <header class="cockpit-header">
+
   <!-- Left Brand & Candidate Info -->
   <div class="cockpit-brand">
     <div class="cockpit-logo-wrap">
@@ -180,13 +326,19 @@
     </div>
   </div>
 
-  <!-- Right Actions: Sync Status, Lifelines, Instructions, Submit -->
+  <!-- Right Actions: Sync Status, Calculator, Lifelines, Instructions, Submit -->
   <div class="cockpit-right-actions">
     <!-- Live Cloud Sync Indicator -->
     <div class="sync-indicator-pill" id="syncStatusPill" title="15s Delta Auto-Save Synchronizer Active">
       <span class="sync-dot"></span>
       <span id="syncStatusText">Synced</span>
     </div>
+
+    <!-- Built-in Calculator Trigger Button -->
+    <button type="button" id="btn-open-calc" class="btn-cockpit-action" title="Open Built-in Scientific & Standard Calculator">
+      {% icon 'help-circle' 'icon-sm' %}
+      <span>Calculator</span>
+    </button>
 
     <!-- Font Size Scaling Controls -->
     <div class="font-scaler-group" title="Adjust Question Reading Text Size">
@@ -221,12 +373,7 @@
       </button>
     {% endif %}
 
-    {% if lifelines.SKIP_QUESTION.is_available %}
-      <button type="button" id="btn-lifeline-skip" class="btn-lifeline-pill btn-lifeline-skip" title="Mark current question skipped (Remaining: {{ lifelines.SKIP_QUESTION.remaining }})">
-        {% icon 'chevron-right' 'icon-sm' %}
-        <span>Skip ({{ lifelines.SKIP_QUESTION.remaining }})</span>
-      </button>
-    {% endif %}
+
 
     <!-- Security Violations Counter (Visible only if > 0) -->
     <span id="violation-counter-pill" class="violation-pill" style="display: none;">
@@ -276,19 +423,28 @@
       </div>
     </div>
 
-    <!-- Section Palette Header -->
+    <!-- Section Palette Header & Quick Filter Chips -->
     <div class="drawer-section-header">
-      <span>Question Navigation</span>
+      <span>Question Palette</span>
       <span class="drawer-count-badge">{{ questions_count }} Questions</span>
     </div>
 
+    <!-- Palette Filter Chips -->
+    <div class="palette-filter-bar">
+      <button type="button" class="filter-chip active" data-filter="all">All (<span id="filter-cnt-all">{{ questions_count }}</span>)</button>
+      <button type="button" class="filter-chip" data-filter="answered">Answered (<span id="filter-cnt-ans">0</span>)</button>
+      <button type="button" class="filter-chip" data-filter="unanswered">Unanswered (<span id="filter-cnt-unans">{{ questions_count }}</span>)</button>
+      <button type="button" class="filter-chip" data-filter="flagged">Flagged (<span id="filter-cnt-flag">0</span>)</button>
+    </div>
+
     <!-- Question Palette Grid -->
-    <div class="palette-grid">
+    <div class="palette-grid" id="paletteGrid">
       {% for q in questions %}
         <div class="palette-tile {% if q.answer.is_answered %}answered{% elif q.answer.is_bookmarked %}bookmarked{% elif q.answer.is_skipped %}skipped{% endif %}" 
              data-index="{{ forloop.counter0 }}" 
              id="palette-tile-{{ forloop.counter0 }}"
              title="Question {{ q.order }} ({{ q.points }} pts)">
+
           <span class="tile-order-num">{{ q.order }}</span>
           {% if q.answer.is_bookmarked %}
             <span class="tile-flag-dot"></span>
@@ -359,58 +515,12 @@
           </label>
         </div>
 
-        <!-- Rich Formatting Action Bar with Comprehensive Formatting Tools -->
-        <div class="rich-format-toolbar" id="richTextToolbar">
-          <div class="toolbar-btn-group">
-            <button type="button" class="toolbar-btn" data-format="bold" title="Bold (**text**)">
-              <strong>B</strong>
-            </button>
-            <button type="button" class="toolbar-btn" data-format="italic" title="Italic (*text*)">
-              <em>I</em>
-            </button>
-            <button type="button" class="toolbar-btn" data-format="underline" title="Underline (<u>text</u>)">
-              <span style="text-decoration: underline; font-weight: 700;">U</span>
-            </button>
-            <button type="button" class="toolbar-btn" data-format="strike" title="Strikethrough (~~text~~)">
-              <span style="text-decoration: line-through;">S</span>
-            </button>
-            <button type="button" class="toolbar-btn" data-format="heading" title="Heading (### Title)">
-              <span style="font-weight: 800; font-size: 0.75rem;">H3</span>
-            </button>
-          </div>
-          <div class="toolbar-divider"></div>
-          <div class="toolbar-btn-group">
-            <button type="button" class="toolbar-btn" data-format="bullet" title="Bullet List (- item)">
-              {% icon 'list' 'icon-xs' %}
-            </button>
-            <button type="button" class="toolbar-btn" data-format="number" title="Numbered List (1. item)">
-              <span style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;">1.</span>
-            </button>
-            <button type="button" class="toolbar-btn" data-format="code" title="Code Block (```)">
-              <span style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;">&lt;/&gt;</span>
-            </button>
-            <button type="button" class="toolbar-btn" data-format="quote" title="Quote Block (&gt; quote)">
-              <span style="font-size: 0.85rem; font-weight: 700;">&rdquo;</span>
-            </button>
-            <button type="button" class="toolbar-btn" data-format="table" title="Insert Markdown Table">
-              <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;">[Table]</span>
-            </button>
-            <button type="button" class="toolbar-btn" data-format="math" title="Math Formula ($latex$)">
-              <span style="font-style: italic; font-weight: 700; font-family: serif;">f(x)</span>
-            </button>
-          </div>
-          <div class="toolbar-divider"></div>
-          <div class="toolbar-btn-group">
-            <button type="button" class="toolbar-btn" id="btn-clear-editor-text" title="Clear Text">
-              {% icon 'trash-2' 'icon-xs' %}
-              <span style="font-size: 0.72rem;">Clear</span>
-            </button>
-          </div>
+        <!-- Quill Full Rich Text WYSIWYG Container -->
+        <div id="quill-editor-wrapper" class="quill-editor-wrapper">
+          <div id="quill-editor-container"></div>
         </div>
-
-        <textarea id="question-text-response" class="form-input text-response-input" rows="12" placeholder="Enter your structured answer here... Use formatting tools above for headings, bullet lists, tables, or code blocks."></textarea>
-
       </div>
+
 
 
       <!-- Live Word Counter HUD -->
@@ -438,10 +548,13 @@
 
   <!-- Center Mini Helper Status -->
   <div class="footer-center-hint">
-    <span class="keyboard-hint"><kbd>Alt</kbd> + <kbd>→</kbd> Next</span>
-    <span class="keyboard-hint"><kbd>Alt</kbd> + <kbd>←</kbd> Prev</span>
-    <span class="keyboard-hint"><kbd>Alt</kbd> + <kbd>F</kbd> Flag</span>
+    <span class="keyboard-hint"><kbd>Alt</kbd> + <kbd>→</kbd> {% if allow_back_navigation %}Next{% else %}Save &amp; Next{% endif %}</span>
+    {% if allow_back_navigation %}
+      <span class="keyboard-hint"><kbd>Alt</kbd> + <kbd>←</kbd> Prev</span>
+      <span class="keyboard-hint"><kbd>Alt</kbd> + <kbd>F</kbd> Flag</span>
+    {% endif %}
   </div>
+
 
   <div class="flex items-center gap-3">
     <button type="button" id="btn-next-question" class="btn-nav-next">
@@ -466,8 +579,14 @@
     enforceFullscreen: {{ enforce_fullscreen|yesno:"true,false" }},
     lockCopyPaste: {{ lock_copy_paste|yesno:"true,false" }},
     allowBackNavigation: {{ allow_back_navigation|yesno:"true,false" }},
+    activeQuestionIndex: {{ active_question_index|default:0 }},
+    isSimulation: {{ is_simulation|yesno:"true,false" }},
+    maxTabSwitchLimit: {{ exam.max_tab_switch_limit|default:"3" }},
     questions: {{ questions_json|safe }}
   };
+
+
+
 </script>
 {% endblock %}
 

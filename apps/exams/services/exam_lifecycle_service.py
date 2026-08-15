@@ -74,10 +74,12 @@ def assign_question_to_section(
     section: ExamSection,
     question: Question,
     order: Optional[int] = None,
-    custom_marks: Optional[Decimal] = None
+    custom_marks: Optional[Decimal] = None,
+    is_reserve: bool = False
 ) -> ExamQuestionAssignment:
     """
     Assigns a question to an exam section with tenant verification.
+    Can be assigned as an active question (is_reserve=False) or a reserve pool item (is_reserve=True).
     """
     if section.exam.tenant != question.tenant:
         raise ValidationError("Cannot assign question from a different institution.")
@@ -91,10 +93,12 @@ def assign_question_to_section(
         question=question,
         defaults={
             'order': order,
-            'custom_marks': custom_marks
+            'custom_marks': custom_marks,
+            'is_reserve': is_reserve
         }
     )
     return assignment
+
 
 
 @transaction.atomic

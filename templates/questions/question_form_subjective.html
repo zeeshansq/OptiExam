@@ -46,6 +46,36 @@
 <form method="post" enctype="multipart/form-data" style="width: 100%;">
   {% csrf_token %}
 
+  <!-- Prominent Form & Rubric Validation Error Summary Banner -->
+  {% if form.errors or formset.errors or formset.non_form_errors %}
+    <div class="glass-card flex flex-col gap-2" style="background: rgba(239, 68, 68, 0.12); border: 1px solid var(--color-danger); padding: 16px 20px; border-radius: var(--radius-md); margin-bottom: 24px;">
+      <div class="flex items-center gap-2" style="color: var(--color-danger); font-weight: 700; font-size: 0.95rem;">
+        {% icon 'alert-triangle' 'icon' %}
+        <span>Please correct the errors before saving this question:</span>
+      </div>
+      <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: var(--color-text-primary); line-height: 1.6;">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        {% for error in formset.non_form_errors %}
+          <li><strong>Rubric:</strong> {{ error }}</li>
+        {% endfor %}
+        {% for f in formset %}
+          {% for field in f %}
+            {% for error in field.errors %}
+              <li><strong>Criterion #{{ forloop.parentloop.counter }} ({{ field.label }}):</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
   <!-- Two-Column Balanced Layout Spanning Full Screen Width -->
   <div class="grid grid-cols-2 gap-6">
     
@@ -91,12 +121,47 @@
           <div class="form-help">Clearly define deliverables, required structure, or word limits.</div>
         </div>
 
+        <!-- Visual Diagram Asset with Instant Preview, Replace & Clear Controls -->
         <div class="form-group" style="margin-bottom: 0;">
-          <label class="form-label">Attached Diagram / Figure / Problem Sheet</label>
-          {{ form.image_asset }}
-          {% if form.image_asset.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.image_asset.errors.0 }}</div>{% endif %}
+          <label class="form-label">Attached Diagram / Visual Asset (Optional)</label>
+          
+          <!-- Existing Image Preview if present -->
+          {% if question.image_asset %}
+            <div id="existing-image-preview-box" class="glass-card" style="padding: 12px 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--color-surface-elevated);">
+              <div class="flex items-center gap-3">
+                <img src="{{ question.image_asset.url }}" alt="Current Diagram" style="max-width: 90px; max-height: 70px; border-radius: var(--radius-sm); object-fit: cover; border: 1px solid var(--color-glass-border);" id="current-diagram-img">
+                <div>
+                  <div style="font-size: 0.84rem; font-weight: 700; color: var(--color-text-primary);">Current Attachment</div>
+                  <a href="{{ question.image_asset.url }}" target="_blank" style="font-size: 0.76rem; color: var(--color-cyan); text-decoration: underline;">View Full Size</a>
+                </div>
+              </div>
+              <label class="flex items-center gap-2" style="cursor: pointer; color: var(--color-danger); font-size: 0.80rem; font-weight: 600;">
+                <input type="checkbox" name="image_asset-clear" id="image_asset-clear_id" class="form-checkbox">
+                <span>Remove current image</span>
+              </label>
+            </div>
+          {% endif %}
+
+          <!-- New File Input with Live Client Preview -->
+          <div class="flex flex-col gap-2">
+            {{ form.image_asset }}
+            {% if form.image_asset.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.image_asset.errors.0 }}</div>{% endif %}
+            
+            <div id="new-image-preview-box" style="display: none; margin-top: 8px;" class="glass-card flex items-center justify-between" style="padding: 10px 14px; background: rgba(79, 70, 229, 0.08); border-color: var(--color-primary);">
+              <div class="flex items-center gap-3">
+                <img id="new-image-preview-elem" src="" alt="New Diagram Preview" style="max-width: 80px; max-height: 60px; border-radius: 4px; object-fit: cover;">
+                <div>
+                  <span style="font-size: 0.80rem; font-weight: 700; color: var(--color-text-primary);" id="new-image-filename"></span>
+                  <div style="font-size: 0.74rem; color: var(--color-accent);">Ready to upload upon saving</div>
+                </div>
+              </div>
+              <button type="button" id="btn-cancel-new-image" class="btn btn-ghost btn-xs" style="color: var(--color-danger);">✕ Cancel</button>
+            </div>
+          </div>
+          <div class="form-help">Uploaded high-res diagram will appear inside candidate examination cockpit.</div>
         </div>
       </div>
+
 
       <!-- Section 2: Rubric Criteria Matrix -->
       <div class="form-section-card" style="margin-bottom: 0;">
@@ -119,6 +184,7 @@
           {% for rub_form in formset %}
             <div class="glass-card" style="padding: 14px 16px; border-radius: var(--radius-sm);">
               {{ rub_form.id }}
+              {{ rub_form.order }}
               <div class="grid grid-cols-3 gap-3">
                 <div style="grid-column: span 2;">
                   <label class="form-label" style="font-size: 0.78rem;">Criterion Title</label>
@@ -131,6 +197,7 @@
                   {% if rub_form.max_points.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ rub_form.max_points.errors.0 }}</div>{% endif %}
                 </div>
               </div>
+
               <div style="margin-top: 8px;">
                 <label class="form-label" style="font-size: 0.78rem;">Grading Guidelines & Performance Benchmarks</label>
                 {{ rub_form.description }}
@@ -226,4 +293,41 @@
     </div>
   </div>
 </form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Live Image Asset Preview, Replace & Cancel
+    const fileInput = document.getElementById('id_image_asset');
+    const previewBox = document.getElementById('new-image-preview-box');
+    const previewImg = document.getElementById('new-image-preview-elem');
+    const previewFilename = document.getElementById('new-image-filename');
+    const btnCancelNew = document.getElementById('btn-cancel-new-image');
+
+    if (fileInput && previewBox && previewImg) {
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            previewImg.src = evt.target.result;
+            if (previewFilename) previewFilename.textContent = file.name;
+            previewBox.style.display = 'flex';
+          };
+          reader.readAsDataURL(file);
+        } else {
+          previewBox.style.display = 'none';
+        }
+      });
+
+      if (btnCancelNew) {
+        btnCancelNew.addEventListener('click', () => {
+          fileInput.value = '';
+          previewBox.style.display = 'none';
+          previewImg.src = '';
+        });
+      }
+    }
+  });
+</script>
 {% endblock %}
+

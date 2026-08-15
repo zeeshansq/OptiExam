@@ -73,10 +73,11 @@ class TestExamBlueprintAndLifecycle:
         )
 
         assert exam.sections.count() == 2
-        assert exam.lifeline_configs.count() == 4
-        assert exam.lifeline_configs.filter(is_enabled=True).count() == 4
+        assert exam.lifeline_configs.count() == 3
+        assert exam.lifeline_configs.filter(is_enabled=True).count() == 3
         assert exam.total_assigned_questions == 0
         assert exam.total_enrolled_candidates == 0
+
 
     def test_question_assignment_to_exam_section(self, exam_tenant, designer_user, other_tenant):
         start = timezone.now() + timedelta(days=1)

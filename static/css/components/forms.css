@@ -139,21 +139,25 @@
   margin-bottom: 0;
 }
 
-/* Full-Width Sticky Bottom Actions Bar */
+/* Full-Width Floating Sticky Bottom Actions Bar */
 .form-actions-bar {
-  background: var(--color-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-glass-border);
+  position: sticky;
+  bottom: 20px;
+  z-index: 100;
+  background: var(--color-surface-elevated);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-primary);
   border-radius: var(--radius-lg);
-  padding: 16px 24px;
-  margin-top: 24px;
+  padding: 16px 28px;
+  margin-top: 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
 }
+
 
 /* Drag-and-Drop Animated Upload Dropzone */
 .file-dropzone {

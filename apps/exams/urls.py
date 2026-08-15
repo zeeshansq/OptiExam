@@ -21,8 +21,10 @@ from apps.exams.views.roster_views import (
 )
 from apps.exams.views.live_ops_views import (
     LiveOpsView,
-    LiveOpsBonusTimeAPIView
+    LiveOpsBonusTimeAPIView,
+    LiveOpsUnlockAttemptAPIView
 )
+
 from apps.exams.views.publication_views import ExamPublishResultsView
 from apps.exams.views.analytics_views import (
     ExamAnalyticsDashboardView,
@@ -55,6 +57,8 @@ urlpatterns = [
     # Designer Live Ops Command Center
     path('exams/<int:exam_id>/live/', LiveOpsView.as_view(), name='live_ops'),
     path('exams/<int:exam_id>/live/bonus-time/', LiveOpsBonusTimeAPIView.as_view(), name='live_ops_bonus_time'),
+    path('exams/<int:exam_id>/live/unlock-attempt/', LiveOpsUnlockAttemptAPIView.as_view(), name='live_ops_unlock_attempt'),
+
 
     # Result Publication & Cohort Analytics Hub
     path('exams/<int:exam_id>/publish-results/', ExamPublishResultsView.as_view(), name='publish_results'),

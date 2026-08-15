@@ -46,14 +46,22 @@ class ExamCockpitView(LoginRequiredMixin, View):
 class ExamSubmitView(LoginRequiredMixin, View):
     """
     Finalizes submission of an active exam attempt.
+    Supports both POST (manual button) and GET (auto-submit timeout / violation redirects).
     """
-    def post(self, request, attempt_id, *args, **kwargs):
+    def _finalize_and_render(self, request, attempt_id):
         attempt = get_object_or_404(ExamAttempt, pk=attempt_id)
         if attempt.participant != request.user and not request.user.is_super_admin():
             raise PermissionDenied()
 
         finalize_submission(attempt)
         return render(request, 'submissions/submission_receipt.html', {'attempt': attempt})
+
+    def post(self, request, attempt_id, *args, **kwargs):
+        return self._finalize_and_render(request, attempt_id)
+
+    def get(self, request, attempt_id, *args, **kwargs):
+        return self._finalize_and_render(request, attempt_id)
+
 
 
 class CandidateDryRunSimulationView(LoginRequiredMixin, View):

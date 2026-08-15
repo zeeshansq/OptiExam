@@ -83,6 +83,14 @@ def get_attempt_cockpit_state(attempt: ExamAttempt) -> Dict[str, Any]:
 
     import json
 
+    # Determine current active question index based on candidate's saved pointer
+    active_q_index = 0
+    if attempt.current_question_id:
+        for idx, q_item in enumerate(questions_data):
+            if q_item['question_id'] == attempt.current_question_id:
+                active_q_index = idx
+                break
+
     return {
         'attempt': attempt,
         'exam': exam,
@@ -91,10 +99,12 @@ def get_attempt_cockpit_state(attempt: ExamAttempt) -> Dict[str, Any]:
         'questions_count': len(questions_data),
         'questions': questions_data,
         'questions_json': json.dumps(questions_data),
+        'active_question_index': active_q_index,
         'lifelines': lifelines_state,
         'enforce_fullscreen': exam.enforce_fullscreen,
         'lock_copy_paste': exam.lock_copy_paste,
         'allow_back_navigation': exam.allow_back_navigation,
         'is_simulation': attempt.is_simulation
     }
+
 

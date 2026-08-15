@@ -2,7 +2,7 @@ import random
 from typing import Dict, Any
 from django.db import transaction
 from django.utils import timezone
-from apps.exams.models import ExamLifelineConfig
+from apps.exams.models import ExamLifelineConfig, ExamQuestionAssignment
 from apps.submissions.models import ExamAttempt, AttemptAnswer, AttemptLifelineUsage, ProctoringLog
 from apps.questions.models import Question, QuestionOption
 
@@ -13,6 +13,7 @@ def execute_lifeline(
     lifeline_type: str,
     question_id: int
 ) -> Dict[str, Any]:
+
     """
     Executes an active lifeline requested by candidate during examination.
     """
@@ -63,19 +64,13 @@ def execute_lifeline(
             return {'success': False, 'error': "No guidance hint available for this question."}
         details['hint_text'] = question.hint_text
 
-    elif lifeline_type == ExamLifelineConfig.LifelineType.SKIP_QUESTION:
-        ans = AttemptAnswer.objects.filter(attempt=attempt, question=question).first()
-        if ans:
-            ans.is_skipped = True
-            ans.save(update_fields=['is_skipped'])
-        details['skipped'] = True
-
     elif lifeline_type == ExamLifelineConfig.LifelineType.BOOKMARK_FLAG:
         ans = AttemptAnswer.objects.filter(attempt=attempt, question=question).first()
         if ans:
             ans.is_bookmarked = not ans.is_bookmarked
             ans.save(update_fields=['is_bookmarked'])
             details['is_bookmarked'] = ans.is_bookmarked
+
 
     # Log usage
     usage = AttemptLifelineUsage.objects.create(

@@ -307,10 +307,10 @@ class ExamParticipantRoster(models.Model):
 ### 3.5 `ExamLifelineConfig` Model
 ```python
 class LifelineType(models.TextChoices):
-    SKIP_QUESTION = 'SKIP_QUESTION', 'Skip Question Quota'
     FIFTY_FIFTY   = 'FIFTY_FIFTY',   '50:50 Eliminator'
     HINT_TOKEN    = 'HINT_TOKEN',    'Hint Token'
     BOOKMARK_FLAG = 'BOOKMARK_FLAG', 'Review Bookmark'
+
 
 class ExamLifelineConfig(models.Model):
     exam         = models.ForeignKey('exams.Exam', on_delete=models.CASCADE, related_name='lifeline_configs')
