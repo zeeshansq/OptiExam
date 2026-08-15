@@ -173,13 +173,34 @@
           <span>Constructive Feedback to Candidate</span>
         </label>
         
-        <!-- Quick Feedback Snippet Templates -->
-        <div class="feedback-snippets-container">
-          <span style="font-size: 0.68rem; color: var(--color-text-muted); text-transform: uppercase;">Quick Inserts:</span>
-          <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Well structured answer with correct theoretical formulation.')">+ Excellent Theory</button>
-          <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Good analysis, but lacks practical edge-case consideration.')">+ Missing Edge Cases</button>
-          <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Mathematical derivation and complexity analysis are spot-on.')">+ Perfect Math</button>
-          <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Please review algorithmic invariant proof techniques.')">+ Review Proofs</button>
+        <!-- Categorized High-Yield Academic Feedback Presets -->
+        <div style="margin-bottom: 10px;">
+          <!-- Category 1: Commendations & High Performance -->
+          <div class="feedback-snippets-container" style="gap: 5px; margin-bottom: 6px;">
+            <span style="font-size: 0.68rem; color: var(--color-accent); text-transform: uppercase; font-weight: 800; min-width: 85px;">Commend:</span>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Exceptional theoretical formulation with rigorous analytical depth.')">🌟 Exemplary Depth</button>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Mathematical derivation and complexity bounds are comprehensively accurate.')">📐 Flawless Math</button>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Concise, well-organized response that directly addresses all rubric criteria.')">🎯 High Precision</button>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Demonstrates clear conceptual mastery with relevant architectural context.')">💡 Strong Mastery</button>
+          </div>
+
+          <!-- Category 2: Constructive Guidance & Partial Credit -->
+          <div class="feedback-snippets-container" style="gap: 5px; margin-bottom: 6px;">
+            <span style="font-size: 0.68rem; color: var(--color-warning); text-transform: uppercase; font-weight: 800; min-width: 85px;">Refine:</span>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Sound foundational reasoning; however, boundary conditions and edge cases were omitted.')">⚠️ Missing Edge Cases</button>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Core hypothesis is correct, but requires deeper analytical justification and proof.')">🔍 Needs Proof</button>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Explanation is partially valid, but conclusion deviates from established principles.')">🔄 Revisit Conclusion</button>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Consider refining technical terminology and adhering to standard notation.')">📖 Standard Notation</button>
+          </div>
+
+          <!-- Category 3: Remedial & Literature Recommendations -->
+          <div class="feedback-snippets-container" style="gap: 5px;">
+            <span style="font-size: 0.68rem; color: var(--color-danger); text-transform: uppercase; font-weight: 800; min-width: 85px;">Remediate:</span>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Response demonstrates fundamental misconceptions regarding the core concept.')">❌ Core Misconception</button>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Key procedural steps were omitted; review standard algorithmic formulations.')">📋 Incomplete Steps</button>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Recommend reviewing reference course literature on invariant properties and design patterns.')">📚 Literature Review</button>
+            <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Answer was submitted blank or insufficient to award evaluation credit.')">⏳ Insufficient Content</button>
+          </div>
         </div>
 
         <textarea name="feedback_to_student" id="feedback-textarea" class="grading-textarea" rows="3" placeholder="Constructive feedback revealed to student after official results release...">{{ grade_record.feedback_to_student|default:"" }}</textarea>
@@ -225,16 +246,28 @@
     if (hiddenAwarded) hiddenAwarded.value = sum.toFixed(2);
   }
 
-  inputs.forEach((inp, idx) => {
+  // Non-interfering input listener: allows continuous typing like 3.25 without cursor jumps or overwriting
+  inputs.forEach((inp) => {
     inp.addEventListener('input', () => {
-      if (sliders[idx]) sliders[idx].value = inp.value;
+      const rubricId = inp.getAttribute('data-rubric-id');
+      const val = parseFloat(inp.value);
+      if (!isNaN(val)) {
+        const slider = document.querySelector(`.rubric-slider[data-rubric-id="${rubricId}"]`);
+        if (slider) {
+          slider.value = Math.min(val, parseFloat(slider.max));
+        }
+      }
       calculateTotal();
     });
   });
 
-  sliders.forEach((sld, idx) => {
+  sliders.forEach((sld) => {
     sld.addEventListener('input', () => {
-      if (inputs[idx]) inputs[idx].value = sld.value;
+      const rubricId = sld.getAttribute('data-rubric-id');
+      const input = document.querySelector(`input[name="rubric_${rubricId}"]`);
+      if (input) {
+        input.value = sld.value;
+      }
       calculateTotal();
     });
   });
@@ -242,16 +275,18 @@
   function setRubricScore(rubricId, value) {
     const input = document.querySelector(`input[name="rubric_${rubricId}"]`);
     const slider = document.querySelector(`.rubric-slider[data-rubric-id="${rubricId}"]`);
-    const val = parseFloat(value).toFixed(1);
-    if (input) input.value = val;
-    if (slider) slider.value = val;
+    const num = parseFloat(value);
+    const formatted = Number.isInteger(num) ? num.toString() : num.toString();
+    if (input) input.value = formatted;
+    if (slider) slider.value = num;
     calculateTotal();
   }
 
   function setDirectScore(value) {
     const input = document.getElementById('awarded-marks-input');
     if (input) {
-      input.value = parseFloat(value).toFixed(1);
+      const num = parseFloat(value);
+      input.value = Number.isInteger(num) ? num.toString() : num.toString();
     }
   }
 
@@ -276,4 +311,5 @@
   });
 </script>
 {% endblock %}
+
 
