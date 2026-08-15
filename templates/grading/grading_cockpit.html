@@ -4,63 +4,88 @@
 {% block title %}Evaluation Cockpit — CAND-{{ attempt.id|stringformat:"04d" }}{% endblock %}
 
 {% block content %}
-<!-- Header -->
+<!-- Universal Grading Header Bar -->
 <header class="grading-header">
   <div class="flex items-center gap-3">
-    {% icon 'award' 'icon-lg' %}
+    <div style="background: var(--color-primary-light); color: var(--color-primary); padding: 8px; border-radius: var(--radius-sm);">
+      {% icon 'award' 'icon-md' %}
+    </div>
     <div>
-      <div style="font-weight: 700; font-size: 1.05rem;">Evaluation Cockpit: {{ attempt.exam.title }}</div>
-      <div style="font-size: 0.80rem; color: var(--grading-text-muted);">
-        Candidate: <strong class="badge badge-accent" style="font-family: var(--font-mono);">CAND-{{ attempt.id|stringformat:"04d" }}</strong> (Double-Blind Anonymized)
+      <div style="font-weight: 800; font-size: 1.05rem; color: var(--color-text-primary); line-height: 1.2;">
+        Evaluation Cockpit: {{ attempt.exam.title }}
+      </div>
+      <div class="flex items-center gap-2" style="font-size: 0.78rem; color: var(--color-text-muted); margin-top: 2px;">
+        <span>Candidate: <strong class="badge badge-accent" style="font-family: var(--font-mono); font-size: 0.76rem;">CAND-{{ attempt.id|stringformat:"04d" }}</strong></span>
+        <span>•</span>
+        <span>Attempt ID: #{{ attempt.pk }}</span>
+        <span>•</span>
+        <span class="badge badge-secondary" style="font-size: 0.72rem;">Double-Blind Anonymized</span>
       </div>
     </div>
   </div>
 
-  <div class="flex items-center gap-3">
-    <a href="{% url 'accounts:role_redirect' %}" class="btn btn-ghost btn-sm">
-      {% icon 'chevron-left' 'icon' %}
+  <div class="flex items-center gap-2">
+    <!-- Dark / Light Theme Toggle -->
+    <button type="button" id="btn-theme-toggle" class="btn btn-secondary btn-sm" title="Toggle Theme" style="padding: 6px 10px;">
+      {% if is_dark_mode %}
+        {% icon 'sun' 'icon-xs' %}
+      {% else %}
+        {% icon 'moon' 'icon-xs' %}
+      {% endif %}
+      <span>Theme</span>
+    </button>
+
+    <a href="{% url 'accounts:role_redirect' %}" class="btn btn-secondary btn-sm">
+      {% icon 'chevron-left' 'icon-xs' %}
       <span>Exit to Queue</span>
     </a>
   </div>
 </header>
 
+
 <!-- Two-Pane Split Screen Layout -->
 <div class="grading-split-container">
-  <!-- Left Pane: Candidate Submission -->
+  
+  <!-- Left Pane: Candidate Submission & Question Prompt -->
   <aside class="grading-left-pane">
-    <div style="font-size: 0.82rem; text-transform: uppercase; color: var(--grading-text-muted); letter-spacing: 0.5px; margin-bottom: 8px;">
-      Question {{ current_answer.order_in_attempt }} of {{ subjective_count }} Subjective Items
-    </div>
-    <h2 style="font-size: 1.25rem; margin-bottom: 16px; line-height: 1.5;">
-      {{ current_answer.question.prompt }}
-    </h2>
-
-    {% if current_answer.question.image_asset %}
-      <div style="text-align: center; margin-bottom: 24px;">
-        <img src="{{ current_answer.question.image_asset.url }}" alt="Question Asset" style="max-width: 100%; border-radius: var(--radius-md); border: 1px solid var(--grading-border);">
+    <div class="question-prompt-card">
+      <div class="flex items-center justify-between" style="margin-bottom: 8px;">
+        <span class="badge badge-primary" style="font-size: 0.74rem;">Item {{ current_answer.order_in_attempt }} of {{ subjective_count }} Subjective Items</span>
+        <span class="badge badge-secondary" style="font-family: var(--font-mono); font-size: 0.78rem;">Max {{ current_answer.question.points }} Points</span>
       </div>
-    {% endif %}
 
-    <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-weight: 600; font-size: 0.90rem;">Candidate Submitted Response</span>
-      <span class="badge badge-primary">{{ current_answer.text_response|wordcount }} words</span>
+      <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-text-primary); line-height: 1.5; margin: 0;">
+        {{ current_answer.question.prompt }}
+      </h2>
+
+      {% if current_answer.question.image_asset %}
+        <div style="text-align: center; margin-top: 14px;">
+          <img src="{{ current_answer.question.image_asset.url }}" alt="Question Asset" style="max-width: 100%; max-height: 260px; border-radius: var(--radius-sm); border: 1px solid var(--color-glass-border);">
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="flex items-center justify-between" style="margin-bottom: 10px; padding: 0 4px;">
+      <span style="font-weight: 700; font-size: 0.86rem; color: var(--color-text-primary); text-transform: uppercase; letter-spacing: 0.5px;">Candidate Written Submission</span>
+      <span class="badge badge-secondary" style="font-size: 0.74rem;">{{ current_answer.text_response|wordcount }} words</span>
     </div>
 
     <div class="candidate-response-card">
-      <div class="response-text-body">{{ current_answer.text_response|default:"[Candidate left this response blank]" }}</div>
+      <div class="response-text-body">{{ current_answer.text_response|default:"[Candidate did not provide a written response / left item blank]" }}</div>
     </div>
   </aside>
 
-  <!-- Right Pane: Model Answer & Rubric Matrix -->
+  <!-- Right Pane: Model Answer, Rubric Matrix & Live Dynamic Grading -->
   <main class="grading-right-pane">
-    <!-- Model Answer -->
+    
+    <!-- Confidential Model Answer Accordion / Card -->
     {% if current_answer.question.model_answer %}
       <div class="model-answer-card">
-        <h4 style="font-size: 0.92rem; color: #818CF8; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-          {% icon 'book' 'icon-sm' %}
-          <span>Confidential Model Answer & Grading Guidelines</span>
+        <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--color-primary); margin: 0 0 6px 0; display: flex; align-items: center; gap: 6px;">
+          {% icon 'book' 'icon-xs' %}
+          <span>Official Benchmark & Evaluation Guidelines</span>
         </h4>
-        <div style="font-size: 0.88rem; line-height: 1.6; color: #CBD5E1;">
+        <div style="font-size: 0.86rem; line-height: 1.6; color: var(--color-text-primary);">
           {{ current_answer.question.model_answer|linebreaks }}
         </div>
       </div>
@@ -73,64 +98,109 @@
       <input type="hidden" name="client_version" value="{{ grade_record.version|default:1 }}">
 
       <div style="margin-bottom: 20px;">
-        <h3 style="margin-bottom: 12px;">Rubric Evaluation Matrix (Max: {{ current_answer.question.points }} pts)</h3>
+        <div class="flex items-center justify-between" style="margin-bottom: 12px;">
+          <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0; color: var(--color-text-primary);">
+            Rubric Evaluation Matrix
+          </h3>
+          <span style="font-size: 0.80rem; color: var(--color-text-muted);">Allocated: <strong>{{ current_answer.question.points }} pts</strong></span>
+        </div>
 
         {% for rubric in rubrics %}
           <div class="rubric-criteria-card">
             <div class="rubric-header-row">
               <span class="rubric-title">{{ rubric.criteria_title }}</span>
-              <span class="badge badge-primary">Max {{ rubric.max_points }} pts</span>
+              <span class="badge badge-primary" style="font-family: var(--font-mono); font-size: 0.76rem;">Max {{ rubric.max_points }} pts</span>
             </div>
-            <p style="font-size: 0.80rem; color: var(--grading-text-muted); margin-bottom: 10px;">{{ rubric.description }}</p>
+            <p style="font-size: 0.78rem; color: var(--color-text-muted); margin-bottom: 10px; line-height: 1.4;">{{ rubric.description }}</p>
+            
             <div class="flex items-center gap-3">
-              <input type="range" class="rubric-slider" min="0" max="{{ rubric.max_points }}" step="0.5" value="{% if grade_record %}{{ grade_record.rubric_breakdown|get_item:rubric.id|default:0 }}{% else %}0{% endif %}" data-rubric-id="{{ rubric.id }}" style="flex: 1;">
-              <input type="number" class="form-input rubric-points-input" min="0" max="{{ rubric.max_points }}" step="0.5" value="{% if grade_record %}{{ grade_record.rubric_breakdown|get_item:rubric.id|default:0 }}{% else %}0{% endif %}" data-rubric-id="{{ rubric.id }}" name="rubric_{{{ rubric.id }}">
+              <input type="range" class="rubric-slider" min="0" max="{{ rubric.max_points }}" step="0.25" value="{% if grade_record %}{{ grade_record.rubric_breakdown|get_item:rubric.id|default:0 }}{% else %}0{% endif %}" data-rubric-id="{{ rubric.id }}" style="flex: 1;">
+              <input type="number" class="form-input rubric-points-input" min="0" max="{{ rubric.max_points }}" step="any" value="{% if grade_record %}{{ grade_record.rubric_breakdown|get_item:rubric.id|default:0 }}{% else %}0{% endif %}" data-rubric-id="{{ rubric.id }}" name="rubric_{{ rubric.id }}">
+            </div>
+
+
+            <!-- Quick Scoring Chips -->
+            <div class="quick-score-pills">
+              <span style="font-size: 0.68rem; color: var(--color-text-muted); text-transform: uppercase;">Quick Preset:</span>
+              <button type="button" class="quick-chip" onclick="setRubricScore('{{ rubric.id }}', 0)">0.0</button>
+              <button type="button" class="quick-chip" onclick="setRubricScore('{{ rubric.id }}', {{ rubric.max_points }} * 0.5)">50%</button>
+              <button type="button" class="quick-chip" onclick="setRubricScore('{{ rubric.id }}', {{ rubric.max_points }} * 0.75)">75%</button>
+              <button type="button" class="quick-chip" onclick="setRubricScore('{{ rubric.id }}', {{ rubric.max_points }})">Full ({{ rubric.max_points }})</button>
             </div>
           </div>
         {% empty %}
-          <div class="form-group">
-            <label class="form-label">Awarded Score (Max {{ current_answer.question.points }} pts)</label>
-            <input type="number" name="awarded_marks" id="awarded-marks-input" class="form-input" min="0" max="{{ current_answer.question.points }}" step="0.5" value="{{ grade_record.awarded_marks|default:0 }}">
+          <div class="rubric-criteria-card" style="padding: 18px 20px;">
+            <label class="form-label" style="font-weight: 700; margin-bottom: 8px;">Direct Score Award (Max {{ current_answer.question.points }} pts)</label>
+            <div class="flex items-center gap-4">
+              <input type="number" name="awarded_marks" id="awarded-marks-input" class="form-input rubric-points-input" style="width: 120px; font-size: 1.2rem;" min="0" max="{{ current_answer.question.points }}" step="any" value="{{ grade_record.awarded_marks|default:0 }}">
+              
+              <!-- Quick Scoring Chips -->
+
+              <div class="quick-score-pills">
+                <button type="button" class="quick-chip" onclick="setDirectScore(0)">0.0</button>
+                <button type="button" class="quick-chip" onclick="setDirectScore({{ current_answer.question.points }} * 0.5)">50% ({{ current_answer.question.points|floatformat:1 }})</button>
+                <button type="button" class="quick-chip" onclick="setDirectScore({{ current_answer.question.points }} * 0.75)">75%</button>
+                <button type="button" class="quick-chip" onclick="setDirectScore({{ current_answer.question.points }})">Full ({{ current_answer.question.points }})</button>
+              </div>
+            </div>
           </div>
         {% endfor %}
       </div>
 
-      <!-- Live Dynamic Totalizer -->
+      <!-- Live Dynamic Totalizer Bar -->
       {% if rubrics %}
         <div class="rubric-totalizer-bar">
           <div>
-            <div style="font-size: 0.80rem; text-transform: uppercase; color: #6EE7B7; font-weight: 600;">Total Evaluated Marks</div>
-            <div style="font-size: 0.80rem; color: var(--grading-text-muted);">Max possible: {{ current_answer.question.points }} pts</div>
+            <div style="font-size: 0.76rem; text-transform: uppercase; color: var(--color-accent); font-weight: 800; letter-spacing: 0.5px;">Evaluated Total Marks</div>
+            <div style="font-size: 0.78rem; color: var(--color-text-muted);">Max possible: {{ current_answer.question.points }} points</div>
           </div>
-          <div class="rubric-total-num" id="rubric-total-display">0.00</div>
+          <div class="rubric-total-num" id="rubric-total-display">0.00 pts</div>
         </div>
         <input type="hidden" name="awarded_marks" id="awarded-marks-input" value="{{ grade_record.awarded_marks|default:0 }}">
       {% endif %}
 
       <div class="form-group">
-        <label class="form-label">Examiner Notes (Confidential / Internal)</label>
-        <textarea name="examiner_notes" class="form-input" rows="2" placeholder="Private notes for Chief Examiner moderation...">{{ grade_record.examiner_notes|default:"" }}</textarea>
+        <label class="form-label">
+          {% icon 'lock' 'icon-xs' %}
+          <span>Examiner Notes (Internal & Confidential)</span>
+        </label>
+        <textarea name="examiner_notes" class="grading-textarea" rows="2" placeholder="Private notes for Chief Examiner moderation...">{{ grade_record.examiner_notes|default:"" }}</textarea>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Constructive Feedback to Student</label>
-        <textarea name="feedback_to_student" class="form-input" rows="3" placeholder="Constructive feedback revealed to candidate after results release...">{{ grade_record.feedback_to_student|default:"" }}</textarea>
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label class="form-label">
+          {% icon 'message-square' 'icon-xs' %}
+          <span>Constructive Feedback to Candidate</span>
+        </label>
+        
+        <!-- Quick Feedback Snippet Templates -->
+        <div class="feedback-snippets-container">
+          <span style="font-size: 0.68rem; color: var(--color-text-muted); text-transform: uppercase;">Quick Inserts:</span>
+          <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Well structured answer with correct theoretical formulation.')">+ Excellent Theory</button>
+          <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Good analysis, but lacks practical edge-case consideration.')">+ Missing Edge Cases</button>
+          <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Mathematical derivation and complexity analysis are spot-on.')">+ Perfect Math</button>
+          <button type="button" class="feedback-snippet-btn" onclick="insertFeedback('Please review algorithmic invariant proof techniques.')">+ Review Proofs</button>
+        </div>
+
+        <textarea name="feedback_to_student" id="feedback-textarea" class="grading-textarea" rows="3" placeholder="Constructive feedback revealed to student after official results release...">{{ grade_record.feedback_to_student|default:"" }}</textarea>
       </div>
+
 
       <!-- Fixed Bottom Action Bar -->
       <footer class="grading-actions-bar">
-        <button type="button" id="btn-save-draft" class="btn btn-ghost">
-          {% icon 'file-text' 'icon' %}
+        <button type="button" id="btn-save-draft" class="btn btn-secondary">
+          {% icon 'file-text' 'icon-xs' %}
           <span>Save as Draft</span>
         </button>
 
-        <div class="flex items-center gap-2">
-          <button type="submit" id="btn-finalize" class="btn btn-accent btn-lg">
-            {% icon 'check-circle' 'icon' %}
-            <span>Finalize & Mark Complete</span>
+        <div class="flex items-center gap-3">
+          <button type="submit" id="btn-finalize" class="btn btn-primary btn-lg">
+            {% icon 'check-circle' 'icon-sm' %}
+            <span>Finalize & Submit Score</span>
           </button>
         </div>
       </footer>
+
     </form>
   </main>
 </div>
@@ -169,6 +239,34 @@
     });
   });
 
+  function setRubricScore(rubricId, value) {
+    const input = document.querySelector(`input[name="rubric_${rubricId}"]`);
+    const slider = document.querySelector(`.rubric-slider[data-rubric-id="${rubricId}"]`);
+    const val = parseFloat(value).toFixed(1);
+    if (input) input.value = val;
+    if (slider) slider.value = val;
+    calculateTotal();
+  }
+
+  function setDirectScore(value) {
+    const input = document.getElementById('awarded-marks-input');
+    if (input) {
+      input.value = parseFloat(value).toFixed(1);
+    }
+  }
+
+  function insertFeedback(text) {
+    const area = document.getElementById('feedback-textarea');
+    if (area) {
+      if (area.value.trim().length > 0) {
+        area.value += ' ' + text;
+      } else {
+        area.value = text;
+      }
+      area.focus();
+    }
+  }
+
   calculateTotal();
 
   // Draft vs Finalize
@@ -178,3 +276,4 @@
   });
 </script>
 {% endblock %}
+

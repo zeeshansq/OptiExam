@@ -1,23 +1,26 @@
 {% load static optiexam_tags %}
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="{{ ui_theme|default:'dark' }}">
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Evaluation Studio — OptiExam{% endblock %}</title>
 
-  <!-- Local Fonts (Zero CDN) -->
-  <link rel="stylesheet" href="{% static 'fonts/inter/inter.css' %}">
-  <link rel="stylesheet" href="{% static 'fonts/outfit/outfit.css' %}">
-  <link rel="stylesheet" href="{% static 'fonts/jetbrains-mono/jetbrains-mono.css' %}">
-
-  <!-- Core & Grading Styles -->
+  <!-- 100% Offline Static Stylesheets (Zero CDN) -->
   <link rel="stylesheet" href="{% static 'css/optiexam-core.css' %}">
   <link rel="stylesheet" href="{% static 'css/optiexam-theme.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/forms.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/badges.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/cards.css' %}">
   <link rel="stylesheet" href="{% static 'css/grading.css' %}">
 
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/optiexam-logo.svg' %}">
   {% block extra_css %}{% endblock %}
 </head>
+
+
 <body class="grading-mode">
   {% block content %}{% endblock %}
 

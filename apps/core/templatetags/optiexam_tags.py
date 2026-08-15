@@ -68,3 +68,28 @@ def sort_header(context, field_name: str, label: str):
       <span class="sort-indicator">{indicator}</span>
     </a>'''
     return mark_safe(html)
+
+@register.filter
+def get_item(dictionary, key):
+    """
+    Template filter to look up a key in a dictionary or object.
+    Usage: {{ dict|get_item:key }}
+    Handles string and integer keys smoothly.
+    """
+    if not isinstance(dictionary, dict):
+        return ""
+    
+    # Try exact key, string key, or int key
+    if key in dictionary:
+        return dictionary[key]
+    str_key = str(key)
+    if str_key in dictionary:
+        return dictionary[str_key]
+    try:
+        int_key = int(key)
+        if int_key in dictionary:
+            return dictionary[int_key]
+    except (ValueError, TypeError):
+        pass
+    return ""
+

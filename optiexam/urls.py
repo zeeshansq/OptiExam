@@ -14,6 +14,10 @@ urlpatterns = [
     # Root redirect to login
     path('', RedirectView.as_view(pattern_name='accounts:login', permanent=False), name='index'),
 
+    # Favicon route
+    path('favicon.ico', RedirectView.as_view(url='/static/img/optiexam-logo.svg', permanent=True)),
+
+
     # Core Global Services & Template Downloads (/core/templates/...)
     path('core/', include('apps.core.urls', namespace='core')),
 
