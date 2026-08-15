@@ -29,8 +29,18 @@ class ExamCockpitView(LoginRequiredMixin, View):
         if attempt.status != ExamAttempt.Status.IN_PROGRESS:
             return render(request, 'submissions/submission_receipt.html', {'attempt': attempt})
 
+        if attempt.is_expired:
+            if attempt.is_simulation:
+                # Reset simulation automatically
+                reset_simulation_attempt(attempt.exam, request.user)
+                return redirect('submissions:dry_run_simulation', exam_id=attempt.exam.pk)
+            else:
+                finalize_submission(attempt)
+                return render(request, 'submissions/submission_receipt.html', {'attempt': attempt})
+
         state = get_attempt_cockpit_state(attempt)
         return render(request, self.template_name, state)
+
 
 
 class ExamSubmitView(LoginRequiredMixin, View):

@@ -1,13 +1,13 @@
 /**
  * OptiExam Anti-Cheating & Proctoring Shield
  * 100% Offline Compatible (Zero CDN Dependencies)
- * Intercepts copy/paste/keys, monitors window blur, enforces fullscreen lockdown.
+ * Respects exam policy switches.
  */
 
 class AntiCheatShield {
   constructor(config = {}) {
-    this.enforceFullscreen = config.enforceFullscreen || false;
-    this.lockCopyPaste = config.lockCopyPaste || false;
+    this.enforceFullscreen = !!config.enforceFullscreen;
+    this.lockCopyPaste = !!config.lockCopyPaste;
     this.maxViolations = config.maxViolations || 3;
     this.violationCount = config.violationCount || 0;
     this.onViolationCallback = config.onViolation || null;
@@ -20,42 +20,28 @@ class AntiCheatShield {
     if (this.lockCopyPaste) {
       this.bindDOMEventLocks();
     }
-    this.bindVisibilityMonitoring();
     if (this.enforceFullscreen) {
       this.bindFullscreenLock();
+      this.bindVisibilityMonitoring();
     }
   }
 
   bindDOMEventLocks() {
-    // Disable right click context menu
-    document.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-      this.logLocalViolation('CLIPBOARD_BLOCKED', 'Right-click context menu intercepted.');
-    }, false);
-
-    // Disable copy, cut, paste, text select
-    ['copy', 'cut', 'paste', 'selectstart', 'dragstart'].forEach(event => {
-      document.addEventListener(event, (e) => {
-        e.preventDefault();
-        this.logLocalViolation('CLIPBOARD_BLOCKED', `Blocked DOM action: ${event}`);
-      }, false);
-    });
-
-    // Intercept inspect & shortcut keys
+    // Intercept inspect & shortcut keys only outside input elements
     document.addEventListener('keydown', (e) => {
-      // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S, Ctrl+P, Alt+Tab, PrintScreen
+      const isEditable = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
       if (
         e.key === 'F12' ||
-        ((e.ctrlKey || e.metaKey) && ['c', 'v', 'p', 'u', 's', 'a'].includes(e.key.toLowerCase())) ||
-        ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase())) ||
-        e.key === 'PrintScreen'
+        (!isEditable && (e.ctrlKey || e.metaKey) && ['c', 'v', 'p', 'u', 's'].includes(e.key.toLowerCase())) ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase()))
       ) {
         e.preventDefault();
-        e.stopPropagation();
         this.logLocalViolation('DEVTOOLS_BLOCKED', `Blocked key combination: ${e.key}`);
       }
     }, true);
   }
+
+
 
   bindVisibilityMonitoring() {
     let wasBlurred = false;

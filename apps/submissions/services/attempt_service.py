@@ -34,21 +34,26 @@ def initialize_attempt(
     Initializes a new candidate attempt with seeded question/option shuffling,
     or resumes an active attempt if one already exists.
     """
-    # Check for existing IN_PROGRESS attempt
-    existing_attempt = ExamAttempt.objects.filter(
-        exam=exam,
-        participant=participant,
-        status=ExamAttempt.Status.IN_PROGRESS,
-        is_simulation=is_simulation
-    ).first()
+    # For simulations, always purge any old simulation attempt (submitted, expired, in progress) to provide a fresh run
+    if is_simulation:
+        ExamAttempt.objects.filter(exam=exam, participant=participant, is_simulation=True).delete()
+    else:
+        # Check for existing IN_PROGRESS attempt
+        existing_attempt = ExamAttempt.objects.filter(
+            exam=exam,
+            participant=participant,
+            status=ExamAttempt.Status.IN_PROGRESS,
+            is_simulation=False
+        ).first()
 
-    if existing_attempt:
-        if existing_attempt.is_expired:
-            existing_attempt.status = ExamAttempt.Status.AUTO_SUBMITTED
-            existing_attempt.submitted_at = timezone.now()
-            existing_attempt.save(update_fields=['status', 'submitted_at'])
-        else:
-            return existing_attempt
+        if existing_attempt:
+            if existing_attempt.is_expired:
+                existing_attempt.status = ExamAttempt.Status.AUTO_SUBMITTED
+                existing_attempt.submitted_at = timezone.now()
+                existing_attempt.save(update_fields=['status', 'submitted_at'])
+            else:
+                return existing_attempt
+
 
     # Enforce Roster verification for non-simulations
     if not is_simulation:

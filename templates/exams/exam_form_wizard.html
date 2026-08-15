@@ -291,7 +291,9 @@
                   <span style="font-weight: 600; color: var(--color-text-primary); font-size: 0.85rem;">
                     {{ lf_form.instance.get_lifeline_type_display }}
                   </span>
+                  <div style="display: none;">{{ lf_form.lifeline_type }}</div>
                 </div>
+
                 <div class="flex items-center gap-2">
                   <span style="font-size: 0.80rem; color: var(--color-text-muted);">Max uses:</span>
                   {{ lf_form.max_allowed }}

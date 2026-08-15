@@ -5,20 +5,37 @@
 
 {% block body_content %}
 <div class="auth-viewport-wrapper">
-  <!-- Dynamic Ambient Lighting Background -->
+  <!-- Dynamic Ambient Lighting Background (Unified Across 100% Viewport) -->
   <div class="ambient-glow orb-1"></div>
   <div class="ambient-glow orb-2"></div>
   <div class="ambient-glow orb-3"></div>
   <div class="grid-backdrop-overlay"></div>
 
-  <!-- Main 70/30 Split Layout Container -->
+  <!-- Lightweight Floating Exam-Relevant Icons (Moving Down-to-Up, Ultra-smooth GPU) -->
+  <div class="exam-floating-particles" aria-hidden="true">
+    <div class="floating-particle p-1">{% icon 'book-open' 'particle-svg' %}</div>
+    <div class="floating-particle p-2">{% icon 'edit-3' 'particle-svg' %}</div>
+    <div class="floating-particle p-3">{% icon 'shield-check' 'particle-svg' %}</div>
+    <div class="floating-particle p-4">{% icon 'award' 'particle-svg' %}</div>
+    <div class="floating-particle p-5">{% icon 'timer' 'particle-svg' %}</div>
+    <div class="floating-particle p-6">{% icon 'file-text' 'particle-svg' %}</div>
+    <div class="floating-particle p-7">{% icon 'zap' 'particle-svg' %}</div>
+    <div class="floating-particle p-8">{% icon 'school' 'particle-svg' %}</div>
+    <div class="floating-particle p-9">{% icon 'check-circle' 'particle-svg' %}</div>
+    <div class="floating-particle p-10">{% icon 'bookmark' 'particle-svg' %}</div>
+    <div class="floating-particle p-11">{% icon 'layers' 'particle-svg' %}</div>
+    <div class="floating-particle p-12">{% icon 'activity' 'particle-svg' %}</div>
+  </div>
+
+  <!-- Main 62/38 Split Layout Container (100vh Unified Viewport Experience) -->
   <div class="auth-split-layout">
-    
+
     <!-- ====================================================================
-         LEFT REGION (70%): Premium Feature Showcase & Brand Intelligence
+         LEFT REGION (62%): 12 Rich Logical Lifecycle Feature Cards
          ==================================================================== -->
     <aside class="auth-showcase-panel">
-      <!-- Brand & Live System Status Header -->
+
+      <!-- Top Brand Header -->
       <div class="showcase-header">
         <div class="brand-badge-group">
           <div class="brand-logo-container">
@@ -30,12 +47,6 @@
             <div class="brand-subtitle">High-Stakes Examination Engine</div>
           </div>
         </div>
-
-        <!-- Live Operational Telemetry Pill -->
-        <div class="live-status-pill">
-          <span class="status-pulse-dot"></span>
-          <span class="status-pill-text">Platform Active • Zero-Latency Telemetry</span>
-        </div>
       </div>
 
       <!-- Hero Statement -->
@@ -44,125 +55,250 @@
           Engineered for <span class="gradient-text">Rigorous, High-Scale</span> Academic Evaluations.
         </h1>
         <p class="hero-subline">
-          An autonomous, resilient assessment platform delivering sub-second live telemetry, multi-vector anti-cheat lockdown, and double-blind grading workflows.
+          An autonomous assessment platform delivering sub-second live telemetry, multi-vector anti-cheat lockdown, and
+          double-blind grading workflows.
         </p>
       </div>
 
-      <!-- 4 Core Highlighted Feature Cards (2x2 Matrix) -->
-      <div class="features-matrix-grid">
-        
-        <!-- Card 1: Anti-Cheat & Lockdown -->
-        <div class="feature-glass-card card-emerald">
-          <div class="feature-card-header">
-            <div class="feature-icon-wrapper icon-emerald">
-              {% icon 'shield' 'icon-feat' %}
+      <!-- 12 Logical Lifecycle Feature Cards (4 Rows x 3 Columns) -->
+      <div class="features-matrix-12">
+
+        <!-- Lifecycle 1: Multi-Format Authoring -->
+        <div class="feature-mini-card card-indigo">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-indigo">
+              {% icon 'layers' 'icon-feat-sm' %}
             </div>
-            <span class="feature-tag tag-emerald">Anti-Cheat Shield</span>
+            <span class="feature-inline-title">Multi-Format Authoring</span>
+            <span class="feature-inline-tag tag-indigo">5 Types</span>
           </div>
-          <h3 class="feature-card-title">Lockdown Proctoring</h3>
-          <p class="feature-card-desc">
-            Full-screen lockdown, hardware device checks, tab-blur detection, and tamper-resistant attempt telemetry.
+          <p class="feature-inline-desc">
+            Author single &amp; multi-choice MCQs, diagrammatic spotters, conceptual short answers, and structured essay
+            rubrics.
           </p>
         </div>
 
-        <!-- Card 2: 5 Question Paradigms -->
-        <div class="feature-glass-card card-indigo">
-          <div class="feature-card-header">
-            <div class="feature-icon-wrapper icon-indigo">
-              {% icon 'layers' 'icon-feat' %}
+        <!-- Lifecycle 2: Exam Blueprint Studio -->
+        <div class="feature-mini-card card-purple">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-purple">
+              {% icon 'calendar' 'icon-feat-sm' %}
             </div>
-            <span class="feature-tag tag-indigo">5 Question Types</span>
+            <span class="feature-inline-title">Exam Blueprint Studio</span>
+            <span class="feature-inline-tag tag-purple">Blueprints</span>
           </div>
-          <h3 class="feature-card-title">Multi-Format Authoring</h3>
-          <p class="feature-card-desc">
-            Single & multi-choice MCQs, diagrammatic spotters, short conceptual answers, and structured essays with rubrics.
+          <p class="feature-inline-desc">
+            Design multi-section exam blueprints with custom weightages, section cutoffs, negative penalties, and
+            schedules.
           </p>
         </div>
 
-        <!-- Card 3: Double-Blind Grading Studio -->
-        <div class="feature-glass-card card-cyan">
-          <div class="feature-card-header">
-            <div class="feature-icon-wrapper icon-cyan">
-              {% icon 'award' 'icon-feat' %}
+        <!-- Lifecycle 3: Seeded Shuffling Engine -->
+        <div class="feature-mini-card card-cyan">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-cyan">
+              {% icon 'cpu' 'icon-feat-sm' %}
             </div>
-            <span class="feature-tag tag-cyan">Double-Blind</span>
+            <span class="feature-inline-title">Seeded Shuffling Engine</span>
+            <span class="feature-inline-tag tag-cyan">Dynamic</span>
           </div>
-          <h3 class="feature-card-title">Distributed Grading Studio</h3>
-          <p class="feature-card-desc">
-            Candidate-anonymized batch allocations, dynamic step rubrics, and Chief Examiner grade moderation.
+          <p class="feature-inline-desc">
+            Candidate-seeded pseudo-random algorithm dynamically randomizes question order and option sequences per
+            candidate.
           </p>
         </div>
 
-        <!-- Card 4: Live Ops Command Center -->
-        <div class="feature-glass-card card-amber">
-          <div class="feature-card-header">
-            <div class="feature-icon-wrapper icon-amber">
-              {% icon 'activity' 'icon-feat' %}
+        <!-- Lifecycle 4: Lockdown Proctoring -->
+        <div class="feature-mini-card card-emerald">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-emerald">
+              {% icon 'shield' 'icon-feat-sm' %}
             </div>
-            <span class="feature-tag tag-amber">Sub-Second Sync</span>
+            <span class="feature-inline-title">Lockdown Proctoring</span>
+            <span class="feature-inline-tag tag-emerald">Shield</span>
           </div>
-          <h3 class="feature-card-title">Live Ops Control Room</h3>
-          <p class="feature-card-desc">
-            Real-time candidate monitoring matrix, instant heartbeat telemetry, and dynamic bonus time extensions.
+          <p class="feature-inline-desc">
+            Fullscreen lock, clipboard shield, DevTools interception, and real-time tab-blur violation threshold
+            tracking.
+          </p>
+        </div>
+
+        <!-- Lifecycle 5: 15s Heartbeat Auto-Sync -->
+        <div class="feature-mini-card card-amber">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-amber">
+              {% icon 'clock' 'icon-feat-sm' %}
+            </div>
+            <span class="feature-inline-title">15s Heartbeat Sync</span>
+            <span class="feature-inline-tag tag-amber">Telemetry</span>
+          </div>
+          <p class="feature-inline-desc">
+            Continuous sub-second server clock synchronization and delta answer auto-saves with zero network latency
+            bottlenecks.
+          </p>
+        </div>
+
+        <!-- Lifecycle 6: Live Ops Command Center -->
+        <div class="feature-mini-card card-amber">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-amber">
+              {% icon 'activity' 'icon-feat-sm' %}
+            </div>
+            <span class="feature-inline-title">Live Ops Control Room</span>
+            <span class="feature-inline-tag tag-amber">Real-Time</span>
+          </div>
+          <p class="feature-inline-desc">
+            Real-time candidate supervision matrix, live attempt status indicators, instant broadcasts, and bonus time
+            injection.
+          </p>
+        </div>
+
+        <!-- Lifecycle 7: Gamified Lifeline Framework -->
+        <div class="feature-mini-card card-purple">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-purple">
+              {% icon 'zap' 'icon-feat-sm' %}
+            </div>
+            <span class="feature-inline-title">Gamified Lifelines</span>
+            <span class="feature-inline-tag tag-purple">Tokens</span>
+          </div>
+          <p class="feature-inline-desc">
+            Configurable 50:50 option eliminators, question skip quotas, bookmark review flags, and authored hint token
+            reveals.
+          </p>
+        </div>
+
+        <!-- Lifecycle 8: Resilient Crash Recovery -->
+        <div class="feature-mini-card card-emerald">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-emerald">
+              {% icon 'shield-check' 'icon-feat-sm' %}
+            </div>
+            <span class="feature-inline-title">Crash Recovery Engine</span>
+            <span class="feature-inline-tag tag-emerald">Zero-Loss</span>
+          </div>
+          <p class="feature-inline-desc">
+            256-bit encrypted local offline queue automatically restores candidate state and answers after power cuts or
+            crashes.
+          </p>
+        </div>
+
+        <!-- Lifecycle 9: Automated Evaluation -->
+        <div class="feature-mini-card card-cyan">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-cyan">
+              {% icon 'check-circle' 'icon-feat-sm' %}
+            </div>
+            <span class="feature-inline-title">Automated Evaluation</span>
+            <span class="feature-inline-tag tag-cyan">Auto-Grade</span>
+          </div>
+          <p class="feature-inline-desc">
+            Instantaneous automated scoring engine for objective MCQs with partial marking, penalties, and manual
+            override logs.
+          </p>
+        </div>
+
+        <!-- Lifecycle 10: Distributed Grading Studio -->
+        <div class="feature-mini-card card-cyan">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-cyan">
+              {% icon 'award' 'icon-feat-sm' %}
+            </div>
+            <span class="feature-inline-title">Distributed Grading</span>
+            <span class="feature-inline-tag tag-cyan">Double-Blind</span>
+          </div>
+          <p class="feature-inline-desc">
+            Candidate-anonymized batch allocations (`CAND-XXXXX`), split-screen rubric criteria scoring, and moderation
+            review.
+          </p>
+        </div>
+
+        <!-- Lifecycle 11: Psychometric Analytics -->
+        <div class="feature-mini-card card-rose">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-rose">
+              {% icon 'bar-chart-2' 'icon-feat-sm' %}
+            </div>
+            <span class="feature-inline-title">Psychometric Analytics</span>
+            <span class="feature-inline-tag tag-rose">Insights</span>
+          </div>
+          <p class="feature-inline-desc">
+            Item difficulty (p-value), discrimination index (D-index), Bloom's Taxonomy heatmaps, and cohort score
+            histograms.
+          </p>
+        </div>
+
+        <!-- Lifecycle 12: Role-Gated 5-Tier RBAC -->
+        <div class="feature-mini-card card-indigo">
+          <div class="feature-inline-header">
+            <div class="feature-mini-icon icon-indigo">
+              {% icon 'users' 'icon-feat-sm' %}
+            </div>
+            <span class="feature-inline-title">5-Tier Role Security</span>
+            <span class="feature-inline-tag tag-indigo">Sovereign</span>
+          </div>
+          <p class="feature-inline-desc">
+            Tailored sovereign workspaces for Platform Admin, Exam Designer, Item Writer, Evaluation Grader, and Student
+            candidates.
           </p>
         </div>
 
       </div>
 
-      <!-- Showcase Footer & Trust Badges -->
-      <div class="showcase-footer-banner">
-        <div class="trust-metric-chip">
-          {% icon 'check-circle' 'chip-icon' %}
-          <span>100% Air-Gapped & Offline Ready (Zero CDN)</span>
-        </div>
-        <div class="trust-metric-chip">
-          {% icon 'lock' 'chip-icon' %}
-          <span>256-Bit Encrypted Session Recovery</span>
-        </div>
-        <div class="trust-metric-chip">
-          {% icon 'bar-chart' 'chip-icon' %}
-          <span>Psychometric Item Analytics (p-value & D-index)</span>
+      <!-- Left Showcase Footer Strip -->
+      <div class="showcase-bottom-credits">
+        <div class="trust-chip-row">
+          <span class="trust-pill">{% icon 'check-circle' 'pill-icon' %} 100% Offline Ready (Zero CDN)</span>
+          <span class="trust-pill">{% icon 'lock' 'pill-icon' %} 256-Bit Encrypted</span>
+          <span class="trust-pill">{% icon 'school' 'pill-icon' %} Multi-Institutional Sovereignty</span>
         </div>
       </div>
     </aside>
 
 
     <!-- ====================================================================
-         RIGHT REGION (30%): Sleek Interactive Login Card
+         RIGHT REGION (38%): Expanded High-Width Interactive Login Card
          ==================================================================== -->
     <main class="auth-login-panel">
       <div class="login-card-container">
-        
+
         <!-- Mobile-Only Brand Header -->
         <div class="mobile-brand-bar">
           <img src="{% static 'img/optiexam-logo.svg' %}" alt="OptiExam" class="mobile-logo-img">
           <div>
             <div class="mobile-brand-title">OptiExam</div>
-            <div class="mobile-brand-subtitle">Assessment Portal</div>
+            <div class="mobile-brand-subtitle">High-Stakes Assessment Portal</div>
           </div>
         </div>
 
         <!-- Login Card Header -->
         <div class="login-card-header">
-          <div class="access-badge">
-            {% icon 'shield' 'icon-xs' %}
-            <span>SECURE ACCESS PORTAL</span>
+          <!-- Top Row Badges: Secure Access + Centered Live Assessment Telemetry -->
+          <div class="login-header-badge-row">
+            <div class="access-badge">
+              {% icon 'shield' 'icon-xs' %}
+              <span>SECURE ACCESS PORTAL</span>
+            </div>
+            <div class="live-status-pill">
+              <span class="status-pulse-dot"></span>
+              <span class="status-pill-text">Live Assessment Engine • Sub-Second Telemetry</span>
+            </div>
           </div>
           <h2 class="login-title">Sign In</h2>
-          <p class="login-subtitle">Enter your institutional credentials to enter your examination workspace.</p>
+          <p class="login-subtitle">Enter your institutional credentials to access your assessment workspace.</p>
         </div>
 
         <!-- Form Error Alerts -->
         {% if form.errors %}
-          <div class="alert alert-danger custom-login-alert" role="alert">
-            <div class="alert-icon-wrap">
-              {% icon 'alert-triangle' 'icon-sm' %}
-            </div>
-            <div class="alert-content">
-              <strong>Authentication Failed</strong>
-              <div class="alert-desc">Invalid username or password. Please verify your credentials and try again.</div>
-            </div>
+        <div class="alert alert-danger custom-login-alert" role="alert">
+          <div class="alert-icon-wrap">
+            {% icon 'alert-triangle' 'icon-sm' %}
           </div>
+          <div class="alert-content">
+            <strong>Authentication Failed</strong>
+            <div class="alert-desc">Invalid username or password. Please verify your credentials and try again.</div>
+          </div>
+        </div>
         {% endif %}
 
         <!-- Interactive Login Form -->
@@ -193,7 +329,8 @@
                 {% icon 'lock' 'field-svg-icon' %}
               </span>
               {{ form.password }}
-              <button type="button" class="btn-toggle-password" id="togglePasswordBtn" title="Toggle password visibility" tabindex="-1">
+              <button type="button" class="btn-toggle-password" id="togglePasswordBtn"
+                title="Toggle password visibility" tabindex="-1">
                 <span id="eyeIconOpen">
                   {% icon 'eye' 'field-svg-icon' %}
                 </span>
@@ -227,97 +364,86 @@
 
         <!-- Quick Role Demo Access Palette (Controlled by ENABLE_DEMO_LOGINS) -->
         {% if ENABLE_DEMO_LOGINS %}
-          <div class="demo-access-container">
-            <div class="demo-access-header">
-              <div class="demo-header-title">
-                {% icon 'zap' 'icon-xs' %}
-                <span>QUICK ROLE ACCESS</span>
-              </div>
-              <div class="demo-header-sub">Click to fill • Double-click to instant sign in</div>
+        <div class="demo-access-container">
+          <div class="demo-access-header">
+            <div class="demo-header-title">
+              {% icon 'zap' 'icon-xs' %}
+              <span>QUICK DEMO ROLE ACCESS</span>
             </div>
-
-            <div class="demo-roles-palette">
-              <!-- Role 1: Super Admin -->
-              <button type="button" class="btn-role-tile" 
-                      data-username="admin" 
-                      data-password="OptiExam@2026!" 
-                      data-role-label="Platform Super Admin"
-                      data-user-desc="Engr. M. Tariq Javed (Platform Directorate)"
-                      style="--accent-color: #EF4444;"
-                      title="Super Admin">
-                <div class="role-icon-box">
-                  {% icon 'shield' 'role-svg' %}
-                </div>
-                <span class="role-caption">Admin</span>
-              </button>
-
-              <!-- Role 2: Designer -->
-              <button type="button" class="btn-role-tile" 
-                      data-username="dr.sarah.khan" 
-                      data-password="OptiExam@2026!" 
-                      data-role-label="Exam Designer"
-                      data-user-desc="Dr. Sarah Khan (Academic Dean)"
-                      style="--accent-color: #6366F1;"
-                      title="Designer / Academic Head">
-                <div class="role-icon-box">
-                  {% icon 'calendar' 'role-svg' %}
-                </div>
-                <span class="role-caption">Designer</span>
-              </button>
-
-              <!-- Role 3: Item Writer -->
-              <button type="button" class="btn-role-tile" 
-                      data-username="prof.ahmed.bilal" 
-                      data-password="OptiExam@2026!" 
-                      data-role-label="Item Writer / SME"
-                      data-user-desc="Prof. Ahmed Bilal (Subject Matter Expert)"
-                      style="--accent-color: #F59E0B;"
-                      title="Item Writer">
-                <div class="role-icon-box">
-                  {% icon 'edit' 'role-svg' %}
-                </div>
-                <span class="role-caption">Author</span>
-              </button>
-
-              <!-- Role 4: Grader -->
-              <button type="button" class="btn-role-tile" 
-                      data-username="grader.zainab" 
-                      data-password="OptiExam@2026!" 
-                      data-role-label="Grader / Evaluator"
-                      data-user-desc="Zainab Ali (Senior Examiner)"
-                      style="--accent-color: #06B6D4;"
-                      title="Evaluation Officer">
-                <div class="role-icon-box">
-                  {% icon 'award' 'role-svg' %}
-                </div>
-                <span class="role-caption">Grader</span>
-              </button>
-
-              <!-- Role 5: Candidate (Exam Ready) -->
-              <button type="button" class="btn-role-tile candidate-live-tile" 
-                      data-username="ali.hassan" 
-                      data-password="OptiExam@2026!" 
-                      data-role-label="Candidate (Live Exam Ready)"
-                      data-user-desc="Ali Hassan (Enrolled in CS101 Live Exam)"
-                      style="--accent-color: #10B981;"
-                      title="Candidate / Student">
-                <div class="role-icon-box">
-                  {% icon 'zap' 'role-svg' %}
-                </div>
-                <span class="role-caption">Candidate</span>
-              </button>
-            </div>
-
-            <!-- Dynamic Interactive Status Hint Bar -->
-            <div id="demoStatusFeedback" class="demo-feedback-bar">
-              <span class="feedback-placeholder">Hover over any role to inspect • 1-Click to fill • 2-Click to enter</span>
-            </div>
+            <div class="demo-header-sub">1-Click to load • 2-Click to instant sign in</div>
           </div>
+
+          <div class="demo-roles-palette">
+            <!-- Role 1: Super Admin -->
+            <button type="button" class="btn-role-tile" data-username="admin" data-password="OptiExam@2026!"
+              data-role-label="Platform Super Admin" data-user-desc="Engr. M. Tariq Javed (Platform Directorate)"
+              style="--accent-color: #EF4444;" title="Super Admin">
+              <div class="role-icon-box">
+                {% icon 'shield' 'role-svg' %}
+              </div>
+              <span class="role-caption">Admin</span>
+            </button>
+
+            <!-- Role 2: Designer -->
+            <button type="button" class="btn-role-tile" data-username="dr.sarah.khan" data-password="OptiExam@2026!"
+              data-role-label="Exam Designer" data-user-desc="Dr. Sarah Khan (Academic Dean)"
+              style="--accent-color: #6366F1;" title="Designer / Academic Head">
+              <div class="role-icon-box">
+                {% icon 'calendar' 'role-svg' %}
+              </div>
+              <span class="role-caption">Designer</span>
+            </button>
+
+            <!-- Role 3: Item Writer -->
+            <button type="button" class="btn-role-tile" data-username="prof.ahmed.bilal" data-password="OptiExam@2026!"
+              data-role-label="Item Writer / SME" data-user-desc="Prof. Ahmed Bilal (Subject Matter Expert)"
+              style="--accent-color: #F59E0B;" title="Item Writer">
+              <div class="role-icon-box">
+                {% icon 'edit' 'role-svg' %}
+              </div>
+              <span class="role-caption">Author</span>
+            </button>
+
+            <!-- Role 4: Grader -->
+            <button type="button" class="btn-role-tile" data-username="grader.zainab" data-password="OptiExam@2026!"
+              data-role-label="Grader / Evaluator" data-user-desc="Zainab Ali (Senior Examiner)"
+              style="--accent-color: #06B6D4;" title="Evaluation Officer">
+              <div class="role-icon-box">
+                {% icon 'award' 'role-svg' %}
+              </div>
+              <span class="role-caption">Grader</span>
+            </button>
+
+            <!-- Role 5: Candidate (Exam Ready) -->
+            <button type="button" class="btn-role-tile candidate-live-tile" data-username="ali.hassan"
+              data-password="OptiExam@2026!" data-role-label="Candidate (Live Exam Ready)"
+              data-user-desc="Ali Hassan (Enrolled in CS101 Live Exam)" style="--accent-color: #10B981;"
+              title="Candidate / Student">
+              <div class="role-icon-box">
+                {% icon 'zap' 'role-svg' %}
+              </div>
+              <span class="role-caption">Candidate</span>
+            </button>
+          </div>
+
+          <!-- Dynamic Interactive Status Hint Bar -->
+          <div id="demoStatusFeedback" class="demo-feedback-bar">
+            <span class="feedback-placeholder">Hover to inspect • 1-Click to fill • 2-Click to enter</span>
+          </div>
+        </div>
         {% endif %}
 
-        <!-- Card Footer -->
+        <!-- Card Footer with ZeeTechV Credit & WhatsApp Link -->
         <div class="login-card-footer">
-          <span>OptiExam Platform v2.0 • Offline Ready</span>
+          <div class="footer-credit-row">
+            <span>Powered by <strong class="brand-highlight">ZeeTechV</strong></span>
+            <span class="credit-sep">•</span>
+            <a href="https://wa.me/923155754436" target="_blank" rel="noopener noreferrer" class="footer-wa-link"
+              title="Contact ZeeTechV on WhatsApp (03155754436)">
+              <span class="wa-dot"></span>
+              <span>WhatsApp: <strong>03155754436</strong></span>
+            </a>
+          </div>
         </div>
 
       </div>
@@ -327,871 +453,1302 @@
 </div>
 
 <!-- ====================================================================
-     PREMIUM STYLESHEET FOR 70/30 RESPONSIVE REDESIGN
+     PREMIUM STYLESHEET FOR 12-FEATURE 62/38 RESPONSIVE LAYOUT
      ==================================================================== -->
 <style>
-/* Base Viewport Container */
-.auth-viewport-wrapper {
-  position: relative;
-  min-height: 100vh;
-  width: 100%;
-  background-color: #0B0F19;
-  color: #F8FAFC;
-  overflow-x: hidden;
-  display: flex;
-  align-items: stretch;
-}
+  /* Base Viewport Container: Fits exactly 100vh on desktop with UNIFIED background */
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-color: #070B14;
+  }
 
-/* Subtle Animated Ambient Glow Orbs */
-.ambient-glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.22;
-}
-.orb-1 {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, #4F46E5 0%, rgba(79, 70, 229, 0) 70%);
-  top: -150px;
-  left: 10%;
-  animation: floatOrb 22s ease-in-out infinite alternate;
-}
-.orb-2 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, #06B6D4 0%, rgba(6, 182, 212, 0) 70%);
-  bottom: -100px;
-  left: 30%;
-  animation: floatOrb 26s ease-in-out infinite alternate-reverse;
-}
-.orb-3 {
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, #10B981 0%, rgba(16, 185, 129, 0) 70%);
-  top: 40%;
-  right: -100px;
-  animation: floatOrb 20s ease-in-out infinite alternate;
-}
+  .auth-viewport-wrapper {
+    position: relative;
+    height: 100vh;
+    min-height: 100vh;
+    width: 100vw;
+    background: radial-gradient(circle at 50% 30%, #0D1527 0%, #070B14 100%);
+    color: #F8FAFC;
+    overflow: hidden;
+    display: flex;
+    align-items: stretch;
+  }
 
-@keyframes floatOrb {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(40px, -30px) scale(1.12); }
-  100% { transform: translate(-30px, 30px) scale(0.95); }
-}
+  /* Subtle Animated Ambient Glow Orbs */
+  .ambient-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.18;
+    will-change: transform;
+  }
 
-/* Dark Technological Grid Overlay */
-.grid-backdrop-overlay {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
-  background-size: 36px 36px;
-  pointer-events: none;
-  z-index: 2;
-  opacity: 0.6;
-}
+  .orb-1 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, #4F46E5 0%, rgba(79, 70, 229, 0) 70%);
+    top: -120px;
+    left: 5%;
+    animation: floatOrb 22s ease-in-out infinite alternate;
+  }
 
-/* Split Layout 70% / 30% */
-.auth-split-layout {
-  position: relative;
-  z-index: 3;
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-}
+  .orb-2 {
+    width: 520px;
+    height: 520px;
+    background: radial-gradient(circle, #06B6D4 0%, rgba(6, 182, 212, 0) 70%);
+    bottom: -80px;
+    left: 30%;
+    animation: floatOrb 26s ease-in-out infinite alternate-reverse;
+  }
 
-/* ====================================================================
-   LEFT REGION: Feature Showcase Panel (70% on wide screen)
+  .orb-3 {
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, #8B5CF6 0%, rgba(139, 92, 246, 0) 70%);
+    top: 30%;
+    right: -80px;
+    animation: floatOrb 20s ease-in-out infinite alternate;
+  }
+
+  @keyframes floatOrb {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+
+    50% {
+      transform: translate(35px, -25px) scale(1.08);
+    }
+
+    100% {
+      transform: translate(-25px, 25px) scale(0.96);
+    }
+  }
+
+  /* Technological Grid Overlay across whole viewport */
+  .grid-backdrop-overlay {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0.7;
+  }
+
+  /* ====================================================================
+   LIGHTWEIGHT FLOATING EXAM ICONS (Moving Down to Up, Ultra-smooth GPU)
    ==================================================================== */
-.auth-showcase-panel {
-  flex: 0 0 66%;
-  max-width: 66%;
-  padding: 48px 56px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(11, 15, 25, 0.7) 100%);
-  backdrop-filter: blur(12px);
-}
+  .exam-floating-particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 2;
+  }
 
-/* Brand & Status Header */
-.showcase-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 32px;
-}
-.brand-badge-group {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.brand-logo-container {
-  position: relative;
-  width: 52px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.brand-logo-img {
-  width: 44px;
-  height: 44px;
-  position: relative;
-  z-index: 2;
-}
-.logo-ring-glow {
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #4F46E5, #06B6D4);
-  filter: blur(10px);
-  opacity: 0.6;
-  z-index: 1;
-}
-.brand-title {
-  font-size: 1.65rem;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: #FFFFFF;
-}
-.brand-dot {
-  color: #06B6D4;
-}
-.brand-subtitle {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: #94A3B8;
-  letter-spacing: 0.4px;
-}
+  .floating-particle {
+    position: absolute;
+    bottom: -50px;
+    color: #94A3B8;
+    opacity: 0.12;
+    will-change: transform, opacity;
+    animation: floatUp linear infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-/* Live Telemetry Pill with subtle floating */
-.live-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 16px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  border-radius: 999px;
-  backdrop-filter: blur(8px);
-  animation: floatPill 6s ease-in-out infinite alternate;
-}
-@keyframes floatPill {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-3px); }
-}
-.status-pulse-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #10B981;
-  box-shadow: 0 0 8px #10B981;
-  animation: pulseDot 2s infinite;
-}
-@keyframes pulseDot {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px #10B981; }
-  100% { transform: scale(0.95); opacity: 0.8; }
-}
-.status-pill-text {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #34D399;
-  letter-spacing: 0.3px;
-}
+  .particle-svg {
+    width: 100%;
+    height: 100%;
+  }
 
-/* Hero Section */
-.showcase-hero {
-  margin-bottom: 36px;
-}
-.hero-headline {
-  font-size: 2.35rem;
-  font-weight: 800;
-  line-height: 1.22;
-  letter-spacing: -0.8px;
-  color: #FFFFFF;
-  margin-bottom: 14px;
-  max-width: 820px;
-}
-.gradient-text {
-  background: linear-gradient(135deg, #60A5FA 0%, #A78BFA 50%, #34D399 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.hero-subline {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: #94A3B8;
-  max-width: 720px;
-  margin-bottom: 0;
-}
+  @keyframes floatUp {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 0;
+    }
 
-/* 4 Feature Cards Matrix */
-.features-matrix-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  margin-bottom: 32px;
-}
-.feature-glass-card {
-  padding: 22px 24px;
-  border-radius: 16px;
-  background: rgba(30, 41, 59, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-.feature-glass-card:hover {
-  transform: translateY(-4px);
-  background: rgba(30, 41, 59, 0.7);
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
-}
-.card-emerald:hover { border-color: rgba(16, 185, 129, 0.4); }
-.card-indigo:hover  { border-color: rgba(99, 102, 241, 0.4); }
-.card-cyan:hover    { border-color: rgba(6, 182, 212, 0.4); }
-.card-amber:hover   { border-color: rgba(245, 158, 11, 0.4); }
+    15% {
+      opacity: 0.16;
+    }
 
-.feature-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-.feature-icon-wrapper {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.icon-feat {
-  width: 20px;
-  height: 20px;
-}
-.icon-emerald { background: rgba(16, 185, 129, 0.15); color: #34D399; }
-.icon-indigo  { background: rgba(99, 102, 241, 0.15); color: #818CF8; }
-.icon-cyan    { background: rgba(6, 182, 212, 0.15); color: #38BDF8; }
-.icon-amber   { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
+    85% {
+      opacity: 0.16;
+    }
 
-.feature-tag {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 4px 10px;
-  border-radius: 6px;
-}
-.tag-emerald { background: rgba(16, 185, 129, 0.12); color: #6EE7B7; }
-.tag-indigo  { background: rgba(99, 102, 241, 0.12); color: #A5B4FC; }
-.tag-cyan    { background: rgba(6, 182, 212, 0.12); color: #7DD3FC; }
-.tag-amber   { background: rgba(245, 158, 11, 0.12); color: #FDE68A; }
+    100% {
+      transform: translateY(-115vh) rotate(360deg);
+      opacity: 0;
+    }
+  }
 
-.feature-card-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #FFFFFF;
-  margin-bottom: 6px;
-}
-.feature-card-desc {
-  font-size: 0.86rem;
-  line-height: 1.5;
-  color: #94A3B8;
-  margin-bottom: 0;
-}
+  /* Distributed positions & staggered speeds for 12 particles */
+  .p-1 {
+    left: 5%;
+    width: 24px;
+    height: 24px;
+    animation-duration: 22s;
+    animation-delay: 0s;
+  }
 
-/* Footer Trust Chips */
-.showcase-footer-banner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-.trust-metric-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: #CBD5E1;
-}
-.chip-icon {
-  width: 14px;
-  height: 14px;
-  color: #06B6D4;
-}
+  .p-2 {
+    left: 14%;
+    width: 20px;
+    height: 20px;
+    animation-duration: 28s;
+    animation-delay: 4s;
+  }
 
-/* ====================================================================
-   RIGHT REGION: Login Card Panel (34% on wide screen)
+  .p-3 {
+    left: 23%;
+    width: 26px;
+    height: 26px;
+    animation-duration: 20s;
+    animation-delay: 8s;
+  }
+
+  .p-4 {
+    left: 33%;
+    width: 22px;
+    height: 22px;
+    animation-duration: 25s;
+    animation-delay: 2s;
+  }
+
+  .p-5 {
+    left: 43%;
+    width: 28px;
+    height: 28px;
+    animation-duration: 30s;
+    animation-delay: 10s;
+  }
+
+  .p-6 {
+    left: 52%;
+    width: 20px;
+    height: 20px;
+    animation-duration: 24s;
+    animation-delay: 6s;
+  }
+
+  .p-7 {
+    left: 62%;
+    width: 24px;
+    height: 24px;
+    animation-duration: 26s;
+    animation-delay: 12s;
+  }
+
+  .p-8 {
+    left: 71%;
+    width: 26px;
+    height: 26px;
+    animation-duration: 21s;
+    animation-delay: 3s;
+  }
+
+  .p-9 {
+    left: 80%;
+    width: 22px;
+    height: 22px;
+    animation-duration: 27s;
+    animation-delay: 7s;
+  }
+
+  .p-10 {
+    left: 89%;
+    width: 20px;
+    height: 20px;
+    animation-duration: 23s;
+    animation-delay: 1s;
+  }
+
+  .p-11 {
+    left: 10%;
+    width: 18px;
+    height: 18px;
+    animation-duration: 32s;
+    animation-delay: 14s;
+  }
+
+  .p-12 {
+    left: 94%;
+    width: 24px;
+    height: 24px;
+    animation-duration: 29s;
+    animation-delay: 11s;
+  }
+
+
+  /* ====================================================================
+   SPLIT LAYOUT: 62% Showcase / 38% Login (Spacious Wide Login Card)
    ==================================================================== */
-.auth-login-panel {
-  flex: 0 0 34%;
-  max-width: 34%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 32px;
-  background: rgba(11, 15, 25, 0.85);
-  backdrop-filter: blur(20px);
-}
+  .auth-split-layout {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+  }
 
-.login-card-container {
-  width: 100%;
-  max-width: 420px;
-  display: flex;
-  flex-direction: column;
-}
+  /* ====================================================================
+   LEFT REGION: 12 Lifecycle Feature Cards (62% width)
+   ==================================================================== */
+  .auth-showcase-panel {
+    flex: 0 0 62%;
+    max-width: 62%;
+    padding: 24px 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background: transparent;
+    overflow-y: auto;
+  }
 
-/* Mobile-only brand */
-.mobile-brand-bar {
-  display: none;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.mobile-logo-img {
-  width: 40px;
-  height: 40px;
-}
-.mobile-brand-title {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #FFF;
-}
-.mobile-brand-subtitle {
-  font-size: 0.78rem;
-  color: #94A3B8;
-}
+  /* Brand & Status Header */
+  .showcase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
 
-/* Login Header */
-.login-card-header {
-  margin-bottom: 24px;
-}
-.access-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.70rem;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  color: #818CF8;
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  padding: 4px 10px;
-  border-radius: 6px;
-  margin-bottom: 12px;
-}
-.icon-xs {
-  width: 12px;
-  height: 12px;
-}
-.login-title {
-  font-size: 1.85rem;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: #FFFFFF;
-  margin-bottom: 6px;
-}
-.login-subtitle {
-  font-size: 0.88rem;
-  color: #94A3B8;
-  line-height: 1.45;
-  margin-bottom: 0;
-}
+  .brand-badge-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
 
-/* Custom Alert */
-.custom-login-alert {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: 10px;
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #FCA5A5;
-  margin-bottom: 20px;
-}
-.alert-icon-wrap {
-  flex-shrink: 0;
-  color: #EF4444;
-}
-.alert-content strong {
-  display: block;
-  font-size: 0.88rem;
-  color: #FEF2F2;
-  margin-bottom: 2px;
-}
-.alert-desc {
-  font-size: 0.80rem;
-  line-height: 1.4;
-}
+  .brand-logo-container {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-/* Form Fields */
-.form-field-group {
-  margin-bottom: 18px;
-}
-.field-label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-.field-label {
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: #E2E8F0;
-  margin-bottom: 0;
-}
-.field-helper-hint {
-  font-size: 0.72rem;
-  color: #64748B;
-}
+  .brand-logo-img {
+    width: 34px;
+    height: 34px;
+    position: relative;
+    z-index: 2;
+  }
 
-.input-with-icon-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.input-leading-icon {
-  position: absolute;
-  left: 14px;
-  color: #64748B;
-  display: flex;
-  align-items: center;
-  pointer-events: none;
-  z-index: 2;
-}
-.field-svg-icon {
-  width: 18px;
-  height: 18px;
-}
+  .logo-ring-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #4F46E5, #06B6D4);
+    filter: blur(8px);
+    opacity: 0.55;
+    z-index: 1;
+  }
 
-.input-with-icon-wrap input.form-input {
-  width: 100%;
-  height: 46px;
-  padding-left: 44px;
-  padding-right: 44px;
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  color: #F8FAFC;
-  font-size: 0.92rem;
-  transition: all 0.2s ease;
-}
-.input-with-icon-wrap input.form-input:focus {
-  outline: none;
-  border-color: #6366F1;
-  background: rgba(15, 23, 42, 0.9);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-}
+  .brand-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: #FFFFFF;
+    line-height: 1.1;
+  }
 
-.btn-toggle-password {
-  position: absolute;
-  right: 12px;
-  background: transparent;
-  border: none;
-  color: #64748B;
-  padding: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition: color 0.15s ease;
-  z-index: 2;
-}
-.btn-toggle-password:hover {
-  color: #CBD5E1;
-}
+  .brand-dot {
+    color: #06B6D4;
+  }
 
-/* Auxiliary Options */
-.form-options-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 22px;
-}
-.remember-me-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  margin-bottom: 0;
-}
-.remember-label-text {
-  font-size: 0.82rem;
-  color: #94A3B8;
-  user-select: none;
-}
-.session-encryption-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: #64748B;
-}
-.icon-xxs {
-  width: 11px;
-  height: 11px;
-}
+  .brand-subtitle {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #94A3B8;
+    letter-spacing: 0.3px;
+  }
 
-/* Primary Submit Button */
-.btn-login-submit {
-  width: 100%;
-  height: 48px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
-  color: #FFFFFF;
-  font-size: 0.94rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-.btn-login-submit:hover {
-  background: linear-gradient(135deg, #4338CA 0%, #2563EB 100%);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
-  transform: translateY(-1px);
-}
-.btn-login-submit:active {
-  transform: translateY(1px);
-}
-.icon-btn {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.2s ease;
-}
-.btn-login-submit:hover .icon-btn {
-  transform: translateX(3px);
-}
+  /* Live Telemetry Pill */
+  .live-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 999px;
+    backdrop-filter: blur(8px);
+  }
 
-/* ====================================================================
+  .status-pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #10B981;
+    box-shadow: 0 0 6px #10B981;
+    animation: pulseDot 2s infinite;
+  }
+
+  @keyframes pulseDot {
+    0% {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+
+    50% {
+      transform: scale(1.3);
+      opacity: 1;
+      box-shadow: 0 0 10px #10B981;
+    }
+
+    100% {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+  }
+
+  .status-pill-text {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #34D399;
+    letter-spacing: 0.2px;
+  }
+
+  /* Hero Section */
+  .showcase-hero {
+    margin-bottom: 10px;
+  }
+
+  .hero-headline {
+    font-size: 1.55rem;
+    font-weight: 800;
+    line-height: 1.18;
+    letter-spacing: -0.5px;
+    color: #FFFFFF;
+    margin-bottom: 4px;
+    max-width: 820px;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #60A5FA 0%, #A78BFA 50%, #34D399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-subline {
+    font-size: 0.82rem;
+    line-height: 1.38;
+    color: #94A3B8;
+    max-width: 860px;
+    margin-bottom: 0;
+  }
+
+  /* ====================================================================
+   12 BALANCED FEATURE CARDS (4 Rows x 3 Columns Matrix)
+   ==================================================================== */
+  .features-matrix-12 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 9px;
+    margin-bottom: 10px;
+  }
+
+  .feature-mini-card {
+    padding: 20px 15px;
+    border-radius: 9px;
+    background: rgba(30, 41, 59, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .feature-mini-card:hover {
+    transform: translateY(-2px);
+    background: rgba(30, 41, 59, 0.70);
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 18px -3px rgba(0, 0, 0, 0.42);
+  }
+
+  .card-emerald:hover {
+    border-color: rgba(16, 185, 129, 0.45);
+  }
+
+  .card-indigo:hover {
+    border-color: rgba(99, 102, 241, 0.45);
+  }
+
+  .card-cyan:hover {
+    border-color: rgba(6, 182, 212, 0.45);
+  }
+
+  .card-amber:hover {
+    border-color: rgba(245, 158, 11, 0.45);
+  }
+
+  .card-purple:hover {
+    border-color: rgba(168, 85, 247, 0.45);
+  }
+
+  .card-rose:hover {
+    border-color: rgba(244, 63, 94, 0.45);
+  }
+
+  /* SAME-LINE HEADER: [Icon] [Title] [Tag] */
+  .feature-inline-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+
+  .feature-mini-icon {
+    width: 25px;
+    height: 25px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .icon-feat-sm {
+    width: 13px;
+    height: 13px;
+  }
+
+  .icon-emerald {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34D399;
+  }
+
+  .icon-indigo {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818CF8;
+  }
+
+  .icon-cyan {
+    background: rgba(6, 182, 212, 0.15);
+    color: #38BDF8;
+  }
+
+  .icon-amber {
+    background: rgba(245, 158, 11, 0.15);
+    color: #FBBF24;
+  }
+
+  .icon-purple {
+    background: rgba(168, 85, 247, 0.15);
+    color: #C084FC;
+  }
+
+  .icon-rose {
+    background: rgba(244, 63, 94, 0.15);
+    color: #FB7185;
+  }
+
+  .feature-inline-title {
+    font-size: 0.80rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.2;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .feature-inline-tag {
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .tag-emerald {
+    background: rgba(16, 185, 129, 0.12);
+    color: #6EE7B7;
+  }
+
+  .tag-indigo {
+    background: rgba(99, 102, 241, 0.12);
+    color: #A5B4FC;
+  }
+
+  .tag-cyan {
+    background: rgba(6, 182, 212, 0.12);
+    color: #7DD3FC;
+  }
+
+  .tag-amber {
+    background: rgba(245, 158, 11, 0.12);
+    color: #FDE68A;
+  }
+
+  .tag-purple {
+    background: rgba(168, 85, 247, 0.12);
+    color: #E9D5FF;
+  }
+
+  .tag-rose {
+    background: rgba(244, 63, 94, 0.12);
+    color: #FECDD3;
+  }
+
+  .feature-inline-desc {
+    font-size: 0.85rem;
+    line-height: 1.50;
+    color: #94A3B8;
+    margin-bottom: 0;
+  }
+
+
+
+  /* Showcase Bottom Credits */
+  .showcase-bottom-credits {
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .trust-chip-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .trust-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: #CBD5E1;
+  }
+
+  .pill-icon {
+    width: 12px;
+    height: 12px;
+    color: #06B6D4;
+  }
+
+  /* ====================================================================
+   RIGHT REGION: Expanded Wide Login Card Panel (38% width)
+   ==================================================================== */
+  .auth-login-panel {
+    flex: 0 0 38%;
+    max-width: 38%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 36px;
+    background: transparent;
+    overflow-y: auto;
+  }
+
+  .login-card-container {
+    width: 100%;
+    max-width: 480px;
+    /* Expanded spacious width */
+    display: flex;
+    flex-direction: column;
+    background: rgba(15, 23, 42, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    padding: 28px 30px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.40);
+  }
+
+  /* Mobile-only brand */
+  .mobile-brand-bar {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-logo-img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .mobile-brand-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #FFF;
+  }
+
+  .mobile-brand-subtitle {
+    font-size: 0.74rem;
+  /* Login Header */
+  .login-card-header {
+    margin-bottom: 18px;
+    text-align: center;
+  }
+
+  .login-header-badge-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .access-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #818CF8;
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    padding: 3px 9px;
+    border-radius: 6px;
+    margin-bottom: 0;
+  }
+
+  .icon-xs {
+    width: 12px;
+    height: 12px;
+  }
+
+  .login-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #FFFFFF;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+
+  .login-subtitle {
+    font-size: 0.82rem;
+    color: #94A3B8;
+    line-height: 1.4;
+    margin-bottom: 0;
+    text-align: center;
+  }
+
+  /* Custom Alert */
+  .custom-login-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #FCA5A5;
+    margin-bottom: 14px;
+  }
+
+  .alert-icon-wrap {
+    flex-shrink: 0;
+    color: #EF4444;
+  }
+
+  .alert-content strong {
+    display: block;
+    font-size: 0.82rem;
+    color: #FEF2F2;
+    margin-bottom: 1px;
+  }
+
+  .alert-desc {
+    font-size: 0.76rem;
+    line-height: 1.3;
+  }
+
+  /* Form Fields */
+  .form-field-group {
+    margin-bottom: 12px;
+  }
+
+  .field-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .field-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #E2E8F0;
+    margin-bottom: 0;
+  }
+
+  .field-helper-hint {
+    font-size: 0.70rem;
+    color: #64748B;
+  }
+
+  .input-with-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-leading-icon {
+    position: absolute;
+    left: 12px;
+    color: #64748B;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .field-svg-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .input-with-icon-wrap input.form-input {
+    width: 100%;
+    height: 42px;
+    padding-left: 38px;
+    padding-right: 40px;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: #F8FAFC;
+    font-size: 0.90rem;
+    transition: all 0.2s ease;
+  }
+
+  .input-with-icon-wrap input.form-input:focus {
+    outline: none;
+    border-color: #6366F1;
+    background: rgba(15, 23, 42, 0.9);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.22);
+  }
+
+  .btn-toggle-password {
+    position: absolute;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: #64748B;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: color 0.15s ease;
+    z-index: 2;
+  }
+
+  .btn-toggle-password:hover {
+    color: #CBD5E1;
+  }
+
+  /* Auxiliary Options */
+  .form-options-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .remember-me-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    margin-bottom: 0;
+  }
+
+  .remember-label-text {
+    font-size: 0.78rem;
+    color: #94A3B8;
+    user-select: none;
+  }
+
+  .session-encryption-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: #64748B;
+  }
+
+  .icon-xxs {
+    width: 10px;
+    height: 10px;
+  }
+
+  /* Primary Submit Button */
+  .btn-login-submit {
+    width: 100%;
+    height: 44px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
+    color: #FFFFFF;
+    font-size: 0.90rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.32);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-login-submit:hover {
+    background: linear-gradient(135deg, #4338CA 0%, #2563EB 100%);
+    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.48);
+    transform: translateY(-1px);
+  }
+
+  .btn-login-submit:active {
+    transform: translateY(1px);
+  }
+
+  .icon-btn {
+    width: 15px;
+    height: 15px;
+    transition: transform 0.2s ease;
+  }
+
+  .btn-login-submit:hover .icon-btn {
+    transform: translateX(3px);
+  }
+
+  /* ====================================================================
    QUICK ROLE DEMO ACCESS PALETTE
    ==================================================================== */
-.demo-access-container {
-  margin-top: 24px;
-  padding: 16px 14px;
-  background: rgba(15, 23, 42, 0.45);
-  border: 1px dashed rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-}
-.demo-access-header {
-  margin-bottom: 12px;
-  text-align: center;
-}
-.demo-header-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  color: #CBD5E1;
-}
-.demo-header-sub {
-  font-size: 0.70rem;
-  color: #64748B;
-  margin-top: 2px;
-}
-
-.demo-roles-palette {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.btn-role-tile {
-  flex: 1;
-  min-width: 58px;
-  height: 56px;
-  padding: 6px 4px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  color: var(--accent-color);
-}
-.btn-role-tile:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--accent-color);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 0 0 12px var(--accent-color);
-}
-.btn-role-tile:active {
-  transform: translateY(0) scale(0.96);
-}
-.role-icon-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.role-svg {
-  width: 18px;
-  height: 18px;
-}
-.role-caption {
-  font-size: 0.66rem;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  color: #94A3B8;
-  white-space: nowrap;
-}
-.btn-role-tile:hover .role-caption {
-  color: #FFFFFF;
-}
-
-/* Candidate Special Highlight */
-.candidate-live-tile {
-  position: relative;
-}
-.candidate-live-tile::after {
-  content: '';
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #10B981;
-  box-shadow: 0 0 6px #10B981;
-}
-
-/* Dynamic Feedback Bar */
-.demo-feedback-bar {
-  margin-top: 10px;
-  padding: 6px 8px;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 6px;
-  font-size: 0.74rem;
-  text-align: center;
-  color: #94A3B8;
-  min-height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-.feedback-highlight-text {
-  color: #38BDF8;
-  font-weight: 500;
-}
-.feedback-success-text {
-  color: #34D399;
-  font-weight: 600;
-}
-
-/* Field highlight animation on quick fill */
-.input-pulse-fill {
-  animation: fieldGlow 0.6s ease-in-out;
-}
-@keyframes fieldGlow {
-  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); border-color: #10B981; }
-  50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4); border-color: #10B981; }
-  100% { box-shadow: none; }
-}
-
-/* Footer */
-.login-card-footer {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 0.72rem;
-  color: #64748B;
-}
-
-/* ====================================================================
-   RESPONSIVE BREAKPOINTS (Mobile & Tablet Optimization)
-   ==================================================================== */
-@media (max-width: 1199px) {
-  .auth-showcase-panel {
-    flex: 0 0 58%;
-    max-width: 58%;
-    padding: 36px 32px;
+  .demo-access-container {
+    margin-top: 14px;
+    padding: 12px 10px;
+    background: rgba(15, 23, 42, 0.40);
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
   }
-  .auth-login-panel {
-    flex: 0 0 42%;
-    max-width: 42%;
-    padding: 32px 24px;
-  }
-  .hero-headline {
-    font-size: 1.95rem;
-  }
-  .features-matrix-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-}
 
-@media (max-width: 991px) {
-  .auth-split-layout {
-    flex-direction: column;
+  .demo-access-header {
+    margin-bottom: 8px;
+    text-align: center;
   }
-  .auth-showcase-panel {
-    flex: 1 0 auto;
-    max-width: 100%;
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 32px 24px;
-  }
-  .auth-login-panel {
-    flex: 1 0 auto;
-    max-width: 100%;
-    padding: 40px 20px;
-  }
-  .mobile-brand-bar {
+
+  .demo-header-title {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #CBD5E1;
   }
-}
+
+  .demo-header-sub {
+    font-size: 0.64rem;
+    color: #64748B;
+    margin-top: 1px;
+  }
+
+  .demo-roles-palette {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-role-tile {
+    flex: 1;
+    min-width: 52px;
+    height: 48px;
+    padding: 4px 2px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--accent-color);
+  }
+
+  .btn-role-tile:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 10px var(--accent-color);
+  }
+
+  .btn-role-tile:active {
+    transform: translateY(0) scale(0.96);
+  }
+
+  .role-icon-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .role-svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .role-caption {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    color: #94A3B8;
+    white-space: nowrap;
+  }
+
+  .btn-role-tile:hover .role-caption {
+    color: #FFFFFF;
+  }
+
+  /* Candidate Special Highlight */
+  .candidate-live-tile {
+    position: relative;
+  }
+
+  .candidate-live-tile::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #10B981;
+    box-shadow: 0 0 5px #10B981;
+  }
+
+  /* Dynamic Feedback Bar */
+  .demo-feedback-bar {
+    margin-top: 8px;
+    padding: 4px 6px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    font-size: 0.70rem;
+    text-align: center;
+    color: #94A3B8;
+    min-height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .feedback-highlight-text {
+    color: #38BDF8;
+    font-weight: 500;
+  }
+
+  .feedback-success-text {
+    color: #34D399;
+    font-weight: 600;
+  }
+
+  /* Field highlight animation on quick fill */
+  .input-pulse-fill {
+    animation: fieldGlow 0.6s ease-in-out;
+  }
+
+  @keyframes fieldGlow {
+    0% {
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8);
+      border-color: #10B981;
+    }
+
+    50% {
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4);
+      border-color: #10B981;
+    }
+
+    100% {
+      box-shadow: none;
+    }
+  }
+
+  /* Footer with ZeeTechV Credit and WhatsApp */
+  .login-card-footer {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    text-align: center;
+    font-size: 0.70rem;
+    color: #94A3B8;
+  }
+
+  .footer-credit-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .brand-highlight {
+    color: #38BDF8;
+    font-weight: 700;
+  }
+
+  .credit-sep {
+    color: #475569;
+  }
+
+  .footer-wa-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34D399;
+    text-decoration: none;
+    font-size: 0.68rem;
+    transition: all 0.2s ease;
+  }
+
+  .footer-wa-link:hover {
+    background: rgba(16, 185, 129, 0.25);
+    color: #6EE7B7;
+    transform: translateY(-1px);
+  }
+
+  .wa-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: #10B981;
+    box-shadow: 0 0 4px #10B981;
+  }
+
+
+  /* ====================================================================
+   RESPONSIVE BREAKPOINTS (Mobile & Tablet Optimization)
+   PRIORITIZES LOGIN FORM FIRST ON MOBILE/TABLET
+   ==================================================================== */
+  @media (max-width: 1200px) {
+    .auth-showcase-panel {
+      flex: 0 0 58%;
+      max-width: 58%;
+      padding: 20px 24px;
+    }
+
+    .auth-login-panel {
+      flex: 0 0 42%;
+      max-width: 42%;
+      padding: 20px 24px;
+    }
+
+    .features-matrix-12 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hero-headline {
+      font-size: 1.45rem;
+    }
+  }
+
+  @media (max-width: 991px) {
+    .auth-viewport-wrapper {
+      height: auto;
+      min-height: 100vh;
+      overflow-y: auto;
+    }
+
+    .auth-split-layout {
+      flex-direction: column-reverse;
+      /* LOGIN COMES FIRST ON TOP! */
+      height: auto;
+      max-height: none;
+    }
+
+    .auth-login-panel {
+      flex: 1 0 auto;
+      max-width: 100%;
+      padding: 28px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .login-card-container {
+      max-width: 100%;
+      padding: 24px 18px;
+    }
+
+    .mobile-brand-bar {
+      display: flex;
+    }
+
+    .auth-showcase-panel {
+      flex: 1 0 auto;
+      max-width: 100%;
+      border-right: none;
+      padding: 28px 18px 40px;
+    }
+
+    .features-matrix-12 {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .showcase-header {
+      display: none;
+      /* Mobile brand is already in login panel */
+    }
+  }
 </style>
 
 <!-- ====================================================================
      INTERACTIVE SCRIPT (SMOOTH DOUBLE-CLICK & HELPER INTERACTIONS)
      ==================================================================== -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  var userInput = document.getElementById('id-login-username');
-  var passInput = document.getElementById('id-login-password');
-  var loginForm = document.getElementById('loginForm');
-  var feedbackBar = document.getElementById('demoStatusFeedback');
-  var togglePassBtn = document.getElementById('togglePasswordBtn');
-  var eyeOpen = document.getElementById('eyeIconOpen');
-  var eyeClosed = document.getElementById('eyeIconClosed');
-  var clickDebounceTimer = null;
+  document.addEventListener('DOMContentLoaded', function () {
+    var userInput = document.getElementById('id-login-username');
+    var passInput = document.getElementById('id-login-password');
+    var loginForm = document.getElementById('loginForm');
+    var feedbackBar = document.getElementById('demoStatusFeedback');
+    var togglePassBtn = document.getElementById('togglePasswordBtn');
+    var eyeOpen = document.getElementById('eyeIconOpen');
+    var eyeClosed = document.getElementById('eyeIconClosed');
+    var clickDebounceTimer = null;
 
-  // 1. Interactive Password Visibility Toggle
-  if (togglePassBtn && passInput) {
-    togglePassBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      if (passInput.type === 'password') {
-        passInput.type = 'text';
-        if (eyeOpen) eyeOpen.style.display = 'none';
-        if (eyeClosed) eyeClosed.style.display = 'inline';
-      } else {
-        passInput.type = 'password';
-        if (eyeOpen) eyeOpen.style.display = 'inline';
-        if (eyeClosed) eyeClosed.style.display = 'none';
-      }
-      passInput.focus();
-    });
-  }
+    // 1. Interactive Password Visibility Toggle
+    if (togglePassBtn && passInput) {
+      togglePassBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (passInput.type === 'password') {
+          passInput.type = 'text';
+          if (eyeOpen) eyeOpen.style.display = 'none';
+          if (eyeClosed) eyeClosed.style.display = 'inline';
+        } else {
+          passInput.type = 'password';
+          if (eyeOpen) eyeOpen.style.display = 'inline';
+          if (eyeClosed) eyeClosed.style.display = 'none';
+        }
+        passInput.focus();
+      });
+    }
 
-  // 2. Ensure form has data-no-guard attribute so beforeunload never triggers
-  if (loginForm) {
-    loginForm.setAttribute('data-no-guard', 'true');
-  }
+    // 2. Ensure form has data-no-guard attribute so beforeunload never triggers
+    if (loginForm) {
+      loginForm.setAttribute('data-no-guard', 'true');
+    }
 
-  // 3. Quick Role Demo Access (1-Click Fill • 2-Click Instant Submit)
-  var roleButtons = document.querySelectorAll('.btn-role-tile');
+    // 3. Quick Role Demo Access (1-Click Fill • 2-Click Instant Submit)
+    var roleButtons = document.querySelectorAll('.btn-role-tile');
 
-  roleButtons.forEach(function(btn) {
-    var u = btn.getAttribute('data-username');
-    var p = btn.getAttribute('data-password');
-    var label = btn.getAttribute('data-role-label');
-    var desc = btn.getAttribute('data-user-desc');
+    roleButtons.forEach(function (btn) {
+      var u = btn.getAttribute('data-username');
+      var p = btn.getAttribute('data-password');
+      var label = btn.getAttribute('data-role-label');
+      var desc = btn.getAttribute('data-user-desc');
 
-    // Hover Preview
-    btn.addEventListener('mouseenter', function() {
-      if (feedbackBar) {
-        feedbackBar.innerHTML = "<span class='feedback-highlight-text'>" + label + "</span>: " + desc;
-      }
-    });
+      // Hover Preview
+      btn.addEventListener('mouseenter', function () {
+        if (feedbackBar) {
+          feedbackBar.innerHTML = "<span class='feedback-highlight-text'>" + label + "</span>: " + desc;
+        }
+      });
 
-    btn.addEventListener('mouseleave', function() {
-      if (feedbackBar) {
-        feedbackBar.innerHTML = "<span class='feedback-placeholder'>Hover over any role to inspect • 1-Click to fill • 2-Click to enter</span>";
-      }
-    });
+      btn.addEventListener('mouseleave', function () {
+        if (feedbackBar) {
+          feedbackBar.innerHTML = "<span class='feedback-placeholder'>Hover to inspect • 1-Click to fill • 2-Click to enter</span>";
+        }
+      });
 
-    // Single Click: Populate with visual glow
-    btn.addEventListener('click', function(e) {
-      if (clickDebounceTimer) {
-        clearTimeout(clickDebounceTimer);
-        clickDebounceTimer = null;
-        return; // Proceeding to double-click
-      }
+      // Single Click: Populate with visual glow
+      btn.addEventListener('click', function (e) {
+        if (clickDebounceTimer) {
+          clearTimeout(clickDebounceTimer);
+          clickDebounceTimer = null;
+          return; // Proceeding to double-click
+        }
 
-      clickDebounceTimer = setTimeout(function() {
-        if (userInput && passInput) {
+        clickDebounceTimer = setTimeout(function () {
+          if (userInput && passInput) {
+            userInput.value = u;
+            passInput.value = p;
+
+            // Dispatch input events
+            userInput.dispatchEvent(new Event('input', { bubbles: true }));
+            passInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+            // Add animated glow pulse
+            userInput.classList.add('input-pulse-fill');
+            passInput.classList.add('input-pulse-fill');
+            setTimeout(function () {
+              userInput.classList.remove('input-pulse-fill');
+              passInput.classList.remove('input-pulse-fill');
+            }, 600);
+
+            if (feedbackBar) {
+              feedbackBar.innerHTML = "<span class='feedback-success-text'>✓ Loaded " + label + "</span> — Click Sign In or double-click to submit.";
+            }
+          }
+          clickDebounceTimer = null;
+        }, 240);
+      });
+
+      // Double Click: Smooth, instantaneous submission without ANY alert!
+      btn.addEventListener('dblclick', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (clickDebounceTimer) {
+          clearTimeout(clickDebounceTimer);
+          clickDebounceTimer = null;
+        }
+
+        if (userInput && passInput && loginForm) {
           userInput.value = u;
           passInput.value = p;
 
-          // Dispatch input events
-          userInput.dispatchEvent(new Event('input', { bubbles: true }));
-          passInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-          // Add animated glow pulse
-          userInput.classList.add('input-pulse-fill');
-          passInput.classList.add('input-pulse-fill');
-          setTimeout(function() {
-            userInput.classList.remove('input-pulse-fill');
-            passInput.classList.remove('input-pulse-fill');
-          }, 600);
-
           if (feedbackBar) {
-            feedbackBar.innerHTML = "<span class='feedback-success-text'>✓ Loaded " + label + " (" + u + ")</span> — Click Sign In or double-click to submit.";
+            feedbackBar.innerHTML = "<span class='feedback-success-text'>⚡ Signing in as " + label + "...</span>";
+          }
+
+          // Set no-guard flag and bypass beforeunload
+          loginForm.setAttribute('data-no-guard', 'true');
+
+          // Submit smoothly
+          if (typeof loginForm.requestSubmit === 'function') {
+            loginForm.requestSubmit();
+          } else {
+            loginForm.submit();
           }
         }
-        clickDebounceTimer = null;
-      }, 240);
-    });
-
-    // Double Click: Smooth, instantaneous submission without ANY alert!
-    btn.addEventListener('dblclick', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (clickDebounceTimer) {
-        clearTimeout(clickDebounceTimer);
-        clickDebounceTimer = null;
-      }
-
-      if (userInput && passInput && loginForm) {
-        userInput.value = u;
-        passInput.value = p;
-
-        if (feedbackBar) {
-          feedbackBar.innerHTML = "<span class='feedback-success-text'>⚡ Signing in as " + label + "...</span>";
-        }
-
-        // Set no-guard flag and bypass beforeunload
-        loginForm.setAttribute('data-no-guard', 'true');
-
-        // Submit smoothly
-        if (typeof loginForm.requestSubmit === 'function') {
-          loginForm.requestSubmit();
-        } else {
-          loginForm.submit();
-        }
-      }
+      });
     });
   });
-});
 </script>
 {% endblock %}

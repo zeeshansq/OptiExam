@@ -104,6 +104,8 @@ html {
 
 html, body {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-color: var(--color-bg);
   background-image: 
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(79, 70, 229, 0.12), transparent 70%),
@@ -146,8 +148,10 @@ html, body {
 
 .main-content {
   width: 100%;
-  padding: 20px 0 60px 0;
+  flex: 1 0 auto;
+  padding: 20px 0 40px 0;
 }
+
 
 /* SVG Icon Helper System */
 svg[class*="icon"],

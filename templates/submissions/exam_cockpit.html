@@ -7,129 +7,444 @@
 <!-- Simulation Mode Watermark Banner -->
 {% if is_simulation %}
   <div class="simulation-watermark-banner">
-    {% icon 'shield' 'icon-sm' %}
-    <span>DRY-RUN SIMULATION MODE</span>
-    <a href="{% url 'submissions:simulation_reset' exam.pk %}" style="color: #000; text-decoration: underline; margin-left: 6px;" title="Reset attempt and re-seed question order">Re-Seed</a>
-    <a href="{% url 'exams:exam_detail' exam.pk %}" style="color: #000; text-decoration: underline; margin-left: 6px;">Exit</a>
+    {% icon 'zap' 'icon-sm' %}
+    <span>DRY-RUN SIMULATION ACTIVE</span>
+    <span style="opacity: 0.7;">•</span>
+    <a href="{% url 'submissions:simulation_reset' exam.pk %}" class="sim-action-link" title="Reset and generate fresh question sequence">Re-Seed</a>
+    <span style="opacity: 0.7;">•</span>
+    <a href="{% url 'exams:exam_detail' exam.pk %}" class="sim-action-link">Exit Simulation</a>
   </div>
 {% endif %}
 
-<!-- Fullscreen Exit Overlay Alert -->
+<!-- Fullscreen Exit Overlay Alert Modal -->
 <div id="fullscreen-alert-overlay" class="proctoring-alert-overlay">
   <div class="proctoring-alert-modal">
-    <div style="color: var(--cockpit-danger); margin-bottom: 12px;">
-      {% icon 'alert-triangle' 'icon-xl' %}
+    <div class="alert-modal-icon">
+      {% icon 'alert-triangle' 'icon-2xl' %}
     </div>
-    <h2 style="font-size: 1.3rem; margin-bottom: 8px;">Fullscreen Lockdown Violation!</h2>
-    <p style="font-size: 0.88rem; color: #CBD5E1; margin-bottom: 20px;">
-      You have exited the mandatory fullscreen examination lockdown. You must return immediately.
+    <h2>Fullscreen Lockdown Violation!</h2>
+    <p>
+      You have exited the mandatory full-screen examination environment. All system activities are being logged in real time.
     </p>
-    <div style="font-size: 1.1rem; font-family: var(--font-mono); color: var(--cockpit-warning); margin-bottom: 24px;">
-      Grace Period: <span id="fullscreen-grace-seconds">15</span>s remaining
+    <div class="grace-counter-box">
+      Grace Period Remaining: <span id="fullscreen-grace-seconds">15</span>s
     </div>
-    <button type="button" id="btn-return-fullscreen" class="btn btn-danger btn-lg" style="width: 100%;">
+    <button type="button" id="btn-return-fullscreen" class="btn btn-danger btn-lg btn-block">
       {% icon 'maximize' 'icon' %}
-      <span>Return to Fullscreen</span>
+      <span>Return to Fullscreen Mode</span>
     </button>
   </div>
 </div>
 
-<!-- Cockpit Header -->
+<!-- Time Expiry Auto-Submit Overlay Modal -->
+<div id="time-expiry-modal" class="proctoring-alert-overlay">
+  <div class="proctoring-alert-modal" style="border-color: #F59E0B;">
+    <div style="color: #F59E0B; margin-bottom: 12px;">
+      {% icon 'clock' 'icon-2xl' %}
+    </div>
+    <h2>Examination Time Expired</h2>
+    <p style="color: #CBD5E1; margin-bottom: 20px;">
+      Your allocated examination time has concluded. Your saved answers are being securely submitted to the grading authority.
+    </p>
+    <div style="font-size: 0.9rem; color: #38BDF8; margin-bottom: 20px;">
+      Please wait while your submission receipt is generated...
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal Before Final Submission -->
+<div id="submit-confirm-modal" class="proctoring-alert-overlay">
+  <div class="proctoring-alert-modal" style="border-color: var(--cockpit-accent); max-width: 540px; text-align: left;">
+    <div class="flex items-center gap-3" style="margin-bottom: 16px;">
+      <div style="color: var(--cockpit-accent-light);">
+        {% icon 'check-circle' 'icon-xl' %}
+      </div>
+      <div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--cockpit-text-main); margin: 0;">Submit Examination?</h3>
+        <p style="font-size: 0.82rem; color: var(--cockpit-text-muted); margin: 0;">Review your assessment statistics before finalizing.</p>
+      </div>
+    </div>
+
+    <!-- Summary Stats Matrix inside Modal -->
+    <div class="modal-stats-matrix">
+      <div class="modal-stat-box answered-box">
+        <strong id="modal-stat-answered">0</strong>
+        <span>Answered</span>
+      </div>
+      <div class="modal-stat-box bookmarked-box">
+        <strong id="modal-stat-bookmarked">0</strong>
+        <span>Bookmarked</span>
+      </div>
+      <div class="modal-stat-box unanswered-box">
+        <strong id="modal-stat-unanswered">0</strong>
+        <span>Unanswered</span>
+      </div>
+    </div>
+
+    <p style="font-size: 0.86rem; color: var(--cockpit-text-muted); line-height: 1.6; margin-bottom: 20px;">
+      Once submitted, your examination attempt will be permanently closed and submitted for double-blind grading. You will not be able to modify your answers.
+    </p>
+
+    <div class="flex items-center justify-end gap-3">
+      <button type="button" id="btn-cancel-submit-modal" class="btn btn-secondary">
+        Return to Exam
+      </button>
+      <form method="post" action="{% url 'submissions:exam_submit' attempt.pk %}" id="finalSubmitForm" style="margin: 0;">
+        {% csrf_token %}
+        <button type="submit" id="btn-confirm-final-submit" class="btn btn-accent">
+          {% icon 'check' 'icon' %}
+          <span>Confirm &amp; Submit Now</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Candidate Help & Instructions Drawer Modal -->
+<div id="instructions-modal" class="proctoring-alert-overlay">
+  <div class="proctoring-alert-modal" style="border-color: #38BDF8; max-width: 620px; text-align: left;">
+    <div class="flex items-center justify-between" style="margin-bottom: 16px; border-bottom: 1px solid var(--cockpit-border); padding-bottom: 12px;">
+      <div class="flex items-center gap-2">
+        {% icon 'help-circle' 'icon' %}
+        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--cockpit-text-main); margin: 0;">Examination Instructions</h3>
+      </div>
+      <button type="button" id="btn-close-instructions" class="btn btn-ghost btn-sm" style="padding: 4px 8px; font-size: 1rem; color: var(--cockpit-text-main);">✕</button>
+    </div>
+    <div style="max-height: 380px; overflow-y: auto; font-size: 0.90rem; color: var(--cockpit-text-main); line-height: 1.65;">
+      <h4 style="color: #0284C7; margin-bottom: 6px; font-weight: 700;">Assessment Protocol:</h4>
+      <ul style="padding-left: 20px; margin-bottom: 14px; color: var(--cockpit-text-main);">
+        <li>Each question auto-saves delta answers to the server every 15 seconds.</li>
+        <li>Use the <strong>Question Palette</strong> on the left to jump directly to any question.</li>
+        <li>Flag questions with <strong>Bookmark</strong> to review them later before submitting.</li>
+        <li>Remaining time is synchronized continuously with the authoritative server clock.</li>
+      </ul>
+      {% if exam.instructions %}
+        <h4 style="color: #4F46E5; margin-bottom: 6px; font-weight: 700;">Examiner Notes:</h4>
+        <div style="background: var(--cockpit-surface-elevated); padding: 12px; border-radius: 8px; border: 1px solid var(--cockpit-border); color: var(--cockpit-text-main);">
+          {{ exam.instructions|linebreaks }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Lifeline Hint Modal -->
+<div id="lifeline-hint-modal" class="proctoring-alert-overlay">
+  <div class="proctoring-alert-modal" style="border-color: #38BDF8; max-width: 520px; text-align: left;">
+    <div class="flex items-center justify-between" style="margin-bottom: 16px; border-bottom: 1px solid var(--cockpit-border); padding-bottom: 12px;">
+      <div class="flex items-center gap-2">
+        {% icon 'help-circle' 'icon' %}
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--cockpit-text-main); margin: 0;">Question Guidance Hint</h3>
+      </div>
+      <button type="button" id="btn-close-hint-modal" class="btn btn-ghost btn-sm" style="padding: 4px 8px; font-size: 1rem; color: var(--cockpit-text-main);">✕</button>
+    </div>
+    <div id="lifeline-hint-content" style="font-size: 0.96rem; color: var(--cockpit-text-main); line-height: 1.6; background: var(--cockpit-surface-elevated); padding: 14px; border-radius: 8px; border: 1px solid var(--cockpit-border);">
+      Loading guidance hint...
+    </div>
+    <div class="flex items-center justify-end" style="margin-top: 18px;">
+      <button type="button" id="btn-dismiss-hint" class="btn btn-primary">Got it, back to Question</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- ====================================================================
+     COCKPIT HEADER: Exam Title, Live Stats, Sync Status, Central Timer
+     ==================================================================== -->
 <header class="cockpit-header">
+  <!-- Left Brand & Candidate Info -->
   <div class="cockpit-brand">
-    {% icon 'school' 'icon-lg' %}
+    <div class="cockpit-logo-wrap">
+      <img src="{% static 'img/optiexam-logo.svg' %}" alt="OptiExam" class="cockpit-logo-img">
+    </div>
     <div>
       <div class="cockpit-exam-title">{{ exam.title }}</div>
-      <div class="cockpit-candidate-info">{{ request.user.get_full_name|default:request.user.username }} • {{ exam.code }}</div>
+      <div class="cockpit-candidate-info">
+        <span class="info-tag">{{ exam.code }}</span>
+        <span class="info-sep">•</span>
+        <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+        <span class="info-sep">•</span>
+        <span class="info-muted">{{ questions_count }} Questions ({{ exam.total_marks }} Marks)</span>
+      </div>
     </div>
   </div>
 
-  <!-- Center Timer -->
-  <div class="cockpit-timer-pill">
-    {% icon 'clock' 'icon' %}
-    <span id="cockpit-timer-digits" class="timer-digits">00:00:00</span>
+  <!-- Center Timer & Live Synchronizer Status -->
+  <div class="cockpit-center-controls">
+    <div class="cockpit-timer-pill" id="cockpit-timer-box" title="Authoritative synchronized countdown">
+      <span class="timer-icon-wrap">{% icon 'clock' 'icon' %}</span>
+      <span id="cockpit-timer-digits" class="timer-digits">00:00:00</span>
+      <span class="timer-label">REMAINING</span>
+    </div>
   </div>
 
-  <!-- Actions -->
-  <div class="flex items-center gap-3">
+  <!-- Right Actions: Sync Status, Lifelines, Instructions, Submit -->
+  <div class="cockpit-right-actions">
+    <!-- Live Cloud Sync Indicator -->
+    <div class="sync-indicator-pill" id="syncStatusPill" title="15s Delta Auto-Save Synchronizer Active">
+      <span class="sync-dot"></span>
+      <span id="syncStatusText">Synced</span>
+    </div>
+
+    <!-- Font Size Scaling Controls -->
+    <div class="font-scaler-group" title="Adjust Question Reading Text Size">
+      <button type="button" class="btn-font-scale" id="btn-font-dec" title="Decrease font size">A-</button>
+      <button type="button" class="btn-font-scale" id="btn-font-inc" title="Increase font size">A+</button>
+    </div>
+
+    <!-- Dark / Light Theme Toggle -->
+    <button type="button" id="btn-theme-toggle" class="btn-cockpit-action" title="Toggle Dark / Light Theme" aria-label="Toggle Theme">
+      {% icon 'sun' 'icon-sm' %}
+    </button>
+
+    <!-- Help / Instructions Button -->
+    <button type="button" id="btn-open-instructions" class="btn-cockpit-action" title="View Examination Rules & Guidance">
+      {% icon 'help-circle' 'icon-sm' %}
+      <span>Help</span>
+    </button>
+
+
+    <!-- Dynamic Lifelines -->
     {% if lifelines.FIFTY_FIFTY.is_available %}
-      <button type="button" id="btn-lifeline-fifty" class="btn btn-ghost btn-sm" title="Eliminate 2 wrong options (Remaining: {{ lifelines.FIFTY_FIFTY.remaining }})">
-        {% icon 'zap' 'icon' %}
+      <button type="button" id="btn-lifeline-fifty" class="btn-lifeline-pill" title="Eliminate 2 incorrect options (Remaining: {{ lifelines.FIFTY_FIFTY.remaining }})">
+        {% icon 'zap' 'icon-sm' %}
         <span>50:50 ({{ lifelines.FIFTY_FIFTY.remaining }})</span>
       </button>
     {% endif %}
-    <span id="violation-counter-pill" class="badge badge-warning" style="display: none;">0 Violations</span>
-    <form method="post" action="{% url 'submissions:exam_submit' attempt.pk %}" style="margin: 0;">
-      {% csrf_token %}
-      <button type="submit" id="btn-submit-exam" class="btn btn-accent btn-sm">
-        {% icon 'check-circle' 'icon' %}
-        <span>Submit Exam</span>
+
+    {% if lifelines.HINT_TOKEN.is_available %}
+      <button type="button" id="btn-lifeline-hint" class="btn-lifeline-pill btn-lifeline-hint" title="Reveal guidance hint (Remaining: {{ lifelines.HINT_TOKEN.remaining }})">
+        {% icon 'help-circle' 'icon-sm' %}
+        <span>Hint ({{ lifelines.HINT_TOKEN.remaining }})</span>
       </button>
-    </form>
+    {% endif %}
+
+    {% if lifelines.SKIP_QUESTION.is_available %}
+      <button type="button" id="btn-lifeline-skip" class="btn-lifeline-pill btn-lifeline-skip" title="Mark current question skipped (Remaining: {{ lifelines.SKIP_QUESTION.remaining }})">
+        {% icon 'chevron-right' 'icon-sm' %}
+        <span>Skip ({{ lifelines.SKIP_QUESTION.remaining }})</span>
+      </button>
+    {% endif %}
+
+    <!-- Security Violations Counter (Visible only if > 0) -->
+    <span id="violation-counter-pill" class="violation-pill" style="display: none;">
+      {% icon 'shield-alert' 'icon-xs' %}
+      <span id="violation-count-text">0 Violations</span>
+    </span>
+
+
+    <!-- Final Submit Button -->
+    <button type="button" id="btn-trigger-submit-modal" class="btn-cockpit-submit">
+      {% icon 'check-circle' 'icon-sm' %}
+      <span>Finish Exam</span>
+    </button>
   </div>
 </header>
 
-<!-- Cockpit Main Body -->
+<!-- ====================================================================
+     COCKPIT BODY: Left Palette + Live Statistics HUD + Center Stage
+     ==================================================================== -->
 <div class="cockpit-body">
-  <!-- Left Navigator Drawer -->
+
+  <!-- Left Drawer: Progress Stats, Palette Grid, Legend -->
   <aside class="cockpit-drawer">
-    <div class="drawer-section-header">
-      <span>Question Palette</span>
-      <span style="font-size: 0.80rem; color: var(--cockpit-text-muted);">{{ questions_count }} Questions</span>
+    
+    <!-- Real-Time Progress Bar & Stats HUD -->
+    <div class="drawer-stats-hud">
+      <div class="hud-header">
+        <span class="hud-title">Assessment Progress</span>
+        <span class="hud-percent" id="hudProgressPercent">0%</span>
+      </div>
+      <div class="hud-progress-track">
+        <div class="hud-progress-fill" id="hudProgressFill" style="width: 0%;"></div>
+      </div>
+      <div class="hud-counts-row">
+        <div class="hud-count-item">
+          <span class="count-val answered-color" id="stat-answered-count">0</span>
+          <span class="count-lbl">Answered</span>
+        </div>
+        <div class="hud-count-item">
+          <span class="count-val bookmarked-color" id="stat-bookmarked-count">0</span>
+          <span class="count-lbl">Flagged</span>
+        </div>
+        <div class="hud-count-item">
+          <span class="count-val remaining-color" id="stat-remaining-count">{{ questions_count }}</span>
+          <span class="count-lbl">Remaining</span>
+        </div>
+      </div>
     </div>
+
+    <!-- Section Palette Header -->
+    <div class="drawer-section-header">
+      <span>Question Navigation</span>
+      <span class="drawer-count-badge">{{ questions_count }} Questions</span>
+    </div>
+
+    <!-- Question Palette Grid -->
     <div class="palette-grid">
       {% for q in questions %}
-        <div class="palette-tile {% if q.answer.is_answered %}answered{% elif q.answer.is_bookmarked %}bookmarked{% elif q.answer.is_skipped %}skipped{% endif %}" data-index="{{ forloop.counter0 }}">
-          {{ q.order }}
+        <div class="palette-tile {% if q.answer.is_answered %}answered{% elif q.answer.is_bookmarked %}bookmarked{% elif q.answer.is_skipped %}skipped{% endif %}" 
+             data-index="{{ forloop.counter0 }}" 
+             id="palette-tile-{{ forloop.counter0 }}"
+             title="Question {{ q.order }} ({{ q.points }} pts)">
+          <span class="tile-order-num">{{ q.order }}</span>
+          {% if q.answer.is_bookmarked %}
+            <span class="tile-flag-dot"></span>
+          {% endif %}
         </div>
       {% endfor %}
     </div>
+
+    <!-- Palette Color Legend -->
+    <div class="drawer-legend-panel">
+      <div class="legend-item"><span class="legend-dot dot-answered"></span> Answered</div>
+      <div class="legend-item"><span class="legend-dot dot-bookmarked"></span> Flagged</div>
+      <div class="legend-item"><span class="legend-dot dot-active"></span> Current</div>
+      <div class="legend-item"><span class="legend-dot dot-unanswered"></span> Not Visited</div>
+    </div>
   </aside>
 
-  <!-- Central Question Stage -->
+  <!-- Central Examination Stage -->
   <main class="cockpit-main">
-    <div class="question-stage-container">
+    <div class="question-stage-container" id="questionReadingArea">
+      
+      <!-- Top Question Status & Action Strip -->
       <div class="question-meta-bar">
-        <span id="current-question-num" style="font-weight: 700; color: #38BDF8;">Question 1</span>
-        <span id="current-question-points" class="badge badge-primary">1.0 pt</span>
+        <div class="flex items-center gap-3">
+          <span id="current-question-num" class="q-number-badge">Question 1 of {{ questions_count }}</span>
+          <span id="current-question-points" class="q-points-badge">1.0 pt</span>
+          <span id="current-question-type-badge" class="q-type-badge">Multiple Choice</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Bookmark / Flag for Review Button -->
+          <button type="button" id="btn-toggle-bookmark" class="btn-bookmark-action" title="Flag this question for later review">
+            {% icon 'bookmark' 'icon-sm' %}
+            <span id="bookmarkBtnText">Flag for Review</span>
+          </button>
+
+          <!-- Clear Answer Button -->
+          <button type="button" id="btn-clear-answer" class="btn-clear-action" title="Clear selected options for this question">
+            {% icon 'rotate-ccw' 'icon-xs' %}
+            <span>Clear Answer</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Question Diagram (Image MCQ) -->
-      <div id="question-image-container" style="display: none; margin-bottom: 24px; text-align: center;">
-        <img id="question-diagram-img" src="" alt="Question Diagram" style="max-width: 100%; max-height: 360px; border-radius: var(--radius-md); border: 1px solid var(--cockpit-border);">
+      <!-- Question Diagram Spotter (Image MCQ) -->
+      <div id="question-image-container" class="question-image-wrapper" style="display: none;">
+        <div class="diagram-header">
+          {% icon 'image' 'icon-xs' %}
+          <span>High-Resolution Examination Asset</span>
+        </div>
+        <img id="question-diagram-img" src="" alt="Question Diagram" class="diagram-img">
       </div>
 
-      <div id="current-question-prompt" class="question-prompt">
+      <!-- Question Prompt Body -->
+      <div id="current-question-prompt" class="question-prompt-text">
         Loading question prompt...
       </div>
 
-      <!-- Multiple Choice Options Area -->
+      <!-- Multiple Choice Options Grid -->
       <div id="mcq-options-area" class="options-grid"></div>
 
-      <!-- Text Response Area (Short / Long) -->
-      <div id="text-answer-area" style="display: none; margin-bottom: 24px;">
-        <textarea id="question-text-response" class="form-input" rows="8" placeholder="Type your answer here..." style="font-size: 1rem; line-height: 1.6;"></textarea>
+      <!-- Text Response Area (Short / Essay / Coding) -->
+      <div id="text-answer-area" class="text-response-wrapper" style="display: none;">
+        <div class="text-response-header">
+          <label for="question-text-response" class="text-response-label" style="margin-bottom: 0;">
+            <span style="font-weight: 700; color: var(--cockpit-text-main);">Type your comprehensive response below:</span>
+            <span class="auto-save-hint">✓ Answers auto-save continuously</span>
+          </label>
+        </div>
+
+        <!-- Rich Formatting Action Bar with Comprehensive Formatting Tools -->
+        <div class="rich-format-toolbar" id="richTextToolbar">
+          <div class="toolbar-btn-group">
+            <button type="button" class="toolbar-btn" data-format="bold" title="Bold (**text**)">
+              <strong>B</strong>
+            </button>
+            <button type="button" class="toolbar-btn" data-format="italic" title="Italic (*text*)">
+              <em>I</em>
+            </button>
+            <button type="button" class="toolbar-btn" data-format="underline" title="Underline (<u>text</u>)">
+              <span style="text-decoration: underline; font-weight: 700;">U</span>
+            </button>
+            <button type="button" class="toolbar-btn" data-format="strike" title="Strikethrough (~~text~~)">
+              <span style="text-decoration: line-through;">S</span>
+            </button>
+            <button type="button" class="toolbar-btn" data-format="heading" title="Heading (### Title)">
+              <span style="font-weight: 800; font-size: 0.75rem;">H3</span>
+            </button>
+          </div>
+          <div class="toolbar-divider"></div>
+          <div class="toolbar-btn-group">
+            <button type="button" class="toolbar-btn" data-format="bullet" title="Bullet List (- item)">
+              {% icon 'list' 'icon-xs' %}
+            </button>
+            <button type="button" class="toolbar-btn" data-format="number" title="Numbered List (1. item)">
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;">1.</span>
+            </button>
+            <button type="button" class="toolbar-btn" data-format="code" title="Code Block (```)">
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;">&lt;/&gt;</span>
+            </button>
+            <button type="button" class="toolbar-btn" data-format="quote" title="Quote Block (&gt; quote)">
+              <span style="font-size: 0.85rem; font-weight: 700;">&rdquo;</span>
+            </button>
+            <button type="button" class="toolbar-btn" data-format="table" title="Insert Markdown Table">
+              <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;">[Table]</span>
+            </button>
+            <button type="button" class="toolbar-btn" data-format="math" title="Math Formula ($latex$)">
+              <span style="font-style: italic; font-weight: 700; font-family: serif;">f(x)</span>
+            </button>
+          </div>
+          <div class="toolbar-divider"></div>
+          <div class="toolbar-btn-group">
+            <button type="button" class="toolbar-btn" id="btn-clear-editor-text" title="Clear Text">
+              {% icon 'trash-2' 'icon-xs' %}
+              <span style="font-size: 0.72rem;">Clear</span>
+            </button>
+          </div>
+        </div>
+
+        <textarea id="question-text-response" class="form-input text-response-input" rows="12" placeholder="Enter your structured answer here... Use formatting tools above for headings, bullet lists, tables, or code blocks."></textarea>
+
       </div>
 
-      <!-- Live Word Counter -->
-      <div id="word-counter-wrapper" style="display: none; text-align: right; font-size: 0.82rem; color: var(--cockpit-text-muted);">
-        <span id="word-count-num">0</span> words <span id="word-limit-max"></span>
+
+      <!-- Live Word Counter HUD -->
+      <div id="word-counter-wrapper" class="word-counter-box" style="display: none;">
+        <span class="word-count-badge">
+          {% icon 'file-text' 'icon-xs' %}
+          <span>Word Count: <strong id="word-count-num">0</strong> <span id="word-limit-max"></span></span>
+        </span>
       </div>
+
     </div>
   </main>
 </div>
 
-<!-- Bottom Fixed Action Bar -->
+<!-- ====================================================================
+     BOTTOM FOOTER ACTION BAR: Navigation Buttons & Quick Status
+     ==================================================================== -->
 <footer class="cockpit-footer-bar">
   <div>
-    <button type="button" id="btn-prev-question" class="btn btn-ghost">
+    <button type="button" id="btn-prev-question" class="btn-nav-prev">
       {% icon 'chevron-left' 'icon' %}
-      <span>Previous</span>
+      <span>Previous Question</span>
     </button>
   </div>
 
+  <!-- Center Mini Helper Status -->
+  <div class="footer-center-hint">
+    <span class="keyboard-hint"><kbd>Alt</kbd> + <kbd>→</kbd> Next</span>
+    <span class="keyboard-hint"><kbd>Alt</kbd> + <kbd>←</kbd> Prev</span>
+    <span class="keyboard-hint"><kbd>Alt</kbd> + <kbd>F</kbd> Flag</span>
+  </div>
+
   <div class="flex items-center gap-3">
-    <button type="button" id="btn-next-question" class="btn btn-primary">
+    <button type="button" id="btn-next-question" class="btn-nav-next">
       <span>Next Question</span>
       {% icon 'chevron-right' 'icon' %}
     </button>
@@ -142,6 +457,7 @@
   window.COCKPIT_CONFIG = {
     attemptId: {{ attempt.id }},
     remainingSeconds: {{ remaining_seconds }},
+    totalAllowedSeconds: {{ total_allowed_seconds }},
     heartbeatUrl: "{% url 'submissions:api_heartbeat' attempt.pk %}",
     lifelineUrl: "{% url 'submissions:api_lifeline' attempt.pk %}",
     violationUrl: "{% url 'submissions:api_violation' attempt.pk %}",
@@ -149,7 +465,9 @@
     csrfToken: "{{ csrf_token }}",
     enforceFullscreen: {{ enforce_fullscreen|yesno:"true,false" }},
     lockCopyPaste: {{ lock_copy_paste|yesno:"true,false" }},
+    allowBackNavigation: {{ allow_back_navigation|yesno:"true,false" }},
     questions: {{ questions_json|safe }}
   };
 </script>
 {% endblock %}
+
