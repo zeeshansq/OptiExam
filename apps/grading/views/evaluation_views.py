@@ -49,22 +49,45 @@ class GradingCockpitView(GraderRequiredMixin, View):
             messages.info(request, "No subjective questions requiring manual grading for this attempt.")
             return redirect('accounts:role_redirect')
 
-        # Get first ungraded or draft answer
+        # Check for explicitly requested answer or find next ungraded
+        req_answer_id = request.GET.get('answer')
         current_answer = None
-        for ans in subjective_answers:
-            if not ans.is_graded:
-                current_answer = ans
-                break
+
+        if req_answer_id:
+            for ans in subjective_answers:
+                if str(ans.pk) == str(req_answer_id):
+                    current_answer = ans
+                    break
+
+        if not current_answer:
+            for ans in subjective_answers:
+                if not ans.is_graded:
+                    current_answer = ans
+                    break
+
         if not current_answer:
             current_answer = subjective_answers[0]
+
+        # Check for allocation link
+        allocation = GraderAllocation.objects.filter(
+            exam=attempt.exam,
+            grader=request.user
+        ).first()
 
         grade_record = QuestionScore.objects.filter(answer=current_answer).first()
         rubrics = list(QuestionRubric.objects.filter(question=current_answer.question).order_by('order'))
 
+        graded_count = sum(1 for a in subjective_answers if a.is_graded)
+        all_completed = (graded_count == len(subjective_answers))
+
         context = {
             'attempt': attempt,
+            'allocation': allocation,
+            'subjective_answers': subjective_answers,
             'current_answer': current_answer,
             'subjective_count': len(subjective_answers),
+            'graded_count': graded_count,
+            'all_completed': all_completed,
             'grade_record': grade_record,
             'rubrics': rubrics
         }
@@ -73,7 +96,8 @@ class GradingCockpitView(GraderRequiredMixin, View):
 
 class SaveEvaluationView(GraderRequiredMixin, View):
     """
-    Saves or finalizes an evaluation score for a question.
+    Saves or finalizes an evaluation score for a question and auto-advances to the next ungraded item,
+    or redirects back to the batch evaluation queue when all items for this candidate are marked.
     """
     def post(self, request, answer_id, *args, **kwargs):
         answer = get_object_or_404(AttemptAnswer.objects.select_related('attempt', 'question'), pk=answer_id)
@@ -109,11 +133,45 @@ class SaveEvaluationView(GraderRequiredMixin, View):
                 is_draft=is_draft,
                 client_version=client_version
             )
-            messages.success(
-                request,
-                "Evaluation saved as draft." if is_draft else "Evaluation finalized and marked complete."
-            )
         except Exception as e:
             messages.error(request, str(e))
+            return redirect('grading:cockpit', attempt_id=answer.attempt.pk)
 
-        return redirect('grading:cockpit', attempt_id=answer.attempt.pk)
+        # Check remaining ungraded subjective answers in this attempt
+        remaining_ungraded = AttemptAnswer.objects.filter(
+            attempt=answer.attempt,
+            question__question_type__in=['SHORT_ANSWER', 'LONG_ESSAY'],
+            is_graded=False
+        ).order_by('order_in_attempt').first()
+
+        # If there is another ungraded question and not saving draft, advance to next question
+        if remaining_ungraded and not is_draft:
+            messages.success(
+                request,
+                f"Item #{answer.order_in_attempt} finalized ({awarded} pts). Advanced to next question."
+            )
+            return redirect(f"/grading/attempts/{answer.attempt.pk}/cockpit/?answer={remaining_ungraded.pk}")
+
+        # If ALL subjective questions are now marked complete
+        if not remaining_ungraded and not is_draft:
+            messages.success(
+                request,
+                f"✓ Candidate CAND-{answer.attempt.id:04d} evaluation completed! All subjective items successfully marked."
+            )
+            # Find grader allocation for this exam & grader
+            allocation = GraderAllocation.objects.filter(
+                exam=answer.attempt.exam,
+                grader=request.user
+            ).first()
+            if not allocation:
+                allocation = GraderAllocation.objects.filter(exam=answer.attempt.exam).first()
+
+            if allocation:
+                return redirect('grading:batch_queue', allocation_id=allocation.pk)
+            return redirect('accounts:role_redirect')
+
+        # Draft save
+        messages.success(request, f"Item #{answer.order_in_attempt} saved as draft.")
+        return redirect(f"/grading/attempts/{answer.attempt.pk}/cockpit/?answer={answer.pk}")
+
+

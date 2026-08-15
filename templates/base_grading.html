@@ -22,9 +22,28 @@
 
 
 <body class="grading-mode">
+  <!-- Dynamic Flash Notifications -->
+  {% if messages %}
+    <div class="alert-container" style="position: fixed; top: 16px; right: 20px; z-index: 9999; max-width: 420px;">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}" style="box-shadow: var(--shadow-lg); animation: slideDown 0.3s ease;">
+          {% if message.tags == 'success' %}
+            {% icon 'check-circle' 'icon' %}
+          {% elif message.tags == 'error' or message.tags == 'danger' %}
+            {% icon 'alert-triangle' 'icon' %}
+          {% else %}
+            {% icon 'activity' 'icon' %}
+          {% endif %}
+          <span>{{ message }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   {% block content %}{% endblock %}
 
   <script src="{% static 'js/optiexam-core.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>
+
 </html>

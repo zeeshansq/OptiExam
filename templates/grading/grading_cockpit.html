@@ -25,6 +25,15 @@
   </div>
 
   <div class="flex items-center gap-2">
+    <!-- Question Selector Pills -->
+    <div class="flex items-center gap-1.5" style="margin-right: 8px; background: var(--color-bg-subtle); padding: 3px 6px; border-radius: var(--radius-sm); border: 1px solid var(--color-glass-border);">
+      {% for ans in subjective_answers %}
+        <a href="?answer={{ ans.pk }}" class="btn btn-sm {% if ans.pk == current_answer.pk %}btn-primary{% elif ans.is_graded %}btn-accent{% else %}btn-ghost{% endif %}" style="padding: 4px 9px; font-size: 0.76rem; font-family: var(--font-mono);" title="Jump to Question #{{ ans.order_in_attempt }}">
+          {% if ans.is_graded %}✓{% endif %} #{{ ans.order_in_attempt }}
+        </a>
+      {% endfor %}
+    </div>
+
     <!-- Dark / Light Theme Toggle -->
     <button type="button" id="btn-theme-toggle" class="btn btn-secondary btn-sm" title="Toggle Theme" style="padding: 6px 10px;">
       {% if is_dark_mode %}
@@ -35,12 +44,21 @@
       <span>Theme</span>
     </button>
 
-    <a href="{% url 'accounts:role_redirect' %}" class="btn btn-secondary btn-sm">
-      {% icon 'chevron-left' 'icon-xs' %}
-      <span>Exit to Queue</span>
-    </a>
+    {% if allocation %}
+      <a href="{% url 'grading:batch_queue' allocation.pk %}" class="btn btn-secondary btn-sm">
+        {% icon 'chevron-left' 'icon-xs' %}
+        <span>Exit to Queue</span>
+      </a>
+    {% else %}
+      <a href="{% url 'accounts:role_redirect' %}" class="btn btn-secondary btn-sm">
+        {% icon 'chevron-left' 'icon-xs' %}
+        <span>Exit to Queue</span>
+      </a>
+    {% endif %}
   </div>
 </header>
+
+
 
 
 <!-- Two-Pane Split Screen Layout -->
@@ -230,13 +248,15 @@
 {% block extra_js %}
 <script>
   // Rubric Totalizer Script
+  const hasRubrics = {% if rubrics %}true{% else %}false{% endif %};
   const maxAllowed = parseFloat("{{ current_answer.question.points }}");
-  const inputs = document.querySelectorAll('.rubric-points-input');
+  const inputs = document.querySelectorAll('.rubric-points-input[data-rubric-id]');
   const sliders = document.querySelectorAll('.rubric-slider');
   const totalDisplay = document.getElementById('rubric-total-display');
   const hiddenAwarded = document.getElementById('awarded-marks-input');
 
   function calculateTotal() {
+    if (!hasRubrics) return; // For direct score award questions, let user type directly into awarded-marks-input
     let sum = 0;
     inputs.forEach(inp => {
       sum += parseFloat(inp.value) || 0;
@@ -245,6 +265,7 @@
     if (totalDisplay) totalDisplay.textContent = sum.toFixed(2) + ' pts';
     if (hiddenAwarded) hiddenAwarded.value = sum.toFixed(2);
   }
+
 
   // Non-interfering input listener: allows continuous typing like 3.25 without cursor jumps or overwriting
   inputs.forEach((inp) => {
