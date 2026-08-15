@@ -19,6 +19,10 @@ from apps.exams.views.roster_views import (
     CandidateUpdateView,
     CandidateDeleteView
 )
+from apps.exams.views.live_ops_views import (
+    LiveOpsView,
+    LiveOpsBonusTimeAPIView
+)
 
 app_name = 'exams'
 
@@ -42,4 +46,8 @@ urlpatterns = [
     path('exams/<int:exam_id>/roster/<int:entry_id>/edit/', CandidateUpdateView.as_view(), name='candidate_update'),
     path('exams/<int:exam_id>/roster/<int:entry_id>/delete/', CandidateDeleteView.as_view(), name='candidate_delete'),
     path('exams/<int:exam_id>/roster/import/', ExamRosterImportView.as_view(), name='roster_import'),
+
+    # Designer Live Ops Command Center
+    path('exams/<int:exam_id>/live/', LiveOpsView.as_view(), name='live_ops'),
+    path('exams/<int:exam_id>/live/bonus-time/', LiveOpsBonusTimeAPIView.as_view(), name='live_ops_bonus_time'),
 ]

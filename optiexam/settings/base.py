@@ -26,12 +26,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # OptiExam Modular Apps (Foundation, Phase 1 & Phase 2)
+    # OptiExam Modular Apps (Foundation, Phase 1, Phase 2 & Phase 3)
     'apps.core.apps.CoreConfig',
     'apps.tenants.apps.TenantsConfig',
     'apps.accounts.apps.AccountsConfig',
     'apps.questions.apps.QuestionsConfig',
     'apps.exams.apps.ExamsConfig',
+    'apps.submissions.apps.SubmissionsConfig',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'

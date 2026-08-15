@@ -32,17 +32,21 @@
     </div>
   </div>
   <div class="page-actions">
-    <a href="{% url 'exams:roster_hub' exam.pk %}" class="btn btn-accent">
+    <a href="{% url 'submissions:dry_run_simulation' exam.pk %}" class="btn btn-accent" title="Test exact candidate experience in safe sandbox">
+      {% icon 'zap' 'icon' %}
+      <span>Dry-Run Simulation</span>
+    </a>
+    <a href="{% url 'exams:live_ops' exam.pk %}" class="btn btn-ghost" title="Real-time Live Exam Ops Command Center">
+      {% icon 'activity' 'icon' %}
+      <span>Live Ops</span>
+    </a>
+    <a href="{% url 'exams:roster_hub' exam.pk %}" class="btn btn-ghost">
       {% icon 'users' 'icon' %}
-      <span>Candidate Roster ({{ exam.total_enrolled_candidates }})</span>
+      <span>Roster ({{ exam.total_enrolled_candidates }})</span>
     </a>
     <a href="{% url 'exams:exam_update' exam.pk %}" class="btn btn-primary">
       {% icon 'edit' 'icon' %}
       <span>Edit Blueprint</span>
-    </a>
-    <a href="{% url 'exams:exam_list' %}" class="btn btn-ghost">
-      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
-      <span>All Blueprints</span>
     </a>
   </div>
 </div>

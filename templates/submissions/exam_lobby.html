@@ -1,0 +1,85 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Exam Lobby — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'accounts:role_redirect' %}">{% icon 'home' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Exam Lobby</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon">
+      {% icon 'calendar' 'icon-lg' %}
+    </div>
+    <div>
+      <h2>{{ exam.title }}</h2>
+      <p class="page-subtitle">{{ exam.subject }} • Code: <code>{{ exam.code }}</code></p>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-3 gap-6" style="margin-bottom: 24px;">
+  <!-- Left 2 Cols: Guidelines & Instructions -->
+  <div style="grid-column: span 2;" class="flex flex-col gap-6">
+    <div class="glass-card" style="padding: 24px;">
+      <h3 style="margin-bottom: 12px;">Candidate Guidelines & Conduct</h3>
+      <div style="font-size: 0.92rem; line-height: 1.7; color: var(--color-text-secondary);">
+        {{ exam.instructions|linebreaks|default:"Please review all questions carefully. Maintain continuous fullscreen mode. Do not attempt to switch tabs or open developer tools." }}
+      </div>
+    </div>
+
+    <!-- Security & Anti-Cheating Invariants Notice -->
+    <div class="glass-card" style="padding: 20px; border-left: 4px solid var(--color-primary);">
+      <h4 style="margin-bottom: 8px; font-size: 0.95rem;">Proctoring Policies Enforced</h4>
+      <ul style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 0; padding-left: 18px; line-height: 1.8;">
+        {% if exam.enforce_fullscreen %}<li><strong>Fullscreen Lockdown:</strong> You must remain in fullscreen mode throughout the exam.</li>{% endif %}
+        {% if exam.lock_copy_paste %}<li><strong>Clipboard Shield:</strong> Copy, cut, and paste shortcuts are disabled.</li>{% endif %}
+        <li><strong>Tab-Switch Monitoring:</strong> Navigating away from the exam tab will trigger automated violation flags.</li>
+        <li><strong>Continuous Auto-Save:</strong> Responses are encrypted and synchronized every 15 seconds to server authority.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Right 1 Col: Key Specs & Launch Card -->
+  <div class="flex flex-col gap-6">
+    <div class="glass-card" style="padding: 24px; text-align: center;">
+      <div style="font-size: 0.82rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+        Assessment Duration
+      </div>
+      <div style="font-size: 2.2rem; font-weight: 800; font-family: var(--font-mono); color: var(--color-primary); margin-bottom: 16px;">
+        {{ exam.duration_minutes }} <span style="font-size: 1.1rem; font-weight: 500;">Minutes</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2" style="font-size: 0.82rem; margin-bottom: 24px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: var(--radius-sm);">
+        <div>
+          <span style="color: var(--color-text-muted); display: block;">Total Marks</span>
+          <strong class="metric-numeral">{{ exam.total_marks }} pts</strong>
+        </div>
+        <div>
+          <span style="color: var(--color-text-muted); display: block;">Passing Grade</span>
+          <strong class="metric-numeral">{{ exam.passing_percentage }}%</strong>
+        </div>
+      </div>
+
+      <form method="post" action="{% url 'submissions:exam_start' exam.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; justify-content: center; font-size: 1.05rem; padding: 14px 20px;">
+          {% icon 'zap' 'icon' %}
+          <span>Enter Examination Cockpit</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

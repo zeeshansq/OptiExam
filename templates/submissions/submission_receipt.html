@@ -1,0 +1,47 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Submission Receipt — {{ attempt.exam.title }}{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 680px; margin: 40px auto; padding: 40px; text-align: center; border-color: rgba(16, 185, 129, 0.4);">
+  <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: var(--color-success); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+    {% icon 'check-circle' 'icon-xl' %}
+  </div>
+
+  <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Examination Successfully Submitted!</h2>
+  <p style="font-size: 0.92rem; color: var(--color-text-secondary); margin-bottom: 28px;">
+    Your responses for <strong>{{ attempt.exam.title }}</strong> have been encrypted, recorded, and finalized.
+  </p>
+
+  <div class="glass-card" style="background: rgba(0, 0, 0, 0.25); padding: 20px; text-align: left; margin-bottom: 28px; font-size: 0.88rem; line-height: 2;">
+    <div class="flex justify-between">
+      <span style="color: var(--color-text-muted);">Candidate:</span>
+      <strong>{{ attempt.participant.get_full_name|default:attempt.participant.username }}</strong>
+    </div>
+    <div class="flex justify-between">
+      <span style="color: var(--color-text-muted);">Exam Code:</span>
+      <span style="font-family: var(--font-mono);">{{ attempt.exam.code }}</span>
+    </div>
+    <div class="flex justify-between">
+      <span style="color: var(--color-text-muted);">Submission Receipt Token:</span>
+      <span style="font-family: var(--font-mono); color: var(--color-primary);">{{ attempt.resume_token|slice:":16" }}...</span>
+    </div>
+    <div class="flex justify-between">
+      <span style="color: var(--color-text-muted);">Submission Timestamp:</span>
+      <span>{{ attempt.submitted_at|date:"M d, Y H:i:s e" }}</span>
+    </div>
+    <div class="flex justify-between">
+      <span style="color: var(--color-text-muted);">Status:</span>
+      <span class="badge badge-success">{{ attempt.get_status_display }}</span>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-center gap-3">
+    <a href="{% url 'accounts:role_redirect' %}" class="btn btn-primary btn-lg">
+      {% icon 'home' 'icon' %}
+      <span>Return to Dashboard</span>
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,228 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Live Exam Ops — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">{% icon 'calendar' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">Exam Blueprints</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_detail' exam.pk %}">{{ exam.title }}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Live Operations Command Center</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--color-danger);">
+      {% icon 'activity' 'icon-lg' %}
+    </div>
+    <div>
+      <h2>Live Exam Ops: {{ exam.title }}</h2>
+      <p class="page-subtitle">{{ exam.code }} • Real-time telemetry, anti-cheating violations & dynamic time controls</p>
+    </div>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'submissions:dry_run_simulation' exam.pk %}" class="btn btn-accent" title="Test exact candidate experience">
+      {% icon 'zap' 'icon' %}
+      <span>Dry-Run Simulation</span>
+    </a>
+    <a href="{% url 'exams:exam_detail' exam.pk %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Blueprint</span>
+    </a>
+  </div>
+</div>
+
+<!-- Live Stats Overview -->
+<div class="grid grid-cols-4 gap-4" style="margin-bottom: 24px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(79, 70, 229, 0.15); color: var(--color-primary);">
+      {% icon 'users' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">{{ attempts.count }}</span></div>
+      <div class="stat-label">Total Attempts</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--color-accent);">
+      {% icon 'activity' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">{{ exam.duration_minutes }}</span>m</div>
+      <div class="stat-label">Base Duration</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">
+      {% icon 'shield' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value">{% if exam.enforce_fullscreen %}Active{% else %}Standard{% endif %}</div>
+      <div class="stat-label">Lockdown Policy</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(56, 189, 248, 0.15); color: #38BDF8;">
+      {% icon 'clock' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">15</span>s</div>
+      <div class="stat-label">Heartbeat Sync Rate</div>
+    </div>
+  </div>
+</div>
+
+<!-- Candidate Live Monitoring Grid -->
+<div class="glass-card" style="padding: 24px;">
+  <div class="flex items-center justify-between" style="margin-bottom: 20px;">
+    <h3>Active Candidate Stream</h3>
+    <button type="button" class="btn btn-primary btn-sm" id="btn-bonus-all" title="Grant +5 mins to all active candidates">
+      {% icon 'clock' 'icon' %}
+      <span>+5 Mins to All Candidates</span>
+    </button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Candidate</th>
+          <th>Status</th>
+          <th>Remaining Time</th>
+          <th>Bonus Time</th>
+          <th>Violations</th>
+          <th>Started At</th>
+          <th style="text-align: right;">Live Ops Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for att in attempts %}
+          <tr>
+            <td>
+              <div style="font-weight: 600; color: var(--color-text-primary);">
+                {{ att.participant.get_full_name|default:att.participant.username }}
+              </div>
+              <div style="font-size: 0.78rem; font-family: var(--font-mono); color: var(--color-text-muted);">
+                {{ att.participant.email }}
+              </div>
+            </td>
+            <td>
+              {% if att.status == 'IN_PROGRESS' %}
+                <span class="badge badge-success">
+                  <span class="status-dot"></span>
+                  <span>Active Live</span>
+                </span>
+              {% elif att.status == 'SUBMITTED' %}
+                <span class="badge badge-accent">
+                  <span class="status-dot"></span>
+                  <span>Submitted</span>
+                </span>
+              {% else %}
+                <span class="badge badge-danger">
+                  <span class="status-dot"></span>
+                  <span>{{ att.get_status_display }}</span>
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="metric-numeral" style="font-size: 0.95rem; color: #38BDF8;">
+                {{ att.remaining_seconds }}s
+              </span>
+            </td>
+            <td>
+              <span class="badge badge-primary">+{{ att.bonus_minutes_awarded }}m</span>
+            </td>
+            <td>
+              {% if att.violation_count > 0 %}
+                <span class="badge badge-danger">{{ att.violation_count }} flags</span>
+              {% else %}
+                <span style="color: var(--color-text-muted); font-size: 0.82rem;">0 flags</span>
+              {% endif %}
+            </td>
+            <td style="font-size: 0.82rem; color: var(--color-text-secondary);">
+              {{ att.started_at|date:"H:i:s" }}
+            </td>
+            <td style="text-align: right;">
+              <button type="button" class="btn btn-ghost btn-sm btn-bonus-single" data-attempt-id="{{ att.id }}" title="Grant +5m to this student">
+                {% icon 'clock' 'icon' %}
+                <span>+5m</span>
+              </button>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">
+              {% icon 'activity' 'icon-xl' %}
+              <h4 style="margin-top: 12px; margin-bottom: 4px; color: var(--color-text-secondary);">No Active Live Sessions</h4>
+              <p style="font-size: 0.85rem;">Candidates will appear here in real-time as they start their examinations.</p>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const bonusUrl = "{% url 'exams:live_ops_bonus_time' exam.pk %}";
+  const csrfToken = "{{ csrf_token }}";
+
+  document.getElementById('btn-bonus-all')?.addEventListener('click', async () => {
+    if (!confirm('Grant +5 minutes to all candidates currently taking this exam?')) return;
+    try {
+      const resp = await fetch(bonusUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ bonus_minutes: 5 })
+      });
+      const data = await resp.json();
+      if (data.status === 'success') {
+        alert(`Successfully granted +5 minutes to ${data.affected_count} candidate(s).`);
+        window.location.reload();
+      }
+    } catch (e) {
+      console.warn(e);
+    }
+  });
+
+  document.querySelectorAll('.btn-bonus-single').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const attId = btn.getAttribute('data-attempt-id');
+      try {
+        const resp = await fetch(bonusUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+          body: JSON.stringify({ attempt_id: attId, bonus_minutes: 5 })
+        });
+        const data = await resp.json();
+        if (data.status === 'success') {
+          alert('Granted +5 minutes to candidate.');
+          window.location.reload();
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+    });
+  });
+</script>
+{% endblock %}

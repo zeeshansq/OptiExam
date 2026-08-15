@@ -37,6 +37,40 @@
 
 {% include "includes/page_guide.html" with guide_icon="layers" guide_title="Designer Control Center" guide_text="Create exam blueprints, configure section weightages, manage candidate rosters, and supervise live exam operations." %}
 
+<!-- KPI Overview Row -->
+<div class="grid grid-cols-3 gap-4" style="margin-bottom: 24px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(79, 70, 229, 0.15); color: var(--color-primary);">
+      {% icon 'calendar' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">{{ total_exams|default:0 }}</span></div>
+      <div class="stat-label">Total Exam Blueprints</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--color-accent);">
+      {% icon 'database' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">{{ total_banks|default:0 }}</span></div>
+      <div class="stat-label">Question Repositories</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">
+      {% icon 'activity' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">{{ active_live_attempts|default:0 }}</span></div>
+      <div class="stat-label">Live Active Candidates</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Modules Grid -->
 <div class="grid grid-cols-3 gap-6" style="margin-bottom: 24px;">
   <div class="glass-card" style="padding: 24px;">
     <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
@@ -71,6 +105,10 @@
         {% icon 'eye' 'icon' %}
         <span>Question Banks</span>
       </a>
+      <a href="{% url 'questions:bank_create' %}" class="btn btn-ghost btn-sm">
+        {% icon 'plus' 'icon' %}
+        <span>New Bank</span>
+      </a>
     </div>
   </div>
 
@@ -80,12 +118,77 @@
       <span>Live Exam Ops</span>
     </h3>
     <p style="font-size: 0.86rem; color: var(--color-text-secondary); margin-bottom: 16px;">
-      Real-time candidate matrix, bonus time injection, and live proctoring control room.
+      Real-time candidate matrix, dynamic bonus time injection, and live proctoring command center.
     </p>
-    <span class="badge badge-warning">
-      <span class="status-dot"></span>
-      <span>Phase 3 Module</span>
-    </span>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'exams:exam_list' %}" class="btn btn-accent btn-sm">
+        {% icon 'activity' 'icon' %}
+        <span>Select Exam Live Ops</span>
+      </a>
+    </div>
   </div>
 </div>
+
+<!-- Recent Blueprints Quick Access -->
+{% if recent_exams %}
+  <div class="glass-card" style="padding: 24px;">
+    <div class="flex items-center justify-between" style="margin-bottom: 16px;">
+      <h3>Recent Exam Blueprints</h3>
+      <a href="{% url 'exams:exam_list' %}" class="btn btn-ghost btn-sm">View All</a>
+    </div>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Exam Title</th>
+            <th>Subject</th>
+            <th>Schedule Window</th>
+            <th>Duration</th>
+            <th>Total Marks</th>
+            <th>Roster</th>
+            <th style="text-align: right;">Quick Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for exam in recent_exams %}
+            <tr>
+              <td>
+                <a href="{% url 'exams:exam_detail' exam.pk %}" style="font-weight: 600; color: var(--color-text-primary); text-decoration: none;">
+                  {{ exam.title }}
+                </a>
+                <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-text-muted);">
+                  {{ exam.code }}
+                </div>
+              </td>
+              <td><span class="badge badge-primary">{{ exam.subject }}</span></td>
+              <td style="font-size: 0.82rem; color: var(--color-text-secondary);">
+                {{ exam.start_time|date:"M d, H:i" }} — {{ exam.end_time|date:"M d, H:i" }}
+              </td>
+              <td><span class="metric-numeral">{{ exam.duration_minutes }}</span>m</td>
+              <td><span class="metric-numeral">{{ exam.total_marks }}</span> pts</td>
+              <td>
+                <a href="{% url 'exams:roster_hub' exam.pk %}" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-accent); text-decoration: none;">
+                  👥 {{ exam.total_enrolled_candidates }}
+                </a>
+              </td>
+              <td style="text-align: right;">
+                <div class="row-actions">
+                  <a href="{% url 'submissions:dry_run_simulation' exam.pk %}" class="action-btn action-btn-accent" data-tooltip="Dry-Run Simulation" aria-label="Dry-Run Simulation">
+                    {% icon 'zap' 'icon' %}
+                  </a>
+                  <a href="{% url 'exams:live_ops' exam.pk %}" class="action-btn action-btn-inspect" data-tooltip="Live Ops" aria-label="Live Ops">
+                    {% icon 'activity' 'icon' %}
+                  </a>
+                  <a href="{% url 'exams:exam_detail' exam.pk %}" class="action-btn action-btn-inspect" data-tooltip="Inspect" aria-label="Inspect">
+                    {% icon 'eye' 'icon' %}
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
 {% endblock %}

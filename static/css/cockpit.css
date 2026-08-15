@@ -1,0 +1,343 @@
+/* ==============================================================================
+   OptiExam Examination Cockpit Architecture
+   100% Fullscreen Distraction-Free High-Contrast High-Stakes Interface
+   Zero CDN Dependencies (Vanilla CSS)
+   ============================================================================== */
+
+:root {
+  --cockpit-bg: #090D16;
+  --cockpit-surface: #0F172A;
+  --cockpit-surface-elevated: #1E293B;
+  --cockpit-border: rgba(255, 255, 255, 0.08);
+  --cockpit-text-main: #F8FAFC;
+  --cockpit-text-muted: #94A3B8;
+  --cockpit-accent: #4F46E5;
+  --cockpit-accent-light: #818CF8;
+  --cockpit-success: #10B981;
+  --cockpit-warning: #F59E0B;
+  --cockpit-danger: #EF4444;
+  --cockpit-palette-gray: #334155;
+}
+
+body.cockpit-mode {
+  background-color: var(--cockpit-bg);
+  color: var(--cockpit-text-main);
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Cockpit Top Bar */
+.cockpit-header {
+  height: 64px;
+  background: var(--cockpit-surface);
+  border-bottom: 1px solid var(--cockpit-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: relative;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.cockpit-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cockpit-exam-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--cockpit-text-main);
+}
+
+.cockpit-candidate-info {
+  font-size: 0.80rem;
+  color: var(--cockpit-text-muted);
+}
+
+/* Center Timer Display */
+.cockpit-timer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--cockpit-border);
+  border-radius: 9999px;
+  box-shadow: 0 0 15px rgba(79, 70, 229, 0.2);
+}
+
+.timer-digits {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+  color: #38BDF8;
+}
+
+.timer-digits.warning {
+  color: var(--cockpit-warning);
+  animation: timer-pulse 1s infinite alternate;
+}
+
+.timer-digits.danger {
+  color: var(--cockpit-danger);
+  animation: timer-flash 0.5s infinite alternate;
+}
+
+@keyframes timer-pulse {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0.8; transform: scale(1.04); }
+}
+
+@keyframes timer-flash {
+  from { opacity: 1; }
+  to { opacity: 0.4; }
+}
+
+/* Cockpit Layout Grid */
+.cockpit-body {
+  display: flex;
+  height: calc(100vh - 64px);
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Left Navigator Palette Drawer */
+.cockpit-drawer {
+  width: 300px;
+  background: var(--cockpit-surface);
+  border-right: 1px solid var(--cockpit-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.drawer-section-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--cockpit-border);
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  padding: 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.palette-tile {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--cockpit-border);
+  background: var(--cockpit-palette-gray);
+  color: #CBD5E1;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.palette-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--cockpit-accent-light);
+}
+
+.palette-tile.active {
+  border: 2px solid #38BDF8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.palette-tile.answered {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: var(--cockpit-success);
+  color: #34D399;
+}
+
+.palette-tile.bookmarked {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: var(--cockpit-warning);
+  color: #FBBF24;
+}
+
+.palette-tile.skipped {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--cockpit-danger);
+  color: #F87171;
+}
+
+/* Main Question Stage */
+.cockpit-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--cockpit-bg);
+  overflow-y: auto;
+  padding: 32px 48px 100px 48px;
+  position: relative;
+}
+
+.question-stage-container {
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.question-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--cockpit-border);
+}
+
+.question-prompt {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  font-weight: 500;
+  color: var(--cockpit-text-main);
+  margin-bottom: 28px;
+}
+
+/* MCQ Options Container */
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.option-card {
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--cockpit-border);
+  background: var(--cockpit-surface);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.option-card:hover {
+  background: var(--cockpit-surface-elevated);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.option-card.selected {
+  background: rgba(79, 70, 229, 0.2);
+  border-color: var(--cockpit-accent-light);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+}
+
+.option-card.eliminated {
+  opacity: 0.35;
+  text-decoration: line-through;
+  pointer-events: none;
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.option-letter {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--cockpit-border);
+  background: var(--cockpit-surface-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.option-card.selected .option-letter {
+  background: var(--cockpit-accent);
+  color: #FFF;
+  border-color: var(--cockpit-accent);
+}
+
+/* Bottom Action Bar */
+.cockpit-footer-bar {
+  position: fixed;
+  bottom: 0;
+  left: 300px;
+  right: 0;
+  height: 72px;
+  background: var(--cockpit-surface);
+  border-top: 1px solid var(--cockpit-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  z-index: 90;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Simulation Floating Banner */
+.simulation-watermark-banner {
+  position: fixed;
+  top: 12px;
+  right: 200px;
+  z-index: 200;
+  background: rgba(245, 158, 11, 0.9);
+  color: #000;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Violation Modal Warning */
+.proctoring-alert-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.proctoring-alert-overlay.show {
+  display: flex;
+}
+
+.proctoring-alert-modal {
+  background: #1E1B4B;
+  border: 1px solid #EF4444;
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
+}

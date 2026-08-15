@@ -55,18 +55,18 @@
     </div>
   </div>
   <div class="glass-card" style="padding: 24px;">
-    <h3 style="margin-bottom: 8px;">Quick Question Bank Creation</h3>
+    <h3 style="margin-bottom: 8px;">Dry-Run Simulation Sandbox</h3>
     <p style="font-size: 0.86rem; color: var(--color-text-secondary); margin-bottom: 16px;">
-      Launch a new academic repository and start populating single MCQs, diagram items, and essay rubrics.
+      Experience the live examination cockpit, test lifelines, and inspect anti-cheat locks as candidates see them.
     </p>
     <div class="flex items-center gap-2">
-      <a href="{% url 'questions:bank_create' %}" class="btn btn-primary btn-sm">
-        {% icon 'plus' 'icon' %}
-        <span>Create Question Bank</span>
+      <a href="{% url 'exams:exam_list' %}" class="btn btn-accent btn-sm">
+        {% icon 'zap' 'icon' %}
+        <span>Launch Exam Dry-Run</span>
       </a>
       <a href="{% url 'core:sample_template_download' 'questions' %}" class="btn btn-ghost btn-sm">
         {% icon 'download' 'icon' %}
-        <span>Download CSV Template</span>
+        <span>Sample Template</span>
       </a>
     </div>
   </div>

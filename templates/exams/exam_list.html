@@ -168,6 +168,12 @@
             </td>
             <td style="text-align: right;">
               <div class="row-actions">
+                <a href="{% url 'submissions:dry_run_simulation' exam.pk %}" class="action-btn action-btn-accent" data-tooltip="Dry-Run" aria-label="Dry-Run Simulation">
+                  {% icon 'zap' 'icon' %}
+                </a>
+                <a href="{% url 'exams:live_ops' exam.pk %}" class="action-btn action-btn-inspect" data-tooltip="Live Ops" aria-label="Live Ops">
+                  {% icon 'activity' 'icon' %}
+                </a>
                 <a href="{% url 'exams:exam_detail' exam.pk %}" class="action-btn action-btn-inspect" data-tooltip="Inspect" aria-label="Inspect">
                   {% icon 'eye' 'icon' %}
                 </a>

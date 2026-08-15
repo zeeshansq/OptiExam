@@ -4,9 +4,24 @@
 {% block title %}Examination Lobby — {{ tenant_name }}{% endblock %}
 
 {% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'accounts:role_redirect' %}">{% icon 'home' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Candidate Lobby</span>
+    </li>
+  </ol>
+</nav>
+
 <div class="page-header">
   <div class="page-title">
-    {% icon 'school' 'icon-xl' %}
+    <div class="page-title-icon">
+      {% icon 'school' 'icon-lg' %}
+    </div>
     <div>
       <h2>Candidate Examination Lobby</h2>
       <p class="page-subtitle">Welcome, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong> ({{ tenant_name }})</p>
@@ -14,18 +29,93 @@
   </div>
 </div>
 
-{% include "includes/page_guide.html" with guide_icon="school" guide_title="Candidate Assessment Portal" guide_text="Review upcoming exams, enter scheduled examination cockpits, and access published scorecards." %}
+{% include "includes/page_guide.html" with guide_icon="school" guide_title="Candidate Assessment Portal" guide_text="Review upcoming authorized examinations, enter live scheduled examination cockpits, and review your submission receipts." %}
 
-<div class="grid grid-cols-2 gap-6">
-  <div class="glass-card" style="padding: 24px;">
-    <h3 style="margin-bottom: 8px;">Scheduled Examinations</h3>
-    <p>View pre-exam instructions, scheduling windows, and allowed lifelines.</p>
-    <span class="badge badge-primary">Phase 3 Module</span>
-  </div>
-  <div class="glass-card" style="padding: 24px;">
-    <h3 style="margin-bottom: 8px;">Completed Exams & Results</h3>
-    <p>Access released scorecards, section breakdowns, and grader feedback.</p>
-    <span class="badge badge-success">Phase 5 Module</span>
+<!-- Enrolled Examinations Section -->
+<div class="glass-card" style="padding: 24px; margin-bottom: 24px;">
+  <h3 style="margin-bottom: 16px;">My Authorized Examinations</h3>
+  
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Examination</th>
+          <th>Subject</th>
+          <th>Schedule Window</th>
+          <th>Duration</th>
+          <th>Total Marks</th>
+          <th>Session Status</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in enrolled_exams %}
+          <tr>
+            <td>
+              <div style="font-weight: 600; color: var(--color-text-primary);">{{ item.exam.title }}</div>
+              <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-text-muted);">{{ item.exam.code }}</div>
+            </td>
+            <td><span class="badge badge-primary">{{ item.exam.subject }}</span></td>
+            <td style="font-size: 0.82rem; color: var(--color-text-secondary);">
+              {{ item.exam.start_time|date:"M d, H:i" }} — {{ item.exam.end_time|date:"M d, H:i" }}
+            </td>
+            <td><span class="metric-numeral">{{ item.exam.duration_minutes }}</span>m</td>
+            <td><span class="metric-numeral">{{ item.exam.total_marks }}</span> pts</td>
+            <td>
+              {% if item.attempt %}
+                {% if item.attempt.status == 'IN_PROGRESS' %}
+                  <span class="badge badge-warning">
+                    <span class="status-dot"></span>
+                    <span>In Progress</span>
+                  </span>
+                {% elif item.attempt.status == 'SUBMITTED' %}
+                  <span class="badge badge-success">
+                    <span class="status-dot"></span>
+                    <span>Submitted</span>
+                  </span>
+                {% else %}
+                  <span class="badge badge-danger">
+                    <span class="status-dot"></span>
+                    <span>{{ item.attempt.get_status_display }}</span>
+                  </span>
+                {% endif %}
+              {% else %}
+                <span class="badge badge-accent">
+                  <span class="status-dot"></span>
+                  <span>Authorized / Ready</span>
+                </span>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              {% if item.attempt and item.attempt.status == 'IN_PROGRESS' %}
+                <a href="{% url 'submissions:exam_cockpit' item.attempt.pk %}" class="btn btn-warning btn-sm">
+                  {% icon 'zap' 'icon' %}
+                  <span>Resume Exam</span>
+                </a>
+              {% elif item.attempt and item.attempt.status == 'SUBMITTED' %}
+                <a href="{% url 'submissions:exam_cockpit' item.attempt.pk %}" class="btn btn-ghost btn-sm">
+                  {% icon 'check-circle' 'icon' %}
+                  <span>View Receipt</span>
+                </a>
+              {% else %}
+                <a href="{% url 'submissions:exam_lobby' item.exam.pk %}" class="btn btn-primary btn-sm">
+                  {% icon 'zap' 'icon' %}
+                  <span>Enter Lobby</span>
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" style="padding: 40px 20px; text-align: center; color: var(--color-text-muted);">
+              {% icon 'school' 'icon-xl' %}
+              <h4 style="margin-top: 12px; margin-bottom: 4px; color: var(--color-text-secondary);">No Examinations Enrolled</h4>
+              <p style="font-size: 0.85rem;">When your institution enrolls you in an exam roster, it will appear here.</p>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 {% endblock %}

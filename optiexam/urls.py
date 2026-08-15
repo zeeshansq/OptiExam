@@ -23,8 +23,12 @@ urlpatterns = [
     # Academic Exam Blueprinting & Rosters (/exams/...)
     path('exams/', include('apps.exams.urls', namespace='exams')),
 
+    # Live Examination Execution & Proctoring (/submissions/...)
+    path('submissions/', include('apps.submissions.urls', namespace='submissions')),
+
     # Tenant-Scoped Dashboards & SaaS Workspace
     path('', include('apps.tenants.urls', namespace='tenants')),
+
 ]
 
 # Serve media files in local development

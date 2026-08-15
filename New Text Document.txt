@@ -1,0 +1,5 @@
+Role		Username	Password		Direct Entry URL
+Item Writer	writer		WriterPass2026!		http://127.0.0.1:8000/questions/banks/
+Designer	designer	DesignerPass2026!	http://127.0.0.1:8000/exams/exams/
+Super Admin	admin		AdminPass2026!		http://127.0.0.1:8000/admin/saas/dashboard/
+Student		student		StudentPass2026!

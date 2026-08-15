@@ -75,15 +75,74 @@ class RoleRedirectView(LoginRequiredMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         return get_redirect_url_for_user(self.request.user)
 
-# Initial Role Dashboards (Foundation / Phase 1)
 class DesignerDashboardView(DesignerRequiredMixin, TemplateView):
     template_name = 'dashboards/designer.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from apps.exams.models import Exam
+        from apps.questions.models import QuestionBank
+        from apps.submissions.models import ExamAttempt
+
+        tenant = self.request.tenant
+        ctx['total_exams'] = Exam.objects.for_tenant(tenant).count()
+        ctx['total_banks'] = QuestionBank.objects.for_tenant(tenant).count()
+        ctx['active_live_attempts'] = ExamAttempt.objects.filter(
+            tenant=tenant,
+            status=ExamAttempt.Status.IN_PROGRESS,
+            is_simulation=False
+        ).count()
+        ctx['recent_exams'] = Exam.objects.for_tenant(tenant).order_by('-created_at')[:5]
+        return ctx
+
 
 class ItemWriterDashboardView(ItemWriterRequiredMixin, TemplateView):
     template_name = 'dashboards/item_writer.html'
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from apps.questions.models import QuestionBank, Question
+        from apps.exams.models import Exam
+
+        tenant = self.request.tenant
+        ctx['total_banks'] = QuestionBank.objects.for_tenant(tenant).count()
+        ctx['total_questions'] = Question.objects.filter(bank__tenant=tenant).count()
+        ctx['available_exams'] = Exam.objects.for_tenant(tenant).order_by('-created_at')[:6]
+        return ctx
+
+
 class GraderDashboardView(GraderRequiredMixin, TemplateView):
     template_name = 'dashboards/grader.html'
 
+
 class ParticipantDashboardView(ParticipantRequiredMixin, TemplateView):
     template_name = 'dashboards/participant.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from apps.exams.models import Exam, ExamParticipantRoster
+        from apps.submissions.models import ExamAttempt
+
+        tenant = self.request.tenant
+        user = self.request.user
+
+        # Get enrolled exams
+        enrolled_exam_ids = ExamParticipantRoster.objects.filter(
+            participant=user,
+            status=ExamParticipantRoster.Status.ENROLLED
+        ).values_list('exam_id', flat=True)
+
+        enrolled_exams = Exam.objects.filter(id__in=enrolled_exam_ids, is_active=True).order_by('start_time')
+        
+        # Attach active attempt status if any
+        exams_with_status = []
+        for ex in enrolled_exams:
+            att = ExamAttempt.objects.filter(exam=ex, participant=user, is_simulation=False).first()
+            exams_with_status.append({
+                'exam': ex,
+                'attempt': att
+            })
+
+        ctx['enrolled_exams'] = exams_with_status
+        return ctx
+

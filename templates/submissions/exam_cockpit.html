@@ -1,0 +1,155 @@
+{% extends "base_exam_cockpit.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}{{ exam.title }} — Examination Cockpit{% endblock %}
+
+{% block content %}
+<!-- Simulation Mode Watermark Banner -->
+{% if is_simulation %}
+  <div class="simulation-watermark-banner">
+    {% icon 'shield' 'icon-sm' %}
+    <span>DRY-RUN SIMULATION MODE</span>
+    <a href="{% url 'submissions:simulation_reset' exam.pk %}" style="color: #000; text-decoration: underline; margin-left: 6px;" title="Reset attempt and re-seed question order">Re-Seed</a>
+    <a href="{% url 'exams:exam_detail' exam.pk %}" style="color: #000; text-decoration: underline; margin-left: 6px;">Exit</a>
+  </div>
+{% endif %}
+
+<!-- Fullscreen Exit Overlay Alert -->
+<div id="fullscreen-alert-overlay" class="proctoring-alert-overlay">
+  <div class="proctoring-alert-modal">
+    <div style="color: var(--cockpit-danger); margin-bottom: 12px;">
+      {% icon 'alert-triangle' 'icon-xl' %}
+    </div>
+    <h2 style="font-size: 1.3rem; margin-bottom: 8px;">Fullscreen Lockdown Violation!</h2>
+    <p style="font-size: 0.88rem; color: #CBD5E1; margin-bottom: 20px;">
+      You have exited the mandatory fullscreen examination lockdown. You must return immediately.
+    </p>
+    <div style="font-size: 1.1rem; font-family: var(--font-mono); color: var(--cockpit-warning); margin-bottom: 24px;">
+      Grace Period: <span id="fullscreen-grace-seconds">15</span>s remaining
+    </div>
+    <button type="button" id="btn-return-fullscreen" class="btn btn-danger btn-lg" style="width: 100%;">
+      {% icon 'maximize' 'icon' %}
+      <span>Return to Fullscreen</span>
+    </button>
+  </div>
+</div>
+
+<!-- Cockpit Header -->
+<header class="cockpit-header">
+  <div class="cockpit-brand">
+    {% icon 'school' 'icon-lg' %}
+    <div>
+      <div class="cockpit-exam-title">{{ exam.title }}</div>
+      <div class="cockpit-candidate-info">{{ request.user.get_full_name|default:request.user.username }} • {{ exam.code }}</div>
+    </div>
+  </div>
+
+  <!-- Center Timer -->
+  <div class="cockpit-timer-pill">
+    {% icon 'clock' 'icon' %}
+    <span id="cockpit-timer-digits" class="timer-digits">00:00:00</span>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex items-center gap-3">
+    {% if lifelines.FIFTY_FIFTY.is_available %}
+      <button type="button" id="btn-lifeline-fifty" class="btn btn-ghost btn-sm" title="Eliminate 2 wrong options (Remaining: {{ lifelines.FIFTY_FIFTY.remaining }})">
+        {% icon 'zap' 'icon' %}
+        <span>50:50 ({{ lifelines.FIFTY_FIFTY.remaining }})</span>
+      </button>
+    {% endif %}
+    <span id="violation-counter-pill" class="badge badge-warning" style="display: none;">0 Violations</span>
+    <form method="post" action="{% url 'submissions:exam_submit' attempt.pk %}" style="margin: 0;">
+      {% csrf_token %}
+      <button type="submit" id="btn-submit-exam" class="btn btn-accent btn-sm">
+        {% icon 'check-circle' 'icon' %}
+        <span>Submit Exam</span>
+      </button>
+    </form>
+  </div>
+</header>
+
+<!-- Cockpit Main Body -->
+<div class="cockpit-body">
+  <!-- Left Navigator Drawer -->
+  <aside class="cockpit-drawer">
+    <div class="drawer-section-header">
+      <span>Question Palette</span>
+      <span style="font-size: 0.80rem; color: var(--cockpit-text-muted);">{{ questions_count }} Questions</span>
+    </div>
+    <div class="palette-grid">
+      {% for q in questions %}
+        <div class="palette-tile {% if q.answer.is_answered %}answered{% elif q.answer.is_bookmarked %}bookmarked{% elif q.answer.is_skipped %}skipped{% endif %}" data-index="{{ forloop.counter0 }}">
+          {{ q.order }}
+        </div>
+      {% endfor %}
+    </div>
+  </aside>
+
+  <!-- Central Question Stage -->
+  <main class="cockpit-main">
+    <div class="question-stage-container">
+      <div class="question-meta-bar">
+        <span id="current-question-num" style="font-weight: 700; color: #38BDF8;">Question 1</span>
+        <span id="current-question-points" class="badge badge-primary">1.0 pt</span>
+      </div>
+
+      <!-- Question Diagram (Image MCQ) -->
+      <div id="question-image-container" style="display: none; margin-bottom: 24px; text-align: center;">
+        <img id="question-diagram-img" src="" alt="Question Diagram" style="max-width: 100%; max-height: 360px; border-radius: var(--radius-md); border: 1px solid var(--cockpit-border);">
+      </div>
+
+      <div id="current-question-prompt" class="question-prompt">
+        Loading question prompt...
+      </div>
+
+      <!-- Multiple Choice Options Area -->
+      <div id="mcq-options-area" class="options-grid"></div>
+
+      <!-- Text Response Area (Short / Long) -->
+      <div id="text-answer-area" style="display: none; margin-bottom: 24px;">
+        <textarea id="question-text-response" class="form-input" rows="8" placeholder="Type your answer here..." style="font-size: 1rem; line-height: 1.6;"></textarea>
+      </div>
+
+      <!-- Live Word Counter -->
+      <div id="word-counter-wrapper" style="display: none; text-align: right; font-size: 0.82rem; color: var(--cockpit-text-muted);">
+        <span id="word-count-num">0</span> words <span id="word-limit-max"></span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Bottom Fixed Action Bar -->
+<footer class="cockpit-footer-bar">
+  <div>
+    <button type="button" id="btn-prev-question" class="btn btn-ghost">
+      {% icon 'chevron-left' 'icon' %}
+      <span>Previous</span>
+    </button>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <button type="button" id="btn-next-question" class="btn btn-primary">
+      <span>Next Question</span>
+      {% icon 'chevron-right' 'icon' %}
+    </button>
+  </div>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  window.COCKPIT_CONFIG = {
+    attemptId: {{ attempt.id }},
+    remainingSeconds: {{ remaining_seconds }},
+    heartbeatUrl: "{% url 'submissions:api_heartbeat' attempt.pk %}",
+    lifelineUrl: "{% url 'submissions:api_lifeline' attempt.pk %}",
+    violationUrl: "{% url 'submissions:api_violation' attempt.pk %}",
+    submitUrl: "{% url 'submissions:exam_submit' attempt.pk %}",
+    csrfToken: "{{ csrf_token }}",
+    enforceFullscreen: {{ enforce_fullscreen|yesno:"true,false" }},
+    lockCopyPaste: {{ lock_copy_paste|yesno:"true,false" }},
+    questions: {{ questions_json|safe }}
+  };
+</script>
+{% endblock %}
