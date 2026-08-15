@@ -25,3 +25,25 @@ class SampleTemplateDownloadView(LoginRequiredMixin, View):
         response = HttpResponse(content, content_type=content_type)
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
+
+
+class HealthCheckView(View):
+    """
+    Production health-check endpoint for load balancers and orchestrators.
+    """
+    def get(self, request, *args, **kwargs):
+        from django.http import JsonResponse
+        from django.db import connection
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+            db_status = "healthy"
+        except Exception as e:
+            db_status = f"unhealthy: {str(e)}"
+
+        return JsonResponse({
+            'status': 'ok' if db_status == 'healthy' else 'degraded',
+            'database': db_status,
+            'zero_cdn_compliant': True
+        })
+

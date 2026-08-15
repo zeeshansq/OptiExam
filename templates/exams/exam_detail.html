@@ -48,10 +48,24 @@
       {% icon 'check-circle' 'icon' %}
       <span>Grading Matrix</span>
     </a>
-    <a href="{% url 'grading:moderation_hub' exam.pk %}" class="btn btn-ghost" title="Chief Examiner grade moderation & sign-off">
-      {% icon 'award' 'icon' %}
-      <span>Grade Moderation</span>
+    <a href="{% url 'exams:exam_analytics' exam.pk %}" class="btn btn-ghost" title="Cohort analytics & score distributions">
+      {% icon 'activity' 'icon' %}
+      <span>Analytics</span>
     </a>
+    <form method="post" action="{% url 'exams:publish_results' exam.pk %}" style="display: inline; margin: 0;">
+      {% csrf_token %}
+      {% if exam.results_published %}
+        <button type="submit" class="btn btn-warning" title="Revoke result publication">
+          {% icon 'eye-off' 'icon' %}
+          <span>Revoke Results</span>
+        </button>
+      {% else %}
+        <button type="submit" class="btn btn-success" title="Publish official scorecards to candidates">
+          {% icon 'award' 'icon' %}
+          <span>Publish Results</span>
+        </button>
+      {% endif %}
+    </form>
     <a href="{% url 'exams:exam_update' exam.pk %}" class="btn btn-primary">
       {% icon 'edit' 'icon' %}
       <span>Edit Blueprint</span>

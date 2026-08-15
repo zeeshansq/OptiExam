@@ -1,0 +1,22 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Results Pending — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 600px; margin: 48px auto; padding: 40px; text-align: center;">
+  <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(245, 158, 11, 0.15); color: var(--color-warning); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+    {% icon 'clock' 'icon-xl' %}
+  </div>
+
+  <h2 style="font-size: 1.4rem; margin-bottom: 8px;">Evaluation in Progress</h2>
+  <p style="font-size: 0.90rem; color: var(--color-text-secondary); margin-bottom: 24px;">
+    The official results for <strong>{{ exam.title }}</strong> are currently undergoing evaluation and Chief Examiner moderation. You will receive an in-app notification once results are published.
+  </p>
+
+  <a href="{% url 'accounts:role_redirect' %}" class="btn btn-primary">
+    {% icon 'home' 'icon' %}
+    <span>Return to Dashboard</span>
+  </a>
+</div>
+{% endblock %}

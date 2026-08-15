@@ -1,0 +1,92 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Pedagogical Item Analysis — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">{% icon 'calendar' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_detail' exam.pk %}">{{ exam.title }}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_analytics' exam.pk %}">Analytics</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Item Analysis</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon" style="background: rgba(79, 70, 229, 0.15); color: var(--color-primary);">
+      {% icon 'layers' 'icon-lg' %}
+    </div>
+    <div>
+      <h2>Item Analysis: {{ exam.title }}</h2>
+      <p class="page-subtitle">{{ exam.code }} • Psychometric Difficulty (p-value) & Discrimination Index (D-value)</p>
+    </div>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'exams:exam_analytics' exam.pk %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Cohort Analytics</span>
+    </a>
+  </div>
+</div>
+
+{% include "includes/page_guide.html" with guide_icon="layers" guide_title="Psychometric Item Analysis Guide" guide_text="Difficulty Index (p) measures percentage of correct answers (Hard < 0.3, Moderate 0.3-0.7, Easy > 0.7). Discrimination Index (D) measures how effectively an item distinguishes top performers from bottom performers (Excellent >= 0.4)." %}
+
+<!-- Items Table -->
+<div class="glass-card" style="padding: 24px;">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Question Prompt</th>
+          <th>Type</th>
+          <th>Bloom's Level</th>
+          <th>Max Points</th>
+          <th>Difficulty ($p$-value)</th>
+          <th>Discrimination ($D$-index)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+          <tr>
+            <td>
+              <div style="font-weight: 500; color: var(--color-text-primary);">{{ it.prompt }}</div>
+              <div style="font-size: 0.78rem; font-family: var(--font-mono); color: var(--color-text-muted);">Q#{{ it.question_id }}</div>
+            </td>
+            <td><span class="badge badge-secondary">{{ it.question_type }}</span></td>
+            <td><span class="badge badge-primary">{{ it.blooms_level }}</span></td>
+            <td><span class="metric-numeral">{{ it.points }}</span> pts</td>
+            <td>
+              <span class="metric-numeral" style="font-weight: 700;">{{ it.p_value }}</span>
+              <span class="badge {{ it.difficulty_badge }}" style="margin-left: 6px;">{{ it.difficulty_label }}</span>
+            </td>
+            <td>
+              <span class="metric-numeral" style="font-weight: 700;">{{ it.d_index }}</span>
+              <span class="badge {{ it.discrimination_badge }}" style="margin-left: 6px;">{{ it.discrimination_label }}</span>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">
+              No completed candidate submissions to compute item psychometrics.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

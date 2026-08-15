@@ -1,0 +1,125 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}My Exam History — OptiExam{% endblock %}
+
+{% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'accounts:role_redirect' %}">{% icon 'home' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>My Exam History</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon">
+      {% icon 'calendar' 'icon-lg' %}
+    </div>
+    <div>
+      <h2>My Examination Records & Transcripts</h2>
+      <p class="page-subtitle">Candidate: <strong>{{ request.user.get_full_name|default:request.user.username }}</strong></p>
+    </div>
+  </div>
+</div>
+
+<div class="glass-card" style="padding: 24px;">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Examination</th>
+          <th>Subject</th>
+          <th>Schedule</th>
+          <th>My Attempt Status</th>
+          <th>Official Score</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in exam_history %}
+          <tr>
+            <td>
+              <div style="font-weight: 600; color: var(--color-text-primary);">{{ item.exam.title }}</div>
+              <div style="font-size: 0.78rem; font-family: var(--font-mono); color: var(--color-text-muted);">{{ item.exam.code }}</div>
+            </td>
+            <td><span class="badge badge-primary">{{ item.exam.subject }}</span></td>
+            <td style="font-size: 0.82rem; color: var(--color-text-secondary);">
+              {{ item.exam.start_time|date:"M d, H:i" }}
+            </td>
+            <td>
+              {% if item.attempt %}
+                {% if item.attempt.status == 'IN_PROGRESS' %}
+                  <span class="badge badge-warning"><span class="status-dot"></span> In Progress</span>
+                {% elif item.attempt.status == 'SUBMITTED' %}
+                  <span class="badge badge-primary"><span class="status-dot"></span> Submitted</span>
+                {% elif item.attempt.status == 'GRADED' %}
+                  <span class="badge badge-success"><span class="status-dot"></span> Evaluated</span>
+                {% else %}
+                  <span class="badge badge-danger"><span class="status-dot"></span> {{ item.attempt.get_status_display }}</span>
+                {% endif %}
+              {% else %}
+                <span class="badge badge-secondary">Not Started</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if item.exam.results_published and item.attempt and item.attempt.grade_moderation %}
+                <span class="metric-numeral" style="font-weight: 700; color: var(--color-accent);">
+                  {{ item.attempt.grade_moderation.total_final_score|default:"0.00" }}
+                </span>
+                <span style="font-size: 0.80rem; color: var(--color-text-muted);">/ {{ item.exam.total_marks }}</span>
+                {% if item.attempt.grade_moderation.is_passed %}
+                  <span class="badge badge-success" style="margin-left: 4px;">Pass</span>
+                {% else %}
+                  <span class="badge badge-danger" style="margin-left: 4px;">Fail</span>
+                {% endif %}
+              {% elif item.attempt and not item.exam.results_published %}
+                <span style="font-size: 0.82rem; color: var(--color-text-muted);">Under Evaluation</span>
+              {% else %}
+                <span style="font-size: 0.82rem; color: var(--color-text-muted);">—</span>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              {% if item.exam.results_published and item.attempt %}
+                <a href="{% url 'submissions:exam_result' item.exam.pk %}" class="btn btn-accent btn-sm">
+                  {% icon 'award' 'icon' %}
+                  <span>View Scorecard</span>
+                </a>
+              {% elif item.attempt and item.attempt.status == 'IN_PROGRESS' %}
+                <a href="{% url 'submissions:exam_cockpit' item.attempt.pk %}" class="btn btn-warning btn-sm">
+                  {% icon 'zap' 'icon' %}
+                  <span>Resume Exam</span>
+                </a>
+              {% elif not item.attempt %}
+                <a href="{% url 'submissions:exam_lobby' item.exam.pk %}" class="btn btn-primary btn-sm">
+                  {% icon 'zap' 'icon' %}
+                  <span>Enter Lobby</span>
+                </a>
+              {% else %}
+                <a href="{% url 'submissions:exam_result' item.exam.pk %}" class="btn btn-ghost btn-sm">
+                  {% icon 'eye' 'icon' %}
+                  <span>Status</span>
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" style="padding: 48px 24px; text-align: center; color: var(--color-text-muted);">
+              {% icon 'calendar' 'icon-xl' %}
+              <h4 style="margin-top: 12px; margin-bottom: 4px; color: var(--color-text-secondary);">No Examination History</h4>
+              <p style="font-size: 0.85rem;">Examinations you are enrolled in will be tracked here.</p>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

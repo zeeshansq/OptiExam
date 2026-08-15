@@ -27,6 +27,12 @@
       <p class="page-subtitle">Welcome, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong> ({{ tenant_name }})</p>
     </div>
   </div>
+  <div class="page-actions">
+    <a href="{% url 'submissions:participant_history' %}" class="btn btn-primary">
+      {% icon 'award' 'icon' %}
+      <span>My Exam History & Transcripts</span>
+    </a>
+  </div>
 </div>
 
 {% include "includes/page_guide.html" with guide_icon="school" guide_title="Candidate Assessment Portal" guide_text="Review upcoming authorized examinations, enter live scheduled examination cockpits, and review your submission receipts." %}
@@ -87,15 +93,20 @@
               {% endif %}
             </td>
             <td style="text-align: right;">
-              {% if item.attempt and item.attempt.status == 'IN_PROGRESS' %}
+              {% if item.exam.results_published and item.attempt %}
+                <a href="{% url 'submissions:exam_result' item.exam.pk %}" class="btn btn-accent btn-sm">
+                  {% icon 'award' 'icon' %}
+                  <span>View Scorecard</span>
+                </a>
+              {% elif item.attempt and item.attempt.status == 'IN_PROGRESS' %}
                 <a href="{% url 'submissions:exam_cockpit' item.attempt.pk %}" class="btn btn-warning btn-sm">
                   {% icon 'zap' 'icon' %}
                   <span>Resume Exam</span>
                 </a>
               {% elif item.attempt and item.attempt.status == 'SUBMITTED' %}
-                <a href="{% url 'submissions:exam_cockpit' item.attempt.pk %}" class="btn btn-ghost btn-sm">
+                <a href="{% url 'submissions:exam_result' item.exam.pk %}" class="btn btn-ghost btn-sm">
                   {% icon 'check-circle' 'icon' %}
-                  <span>View Receipt</span>
+                  <span>View Status</span>
                 </a>
               {% else %}
                 <a href="{% url 'submissions:exam_lobby' item.exam.pk %}" class="btn btn-primary btn-sm">

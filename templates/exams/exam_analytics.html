@@ -1,0 +1,176 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Cohort Analytics — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">{% icon 'calendar' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_detail' exam.pk %}">{{ exam.title }}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Cohort Analytics</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon" style="background: rgba(56, 189, 248, 0.15); color: #38BDF8;">
+      {% icon 'activity' 'icon-lg' %}
+    </div>
+    <div>
+      <h2>Cohort Analytics: {{ exam.title }}</h2>
+      <p class="page-subtitle">{{ exam.code }} • Statistical distributions, pass/fail metrics & section benchmarks</p>
+    </div>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'exams:item_analysis' exam.pk %}" class="btn btn-accent">
+      {% icon 'layers' 'icon' %}
+      <span>Item Analysis & Discrimination</span>
+    </a>
+    <a href="{% url 'exams:exam_detail' exam.pk %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Blueprint</span>
+    </a>
+  </div>
+</div>
+
+<!-- Cohort Metrics Cards Grid -->
+<div class="grid grid-cols-4 gap-4" style="margin-bottom: 24px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(79, 70, 229, 0.15); color: var(--color-primary);">
+      {% icon 'users' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">{{ cohort.total_attempted }}</span> / <span class="metric-numeral">{{ cohort.total_registered }}</span></div>
+      <div class="stat-label">Candidates Attempted</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--color-success);">
+      {% icon 'award' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">{{ cohort.pass_rate }}%</span></div>
+      <div class="stat-label">Cohort Pass Rate</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--color-warning);">
+      {% icon 'zap' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">{{ cohort.average_score }}</span> pts</div>
+      <div class="stat-label">Mean Cohort Score</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon" style="background: rgba(56, 189, 248, 0.15); color: #38BDF8;">
+      {% icon 'activity' 'icon-lg' %}
+    </div>
+    <div>
+      <div class="stat-value"><span class="metric-numeral">{{ cohort.median_score }}</span> pts</div>
+      <div class="stat-label">Median Score</div>
+    </div>
+  </div>
+</div>
+
+<!-- Grade Histogram & Section Comparison Grid -->
+<div class="grid grid-cols-2 gap-6" style="margin-bottom: 24px;">
+  <!-- Grade Distribution -->
+  <div class="glass-card" style="padding: 24px;">
+    <h3 style="margin-bottom: 16px;">Grade Distribution Histogram</h3>
+    <div class="flex flex-col gap-3">
+      <div>
+        <div class="flex justify-between" style="font-size: 0.85rem; margin-bottom: 4px;">
+          <span>Grade A (80–100%)</span>
+          <strong>{{ cohort.grade_histogram.A }} candidates</strong>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); height: 10px; border-radius: 9999px; overflow: hidden;">
+          <div style="background: var(--color-success); height: 100%; width: {% if cohort.total_attempted %}{% widthratio cohort.grade_histogram.A cohort.total_attempted 100 %}{% else %}0{% endif %}%;"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between" style="font-size: 0.85rem; margin-bottom: 4px;">
+          <span>Grade B (70–79%)</span>
+          <strong>{{ cohort.grade_histogram.B }} candidates</strong>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); height: 10px; border-radius: 9999px; overflow: hidden;">
+          <div style="background: var(--color-primary); height: 100%; width: {% if cohort.total_attempted %}{% widthratio cohort.grade_histogram.B cohort.total_attempted 100 %}{% else %}0{% endif %}%;"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between" style="font-size: 0.85rem; margin-bottom: 4px;">
+          <span>Grade C (60–69%)</span>
+          <strong>{{ cohort.grade_histogram.C }} candidates</strong>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); height: 10px; border-radius: 9999px; overflow: hidden;">
+          <div style="background: #38BDF8; height: 100%; width: {% if cohort.total_attempted %}{% widthratio cohort.grade_histogram.C cohort.total_attempted 100 %}{% else %}0{% endif %}%;"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between" style="font-size: 0.85rem; margin-bottom: 4px;">
+          <span>Grade D (50–59%)</span>
+          <strong>{{ cohort.grade_histogram.D }} candidates</strong>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); height: 10px; border-radius: 9999px; overflow: hidden;">
+          <div style="background: var(--color-warning); height: 100%; width: {% if cohort.total_attempted %}{% widthratio cohort.grade_histogram.D cohort.total_attempted 100 %}{% else %}0{% endif %}%;"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between" style="font-size: 0.85rem; margin-bottom: 4px;">
+          <span>Grade F (< 50%)</span>
+          <strong>{{ cohort.grade_histogram.F }} candidates</strong>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); height: 10px; border-radius: 9999px; overflow: hidden;">
+          <div style="background: var(--color-danger); height: 100%; width: {% if cohort.total_attempted %}{% widthratio cohort.grade_histogram.F cohort.total_attempted 100 %}{% else %}0{% endif %}%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section-Wise Benchmarks -->
+  <div class="glass-card" style="padding: 24px;">
+    <h3 style="margin-bottom: 16px;">Section Performance Benchmarks</h3>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Section Title</th>
+            <th style="text-align: right;">Average Mark</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sec in cohort.section_averages %}
+            <tr>
+              <td>{{ sec.section_title }}</td>
+              <td style="text-align: right;">
+                <span class="metric-numeral" style="font-weight: 700; color: var(--color-accent);">{{ sec.average_score }} pts</span>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="2" style="text-align: center; color: var(--color-text-muted);">No section data available.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

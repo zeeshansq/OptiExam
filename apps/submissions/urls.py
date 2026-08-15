@@ -14,6 +14,8 @@ from apps.submissions.views.api_views import (
     LifelineExecuteAPIView,
     ProctoringViolationAPIView
 )
+from apps.submissions.views.result_views import ExamResultView
+from apps.submissions.views.history_views import ParticipantHistoryView
 
 app_name = 'submissions'
 
@@ -25,6 +27,10 @@ urlpatterns = [
     # Fullscreen Live Examination Cockpit
     path('attempts/<int:attempt_id>/cockpit/', ExamCockpitView.as_view(), name='exam_cockpit'),
     path('attempts/<int:attempt_id>/submit/', ExamSubmitView.as_view(), name='exam_submit'),
+
+    # Participant Results & Scorecards
+    path('exams/<int:exam_id>/result/', ExamResultView.as_view(), name='exam_result'),
+    path('my-history/', ParticipantHistoryView.as_view(), name='participant_history'),
 
     # Candidate Dry-Run Simulation Studio (Designer & Item Writer)
     path('exams/<int:exam_id>/dry-run/', CandidateDryRunSimulationView.as_view(), name='dry_run_simulation'),

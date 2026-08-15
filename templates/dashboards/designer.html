@@ -123,7 +123,11 @@
     <div class="flex items-center gap-2">
       <a href="{% url 'exams:exam_list' %}" class="btn btn-accent btn-sm">
         {% icon 'activity' 'icon' %}
-        <span>Select Exam Live Ops</span>
+        <span>Live Ops</span>
+      </a>
+      <a href="{% url 'exams:exam_list' %}" class="btn btn-ghost btn-sm">
+        {% icon 'award' 'icon' %}
+        <span>Analytics</span>
       </a>
     </div>
   </div>

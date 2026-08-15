@@ -75,16 +75,11 @@ def notification_context(request):
             'recent_notifications': [],
         }
 
-    # Safe lookup if notifications app is installed in subsequent phases
     try:
-        from notifications.models import Notification
-        cache_key = f'unread_notif_count_{request.user.pk}'
-        unread_count = cache.get(cache_key)
-        if unread_count is None:
-            unread_count = Notification.objects.filter(recipient=request.user, is_read=False).count()
-            cache.set(cache_key, unread_count, timeout=60)
-        recent_alerts = Notification.objects.filter(recipient=request.user, is_read=False).order_by('-created_at')[:5]
-    except (ImportError, Exception):
+        from apps.accounts.models import Notification
+        unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
+        recent_alerts = Notification.objects.filter(user=request.user).order_by('-created_at')[:5]
+    except Exception:
         unread_count = 0
         recent_alerts = []
 

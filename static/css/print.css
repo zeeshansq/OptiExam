@@ -1,0 +1,52 @@
+/* ==============================================================================
+   OptiExam Print & Transcript Stylesheet
+   Zero CDN Dependencies
+   ============================================================================== */
+
+@media print {
+  body {
+    background: #FFF !important;
+    color: #000 !important;
+    font-family: 'Inter', sans-serif !important;
+  }
+
+  .sidebar,
+  .top-navbar,
+  .breadcrumbs-bar,
+  .page-actions,
+  .btn,
+  .notification-drawer,
+  header {
+    display: none !important;
+  }
+
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .glass-card {
+    background: #FFF !important;
+    border: 1px solid #CCC !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  .badge {
+    border: 1px solid #000 !important;
+    color: #000 !important;
+    background: transparent !important;
+  }
+
+  .print-only-header {
+    display: block !important;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 12px;
+  }
+}
+
+.print-only-header {
+  display: none;
+}
