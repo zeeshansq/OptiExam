@@ -13,9 +13,16 @@
   </div>
   <div class="notification-body">
     {% for alert in recent_notifications %}
-      <div class="notification-item">
-        <strong class="notification-item-title">{{ alert.title }}</strong>
-        <p class="notification-item-msg">{{ alert.message }}</p>
+      <div class="notification-item {% if not alert.is_read %}unread{% endif %}">
+        {% if alert.link_url %}
+          <a href="{{ alert.link_url }}" style="text-decoration: none; color: inherit; display: block;">
+            <strong class="notification-item-title">{{ alert.title }}</strong>
+            <p class="notification-item-msg">{{ alert.message }}</p>
+          </a>
+        {% else %}
+          <strong class="notification-item-title">{{ alert.title }}</strong>
+          <p class="notification-item-msg">{{ alert.message }}</p>
+        {% endif %}
         {% if alert.created_at %}
           <span class="notification-item-time">{{ alert.created_at|timesince }} ago</span>
         {% endif %}
