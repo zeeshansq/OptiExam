@@ -125,15 +125,22 @@ apps/
 1. Implement `ExamLifelineConfig` model (`SKIP_QUESTION`, `FIFTY_FIFTY`, `HINT_TOKEN`, `BOOKMARK_FLAG`).
 2. Build `ExamLifelineConfigFormSet` allowing the Designer to enable/disable each lifeline and set max allowed usages per exam.
 
-### Task 2.6: Participant Roster Bulk Import Hub & Access Engine
+### Task 2.6: Participant Roster Hub, Candidate CRUD & Bulk Import Engine
 1. Implement `ExamParticipantRoster` model with `candidate_index` (sequential 1, 2, 3... integer used for grader batching), `registration_number`, `status` (`ENROLLED`, `ABSENT`, `REVOKED`).
-2. Build Dedicated Roster Import Page (`/{tenant_slug}/exams/{exam_id}/roster/import/`):
+2. Build Candidate Roster Hub (`/{tenant_slug}/exams/{exam_id}/roster/`) with full Candidate CRUD operations:
+   * **List/Directory:** High-density table with sequential double-blind index badges (`#001`), candidate names, registration numbers, institutional emails, academic departments, and status badges with glowing dots.
+   * **Create / Manual Enrollment:** Add individual candidates (`exams/roster/add/`) with automatic sequential index assignment and user provisioning.
+   * **Inspect Detail:** Comprehensive candidate profile view (`exams/roster/{id}/`) displaying blind grading index, institutional credentials, and security status.
+   * **Update / Edit:** Modify candidate name, registration #, email, department, cohort, or enrollment status (`exams/roster/{id}/edit/`).
+   * **Delete / Remove:** Remove/revoke a candidate (`exams/roster/{id}/delete/`) with automatic re-sequencing of remaining candidate blind indices.
+3. Build Dedicated Roster Import Page (`/{tenant_slug}/exams/{exam_id}/roster/import/`):
    * Prominent **"Download Sample Template"** buttons (`.csv` and `.xlsx`).
    * Step-by-step instructions with field requirements table (`registration_number`, `first_name`, `last_name`, `email`, `department`, `batch_year`).
    * Drag-and-drop file upload zone.
-3. Build `roster_service.py` with 2-stage import pipeline:
+4. Build `roster_service.py` with 2-stage import pipeline:
    * **Stage 1 (Dry-Run Validate):** Parses rows, validates email format and unique registration numbers, returns 10-row preview or line-by-line error audit table.
    * **Stage 2 (Commit Ingestion):** Provisions `accounts.User` (role: `PARTICIPANT`) if new, links to `ExamParticipantRoster` with sequential `candidate_index`, logs `DataImportJob`.
+
 
 ### Task 2.7: Question Bank Bulk Import Hub (`apps/questions`)
 1. Build Dedicated Question Bank Import Page (`/{tenant_slug}/questions/banks/{bank_id}/import/`):

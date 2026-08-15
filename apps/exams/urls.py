@@ -13,7 +13,11 @@ from apps.exams.views.assignment_views import (
 )
 from apps.exams.views.roster_views import (
     ExamRosterHubView,
-    ExamRosterImportView
+    ExamRosterImportView,
+    CandidateCreateView,
+    CandidateDetailView,
+    CandidateUpdateView,
+    CandidateDeleteView
 )
 
 app_name = 'exams'
@@ -31,7 +35,11 @@ urlpatterns = [
     path('sections/<int:section_id>/assign/', QuestionPickerPaletteView.as_view(), name='question_picker'),
     path('assignments/<int:assignment_id>/remove/', QuestionRemoveAssignmentView.as_view(), name='remove_assignment'),
 
-    # Participant Roster & 2-Stage Import
+    # Participant Roster CRUD & 2-Stage Import
     path('exams/<int:exam_id>/roster/', ExamRosterHubView.as_view(), name='roster_hub'),
+    path('exams/<int:exam_id>/roster/add/', CandidateCreateView.as_view(), name='candidate_create'),
+    path('exams/<int:exam_id>/roster/<int:entry_id>/', CandidateDetailView.as_view(), name='candidate_detail'),
+    path('exams/<int:exam_id>/roster/<int:entry_id>/edit/', CandidateUpdateView.as_view(), name='candidate_update'),
+    path('exams/<int:exam_id>/roster/<int:entry_id>/delete/', CandidateDeleteView.as_view(), name='candidate_delete'),
     path('exams/<int:exam_id>/roster/import/', ExamRosterImportView.as_view(), name='roster_import'),
 ]

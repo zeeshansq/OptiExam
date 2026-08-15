@@ -1,0 +1,62 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}Remove Candidate #{{ entry.candidate_index|stringformat:"03d" }} — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">{% icon 'calendar' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">Exam Blueprints</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_detail' exam.pk %}">{{ exam.title }}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:roster_hub' exam.pk %}">Candidate Roster</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>Remove Candidate</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="glass-card" style="max-width: 640px; margin: 40px auto; padding: 32px; text-align: center; border-color: rgba(239, 68, 68, 0.4);">
+  <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); color: var(--color-danger); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+    {% icon 'alert-triangle' 'icon-xl' %}
+  </div>
+
+  <h2 style="font-size: 1.35rem; margin-bottom: 8px;">Remove Candidate from Exam Roster?</h2>
+  <p style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 24px;">
+    You are about to remove <strong>{{ entry.participant.get_full_name|default:entry.participant.username }}</strong> (Candidate #{{ entry.candidate_index|stringformat:"03d" }}) from the roster for <strong>{{ exam.title }}</strong>.
+  </p>
+
+  <div class="glass-card" style="background: rgba(0, 0, 0, 0.2); padding: 16px; margin-bottom: 24px; text-align: left; font-size: 0.85rem; line-height: 1.8;">
+    <div><strong>Registration #:</strong> {{ entry.registration_number }}</div>
+    <div><strong>Email:</strong> {{ entry.participant.email }}</div>
+    <div><strong>Current Status:</strong> {{ entry.get_status_display }}</div>
+    <div style="margin-top: 8px; color: var(--color-warning); font-size: 0.80rem;">
+      ⚠️ Note: Removing this candidate will automatically re-sequence remaining candidate blind indices.
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="flex items-center justify-center gap-3">
+      <a href="{% url 'exams:roster_hub' exam.pk %}" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-danger btn-lg">
+        {% icon 'trash-2' 'icon' %}
+        <span>Confirm Removal</span>
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

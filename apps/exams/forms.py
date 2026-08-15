@@ -139,7 +139,83 @@ class RosterCSVImportForm(forms.Form):
     )
 
 
+class CandidateEnrollmentForm(forms.Form):
+    first_name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. Alex'})
+    )
+    last_name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. Johnson'})
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'alex.johnson@institution.edu'})
+    )
+    registration_number = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. REG-2026-042'})
+    )
+    department = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. Computer Science'})
+    )
+    batch_year = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. 2026'})
+    )
+    status = forms.ChoiceField(
+        choices=ExamParticipantRoster.Status.choices,
+        initial=ExamParticipantRoster.Status.ENROLLED,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+
+class CandidateEditForm(forms.ModelForm):
+    first_name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-input'})
+    )
+    last_name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-input'})
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-input'})
+    )
+    department = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-input'})
+    )
+    batch_year = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-input'})
+    )
+
+    class Meta:
+        model = ExamParticipantRoster
+        fields = ['registration_number', 'status']
+        widgets = {
+            'registration_number': forms.TextInput(attrs={'class': 'form-input'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.participant:
+            self.fields['first_name'].initial = self.instance.participant.first_name
+            self.fields['last_name'].initial = self.instance.participant.last_name
+            self.fields['email'].initial = self.instance.participant.email
+            if hasattr(self.instance.participant, 'profile'):
+                self.fields['department'].initial = self.instance.participant.profile.department
+                self.fields['batch_year'].initial = self.instance.participant.profile.batch_year
+
+
 class RosterFilterForm(forms.Form):
+
     q = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
@@ -152,3 +228,4 @@ class RosterFilterForm(forms.Form):
         choices=[('', 'All Statuses')] + list(ExamParticipantRoster.Status.choices),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+

@@ -1,0 +1,170 @@
+{% extends "base_app.html" %}
+{% load static optiexam_tags %}
+
+{% block title %}{% if is_create %}Enroll Candidate{% else %}Edit Candidate #{{ entry.candidate_index|stringformat:"03d" }}{% endif %} — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<!-- Universal Breadcrumb Navigation -->
+<nav class="breadcrumbs-bar" aria-label="Breadcrumbs">
+  <ol class="breadcrumbs-list">
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">{% icon 'calendar' 'icon-sm' %}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_list' %}">Exam Blueprints</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:exam_detail' exam.pk %}">{{ exam.title }}</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'exams:roster_hub' exam.pk %}">Candidate Roster</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item active">
+      <span>{% if is_create %}Enroll Candidate{% else %}Edit Candidate #{{ entry.candidate_index|stringformat:"03d" }}{% endif %}</span>
+    </li>
+  </ol>
+</nav>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon">
+      {% icon 'user' 'icon-lg' %}
+    </div>
+    <div>
+      <h2>{% if is_create %}Enroll Candidate{% else %}Edit Candidate #{{ entry.candidate_index|stringformat:"03d" }}{% endif %}</h2>
+      <p class="page-subtitle">{{ exam.title }} ({{ exam.code }})</p>
+    </div>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'exams:roster_hub' exam.pk %}" class="btn btn-ghost">
+      {% icon 'chevron-right' 'icon' style="transform: rotate(180deg);" %}
+      <span>Back to Roster</span>
+    </a>
+  </div>
+</div>
+
+<form method="post" style="width: 100%;">
+  {% csrf_token %}
+
+  <!-- Balanced Two-Column Full-Width Form Layout -->
+  <div class="grid grid-cols-2 gap-6">
+    
+    <!-- LEFT COLUMN: Identity & Registration -->
+    <div class="flex flex-col gap-6">
+      <div class="form-section-card" style="margin-bottom: 0;">
+        <div class="form-section-header">
+          <span class="form-step-badge">1</span>
+          <div>
+            <h3>Candidate Identity & Account</h3>
+            <p>Student personal details and institutional login identity.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">
+              <span>First Name</span>
+              <span class="required-indicator">*</span>
+            </label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.first_name.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span>Last Name</span>
+              <span class="required-indicator">*</span>
+            </label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.last_name.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span>Institutional Email Address</span>
+            <span class="required-indicator">*</span>
+          </label>
+          {{ form.email }}
+          {% if form.email.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.email.errors.0 }}</div>{% endif %}
+          <div class="form-help">Used by candidate to access their examination session.</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">
+            <span>Official Registration / Roll Number</span>
+            <span class="required-indicator">*</span>
+          </label>
+          {{ form.registration_number }}
+          {% if form.registration_number.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.registration_number.errors.0 }}</div>{% endif %}
+          <div class="form-help">e.g. <code>REG-2026-042</code> or Student ID.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Academic Classification & Status -->
+    <div class="flex flex-col gap-6">
+      <div class="form-section-card" style="margin-bottom: 0;">
+        <div class="form-section-header">
+          <span class="form-step-badge">2</span>
+          <div>
+            <h3>Academic Department & Status</h3>
+            <p>Cohort tags and exam authorization status.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">Academic Department</label>
+            {{ form.department }}
+            {% if form.department.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.department.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Batch / Cohort Year</label>
+            {{ form.batch_year }}
+            {% if form.batch_year.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.batch_year.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">
+            <span>Enrollment Authorization Status</span>
+            <span class="required-indicator">*</span>
+          </label>
+          {{ form.status }}
+          {% if form.status.errors %}<div class="form-error">{% icon 'alert-circle' 'icon-sm' %} {{ form.status.errors.0 }}</div>{% endif %}
+          <div class="form-help">Only candidates marked as <strong>Enrolled</strong> may sit for this assessment.</div>
+        </div>
+      </div>
+
+      {% if not is_create %}
+        <div class="glass-card" style="padding: 20px;">
+          <h4 style="margin-bottom: 8px; font-size: 0.92rem; color: var(--color-primary);">Double-Blind Grading Index</h4>
+          <p style="font-size: 0.84rem; color: var(--color-text-secondary); margin-bottom: 0;">
+            This candidate is permanently indexed as <strong class="badge badge-accent">#{{ entry.candidate_index|stringformat:"03d" }}</strong> to protect candidate anonymity during double-blind human grading.
+          </p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Full-Width Bottom Actions Bar -->
+  <div class="form-actions-bar">
+    <div class="flex items-center gap-2" style="font-size: 0.84rem; color: var(--color-text-muted);">
+      {% icon 'shield' 'icon' %}
+      <span>Candidate accounts are scoped strictly to {{ exam.tenant.name }}.</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="{% url 'exams:roster_hub' exam.pk %}" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary btn-lg">
+        {% icon 'check' 'icon' %}
+        <span>{% if is_create %}Enroll Candidate to Roster{% else %}Save Candidate Changes{% endif %}</span>
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}

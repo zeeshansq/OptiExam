@@ -75,13 +75,11 @@ All fonts declared in `optiexam-core.css` using local `@font-face`:
 }
 ```
 
-### 3.3 Icon Usage
-Use inline SVG `<use>` with local sprite only:
-```html
-<svg class="icon" aria-hidden="true">
-  <use href="{% static 'icons/lucide-sprite.svg#bell' %}"></use>
-</svg>
-```
+### 3.3 Icon Usage & Sprite Registration Rule (MANDATORY)
+1. **Always use the template tag:** `{% icon 'icon-name' 'icon-lg' %}` (auto-normalizes classes and references local SVG sprite).
+2. **Sprite Registration Invariant:** Every icon referenced anywhere in any template MUST be declared as a `<symbol id="icon-name" ...>` inside `static/icons/lucide-sprite.svg`.
+3. **SVG Base Styling:** All icon classes (`.icon`, `.icon-xs`, `.icon-sm`, `.icon-md`, `.icon-lg`, `.icon-xl`, `.icon-2xl`) must have `display: inline-block; vertical-align: middle; stroke: currentColor; fill: none; stroke-width: 2;`.
+
 
 ---
 

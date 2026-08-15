@@ -149,30 +149,29 @@ html, body {
   padding: 20px 0 60px 0;
 }
 
-/* SVG Icon Helper */
-.icon {
-  width: 18px;
-  height: 18px;
+/* SVG Icon Helper System */
+svg[class*="icon"],
+.icon,
+.icon-xs,
+.icon-sm,
+.icon-md,
+.icon-lg,
+.icon-xl,
+.icon-2xl {
   display: inline-block;
   vertical-align: middle;
   stroke-width: 2;
   flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
 }
 
-.icon-sm {
-  width: 15px;
-  height: 15px;
-}
-
-.icon-lg {
-  width: 22px;
-  height: 22px;
-}
-
-.icon-xl {
-  width: 30px;
-  height: 30px;
-}
+.icon-xs { width: 12px; height: 12px; }
+.icon-sm { width: 15px; height: 15px; }
+.icon, .icon-md { width: 18px; height: 18px; }
+.icon-lg { width: 22px; height: 22px; }
+.icon-xl { width: 30px; height: 30px; }
+.icon-2xl { width: 40px; height: 40px; }
 
 /* Typography Headings */
 h1, h2, h3, h4, h5, h6 {

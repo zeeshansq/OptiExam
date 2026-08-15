@@ -10,8 +10,11 @@ def icon(name: str, css_class: str = "icon", **kwargs):
     Renders an inline SVG referencing local Lucide icon sprite.
     Usage: {% icon 'shield' 'icon-lg' %}
     """
+    classes = set(css_class.split())
+    classes.add("icon")
+    final_class = ' '.join(sorted(classes))
     extra_attrs = ' '.join(f'{k}="{v}"' for k, v in kwargs.items())
-    html = f'''<svg class="{css_class}" aria-hidden="true" {extra_attrs}>
+    html = f'''<svg class="{final_class}" aria-hidden="true" {extra_attrs}>
       <use href="/static/icons/lucide-sprite.svg#{name}"></use>
     </svg>'''
     return mark_safe(html)

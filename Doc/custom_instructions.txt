@@ -17,11 +17,12 @@ MANDATORY RULES (DO NOT VIOLATE):
    ALL tenant models inherit TenantModelMixin from apps.core.models.
    The active tenant is on request.tenant (set by TenantResolutionMiddleware).
 
-3. OFFLINE-READY ASSET POLICY (ZERO CDN RULE):
+3. OFFLINE-READY ASSET POLICY (ZERO CDN & ICON SPRITE RULE):
    NEVER use <link> or <script> referencing external CDNs.
    FORBIDDEN: fonts.googleapis.com, cdnjs.cloudflare.com, jsdelivr.net, unpkg.com
    REQUIRED: ALL fonts (Inter, Outfit, JetBrains Mono), icons (Lucide SVG),
    CSS, and JS must load from {% static 'path' %} using locally bundled files.
+   ALL icons MUST use {% icon 'name' %} and have defined <symbol id="..."> in static/icons/lucide-sprite.svg.
 
 4. SERVER-AUTHORITATIVE EXAM TIMER:
    NEVER compute remaining time or exam validity on the client side.
