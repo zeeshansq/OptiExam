@@ -25,6 +25,9 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Run Pytest Suite
+        env:
+          SECRET_KEY: 'django-insecure-ci-testing-key-optiexam-test-suite-2026'
+          DEBUG: 'True'
         run: |
           pytest
 
