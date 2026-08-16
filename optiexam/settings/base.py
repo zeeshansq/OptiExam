@@ -13,6 +13,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-optiexam-development-key-default-3.12-5.0')
 DEBUG = env.bool('DEBUG', default=True)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
 
 OPTIEXAM_VERSION = env('OPTIEXAM_VERSION', default='1.0.0')
 ENABLE_DEMO_LOGINS = env.bool('ENABLE_DEMO_LOGINS', default=True)
